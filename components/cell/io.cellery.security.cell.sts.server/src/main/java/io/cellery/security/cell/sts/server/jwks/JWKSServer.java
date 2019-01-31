@@ -17,14 +17,14 @@
  *
  */
 
-package org.wso2.vick.auth.cell.jwks;
+package io.cellery.security.cell.sts.server.jwks;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.utils.CertificateUtils;
+import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -17,19 +17,19 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization;
+package io.cellery.security.cell.sts.server.authorization;
 
 import org.apache.commons.lang.StringUtils;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 
 public class AuthorizationUtils {
 
     /**
      *
      * @return
-     * @throws VickCellSTSException
+     * @throws CelleryCellSTSException
      */
-    public static String getOPAEndpoint() throws VickCellSTSException {
+    public static String getOPAEndpoint() throws CelleryCellSTSException {
 
         int opaPort = 8181;
         // Running in the same pod which STS runs.

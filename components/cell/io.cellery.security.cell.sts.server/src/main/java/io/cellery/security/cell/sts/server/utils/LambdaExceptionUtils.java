@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.vick.auth.cell.utils;
+package io.cellery.security.cell.sts.server.utils;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;

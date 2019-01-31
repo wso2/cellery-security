@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.cellery.security.cell.sts.server.sts.context.store;
+package io.cellery.security.cell.sts.server.core.context.store;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

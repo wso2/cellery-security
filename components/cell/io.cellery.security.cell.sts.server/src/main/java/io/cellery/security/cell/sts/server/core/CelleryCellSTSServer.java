@@ -31,10 +31,10 @@ import io.cellery.security.cell.sts.server.jwks.JWKSServer;
 import io.cellery.security.cell.sts.server.core.context.store.UserContextStore;
 import io.cellery.security.cell.sts.server.core.context.store.UserContextStoreImpl;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
-import io.cellery.security.cell.sts.server.core.service.VickCellInboundInterceptorService;
-import io.cellery.security.cell.sts.server.core.service.VickCellOutboundInterceptorService;
-import io.cellery.security.cell.sts.server.core.service.VickCellSTSException;
-import io.cellery.security.cell.sts.server.core.service.VickCellStsService;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellInboundInterceptorService;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellOutboundInterceptorService;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ import java.nio.file.Paths;
 /**
  * Intercepts outbound calls from micro service proxy.
  */
-public class VickCellSTSServer {
+public class CelleryCellSTSServer {
 
     private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
     private static final String STS_CONFIG_PATH_ENV_VARIABLE = "CONF_PATH";
@@ -54,14 +54,14 @@ public class VickCellSTSServer {
     private static final String CONFIG_AUTH_PASSWORD = "password";
     private static final String CONFIG_GLOBAL_JWKS = "globalJWKS";
 
-    private static final Logger log = LoggerFactory.getLogger(VickCellSTSServer.class);
+    private static final Logger log = LoggerFactory.getLogger(CelleryCellSTSServer.class);
     private final int inboundListeningPort;
     private final Server inboundListener;
 
     private final int outboundListeningPort;
     private final Server outboundListener;
 
-    private VickCellSTSServer(int inboundListeningPort, int outboundListeningPort) throws VickCellSTSException {
+    private CelleryCellSTSServer(int inboundListeningPort, int outboundListeningPort) throws CelleryCellSTSException {
 
         CellStsConfiguration stsConfig = buildCellStsConfiguration();
         log.info("Cell STS configuration:\n" + stsConfig);
@@ -69,20 +69,20 @@ public class VickCellSTSServer {
         UserContextStore contextStore = new UserContextStoreImpl();
         UserContextStore localContextStore = new UserContextStoreImpl();
 
-        VickCellStsService cellStsService = new VickCellStsService(stsConfig, contextStore, localContextStore);
+        CelleryCellStsService cellStsService = new CelleryCellStsService(stsConfig, contextStore, localContextStore);
 
         this.inboundListeningPort = inboundListeningPort;
         inboundListener = ServerBuilder.forPort(inboundListeningPort)
-                .addService(new VickCellInboundInterceptorService(cellStsService))
+                .addService(new CelleryCellInboundInterceptorService(cellStsService))
                 .build();
 
         this.outboundListeningPort = outboundListeningPort;
         outboundListener = ServerBuilder.forPort(outboundListeningPort)
-                .addService(new VickCellOutboundInterceptorService(cellStsService))
+                .addService(new CelleryCellOutboundInterceptorService(cellStsService))
                 .build();
     }
 
-    private CellStsConfiguration buildCellStsConfiguration() throws VickCellSTSException {
+    private CellStsConfiguration buildCellStsConfiguration() throws CelleryCellSTSException {
 
         try {
             String configFilePath = getConfigFilePath();
@@ -96,7 +96,7 @@ public class VickCellSTSServer {
                     .setPassword((String) config.get(CONFIG_AUTH_PASSWORD))
                     .setGlobalJWKEndpoint((String) config.get(CONFIG_GLOBAL_JWKS));
         } catch (ParseException | IOException e) {
-            throw new VickCellSTSException("Error while setting up STS configurations", e);
+            throw new CelleryCellSTSException("Error while setting up STS configurations", e);
         }
     }
 
@@ -106,11 +106,11 @@ public class VickCellSTSServer {
         return StringUtils.isNotBlank(configPath) ? configPath : CONFIG_FILE_PATH;
     }
 
-    private String getMyCellName() throws VickCellSTSException {
+    private String getMyCellName() throws CelleryCellSTSException {
         // For now we pick the cell name from the environment variable.
         String cellName = System.getenv(CELL_NAME_ENV_VARIABLE);
         if (StringUtils.isBlank(cellName)) {
-            throw new VickCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
+            throw new CelleryCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
         }
         return cellName;
     }
@@ -122,13 +122,13 @@ public class VickCellSTSServer {
 
         inboundListener.start();
         outboundListener.start();
-        log.info("Vick Cell STS gRPC Server started, listening for inbound traffic on " + inboundListeningPort);
-        log.info("Vick Cell STS gRPC Server started, listening for outbound traffic on " + outboundListeningPort);
+        log.info("Cellery STS gRPC Server started, listening for inbound traffic on " + inboundListeningPort);
+        log.info("Cellery STS gRPC Server started, listening for outbound traffic on " + outboundListeningPort);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may has been reset by its JVM shutdown hook.
-            System.err.println("Shutting down Vick Cell STS since JVM is shutting down.");
-            VickCellSTSServer.this.stop();
-            System.err.println("Vick Cell STS shut down.");
+            System.err.println("Shutting down Cellery Cell STS since JVM is shutting down.");
+            CelleryCellSTSServer.this.stop();
+            System.err.println("Cellery Cell STS shut down.");
         }));
     }
 
@@ -162,13 +162,13 @@ public class VickCellSTSServer {
 
     public static void main(String[] args) {
 
-        VickCellSTSServer server;
+        CelleryCellSTSServer server;
         int inboundListeningPort = getPortFromEnvVariable("inboundPort", 8080);
         int outboundListeningPort = getPortFromEnvVariable("outboundPort", 8081);;
         int jwksEndpointPort = getPortFromEnvVariable("jwksPort", 8090);
 
         try {
-            server = new VickCellSTSServer(inboundListeningPort, outboundListeningPort);
+            server = new CelleryCellSTSServer(inboundListeningPort, outboundListeningPort);
             server.start();
             JWKSServer jwksServer = new JWKSServer(jwksEndpointPort);
             jwksServer.startServer();

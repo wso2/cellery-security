@@ -16,14 +16,14 @@
  *  under the License.
  */
 
-package org.wso2.vick.sts.core;
+package io.cellery.security.sts.endpoint.core;
 
 import java.util.List;
 
 /**
- * STS Request object for Vick.
+ * STS Request object for Cellery.
  */
-public class VickSTSRequest {
+public class CellerySTSRequest {
 
     /**
      * Identifier of the workload initiating the STS request.

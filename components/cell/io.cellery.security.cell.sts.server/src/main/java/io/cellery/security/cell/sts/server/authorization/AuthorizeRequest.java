@@ -17,12 +17,12 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization;
+package io.cellery.security.cell.sts.server.authorization;
 
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
-import org.wso2.vick.auth.cell.sts.model.RequestContext;
-import org.wso2.vick.auth.cell.sts.model.RequestDestination;
-import org.wso2.vick.auth.cell.sts.model.RequestSource;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.model.RequestContext;
+import io.cellery.security.cell.sts.server.core.model.RequestDestination;
+import io.cellery.security.cell.sts.server.core.model.RequestSource;
 
 import java.util.Map;
 

@@ -45,16 +45,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * The JWT token builder for VICK.
+ * The JWT security builder for Cellery.
  */
-public class VickSignedJWTBuilder {
+public class CellerySignedJWTBuilder {
 
     private static final String TENANT_DOMAIN = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private static final int TENANT_ID = MultitenantConstants.SUPER_TENANT_ID;
 
-    private static final String MICRO_GATEWAY_DEFAULT_AUDIENCE_VALUE = "http://org.wso2.apimgt/gateway";
-    private static final String VICK_STS_ISSUER_CONFIG = "Vick.STS.Issuer";
-    private static final String DEFAULT_ISSUER_VALUE = "https://core.vick.wso2.com";
+    private static final String MICRO_GATEWAY_DEFAULT_AUDIENCE_VALUE = "http://io.cellery.apimgt/gateway";
+    private static final String CELLERY_STS_ISSUER_CONFIG = "Cellery.STS.Issuer";
+    private static final String DEFAULT_ISSUER_VALUE = "https://sts.cellery.io";
     private static final String SCOPE_CLAIM = "scope";
     private static final String KEY_TYPE_CLAIM = "keytype";
     private static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
@@ -66,42 +66,42 @@ public class VickSignedJWTBuilder {
     private long expiryInSeconds = 1200L;
     private List<String> audience = new ArrayList<>();
 
-    public VickSignedJWTBuilder subject(String subject) {
+    public CellerySignedJWTBuilder subject(String subject) {
 
         claimSetBuilder.subject(subject);
         return this;
     }
 
-    public VickSignedJWTBuilder claim(String name, Object value) {
+    public CellerySignedJWTBuilder claim(String name, Object value) {
 
         claimSetBuilder.claim(name, value);
         return this;
     }
 
-    public VickSignedJWTBuilder claims(Map<String, Object> customClaims) {
+    public CellerySignedJWTBuilder claims(Map<String, Object> customClaims) {
 
         customClaims.forEach((x, y) -> claimSetBuilder.claim(x, y));
         return this;
     }
 
-    public VickSignedJWTBuilder scopes(List<String> scopes) {
+    public CellerySignedJWTBuilder scopes(List<String> scopes) {
 
         return claim(SCOPE_CLAIM, scopes);
     }
 
-    public VickSignedJWTBuilder expiryInSeconds(long expiryInSeconds) {
+    public CellerySignedJWTBuilder expiryInSeconds(long expiryInSeconds) {
 
         this.expiryInSeconds = expiryInSeconds;
         return this;
     }
 
-    public VickSignedJWTBuilder audience(List<String> audience) {
+    public CellerySignedJWTBuilder audience(List<String> audience) {
 
         this.audience = audience;
         return this;
     }
 
-    public VickSignedJWTBuilder audience(String audience) {
+    public CellerySignedJWTBuilder audience(String audience) {
 
         this.audience.add(audience);
         return this;
@@ -151,7 +151,7 @@ public class VickSignedJWTBuilder {
 
     private String getIssuer() {
 
-        String issuer = IdentityUtil.getProperty(VICK_STS_ISSUER_CONFIG);
+        String issuer = IdentityUtil.getProperty(CELLERY_STS_ISSUER_CONFIG);
         if (StringUtils.isEmpty(issuer)) {
             issuer = DEFAULT_ISSUER_VALUE;
         }

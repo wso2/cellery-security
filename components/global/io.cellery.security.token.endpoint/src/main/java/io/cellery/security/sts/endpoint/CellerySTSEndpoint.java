@@ -18,14 +18,14 @@
 
 package io.cellery.security.sts.endpoint;
 
+import io.cellery.security.sts.endpoint.core.CellerySTSConstants;
+import io.cellery.security.sts.endpoint.core.CellerySTSException;
+import io.cellery.security.sts.endpoint.core.CellerySTSRequest;
+import io.cellery.security.sts.endpoint.core.CellerySTSResponse;
+import io.cellery.security.sts.endpoint.core.CellerySecureTokenService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.vick.sts.core.VickSTSConstants;
-import org.wso2.vick.sts.core.VickSTSRequest;
-import org.wso2.vick.sts.core.VickSTSResponse;
-import org.wso2.vick.sts.core.VickSecureTokenService;
-import org.wso2.vick.sts.core.VickStsException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,11 +43,11 @@ import javax.ws.rs.core.Response;
  * This is the REST service that is exposed to get the STS security.
  */
 @Path("/core")
-public class VickSTSEndpoint {
+public class CellerySTSEndpoint {
 
-    private static final Log log = LogFactory.getLog(VickSTSEndpoint.class);
+    private static final Log log = LogFactory.getLog(CellerySTSEndpoint.class);
 
-    private VickSecureTokenService tokenService = new VickSecureTokenService();
+    private CellerySecureTokenService tokenService = new CellerySecureTokenService();
 
     @POST
     @Path("/security")
@@ -55,11 +55,11 @@ public class VickSTSEndpoint {
     @Produces("application/json")
     public Response getStsToken(@Context HttpServletRequest request, MultivaluedMap<String, String> form) {
 
-        VickSTSResponse stsResponse;
+        CellerySTSResponse stsResponse;
         try {
-            VickSTSRequest vickSTSRequest = buildStsRequest(request, form);
-            stsResponse = tokenService.issueJWT(vickSTSRequest);
-        } catch (VickStsException e) {
+            io.cellery.security.sts.endpoint.core.CellerySTSRequest cellerySTSRequest = buildStsRequest(request, form);
+            stsResponse = tokenService.issueJWT(cellerySTSRequest);
+        } catch (CellerySTSException e) {
             log.error("Error while issuing STS Token.", e);
             return Response.serverError().build();
         }
@@ -68,13 +68,13 @@ public class VickSTSEndpoint {
         return Response.ok().entity(stsResponse.toJson()).build();
     }
 
-    private VickSTSRequest buildStsRequest(HttpServletRequest request, MultivaluedMap<String, String> form) {
+    private CellerySTSRequest buildStsRequest(HttpServletRequest request, MultivaluedMap<String, String> form) {
 
-        VickSTSRequest stsRequest = new VickSTSRequest();
-        stsRequest.setSource(form.getFirst(VickSTSConstants.VickSTSRequest.SUBJECT));
-        stsRequest.setScopes(buildValueList(form.getFirst(VickSTSConstants.VickSTSRequest.SCOPE)));
-        stsRequest.setAudiences(buildValueList(form.getFirst(VickSTSConstants.VickSTSRequest.AUDIENCE)));
-        stsRequest.setUserContextJwt(form.getFirst(VickSTSConstants.VickSTSRequest.USER_CONTEXT_JWT));
+        CellerySTSRequest stsRequest = new CellerySTSRequest();
+        stsRequest.setSource(form.getFirst(CellerySTSConstants.CellerySTSRequest.SUBJECT));
+        stsRequest.setScopes(buildValueList(form.getFirst(CellerySTSConstants.CellerySTSRequest.SCOPE)));
+        stsRequest.setAudiences(buildValueList(form.getFirst(CellerySTSConstants.CellerySTSRequest.AUDIENCE)));
+        stsRequest.setUserContextJwt(form.getFirst(CellerySTSConstants.CellerySTSRequest.USER_CONTEXT_JWT));
         return stsRequest;
     }
 

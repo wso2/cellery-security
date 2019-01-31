@@ -7,12 +7,12 @@
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
-            <bean class="org.wso2.vick.auth.cell.sts.endpoint.VickStsEndpoint"/>
+            <bean class="io.cellery.security.sts.endpoint.CellerySTSEndpoint"/>
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-            <!--<bean class="org.wso2.carbon.consent.mgt.endpoint.expmapper.ConsentEndpointExceptionMapper"/>-->
+            <!--<bean class="org.cellery.carbon.consent.mgt.endpoint.expmapper.ConsentEndpointExceptionMapper"/>-->
         </jaxrs:providers>
     </jaxrs:server>
 </beans>

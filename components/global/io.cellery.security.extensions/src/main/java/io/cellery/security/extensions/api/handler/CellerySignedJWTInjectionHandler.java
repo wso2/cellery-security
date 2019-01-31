@@ -29,26 +29,26 @@ import java.util.Map;
 /**
  *  Injects the signed jwt issued by the global STS into the authorization header to be forwarded to the API back ends.
  */
-public class VickSignedJWTInjectionHandler extends AbstractHandler {
+public class CellerySignedJWTInjectionHandler extends AbstractHandler {
 
     private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     private static final String JWT_ASSERTION_HEADER = "X-JWT-Assertion";
 
-    private Log log = LogFactory.getLog(VickSignedJWTInjectionHandler.class);
+    private Log log = LogFactory.getLog(CellerySignedJWTInjectionHandler.class);
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        String vickJWT = getVickJWT(messageContext);
+        String celleryJWT = getCelleryJWT(messageContext);
         if (log.isDebugEnabled()) {
-            log.debug("JWT issued from VICK STS: " + vickJWT);
+            log.debug("JWT issued from Cellery STS: " + celleryJWT);
         }
 
-        removeVickSTSHeader(messageContext);
+        removeCellerySTSHeader(messageContext);
         if (log.isDebugEnabled()) {
             log.debug("Removed JWT Assertion Header: " + JWT_ASSERTION_HEADER);
         }
 
-        String bearerHeader = "Bearer " + vickJWT;
+        String bearerHeader = "Bearer " + celleryJWT;
         setAuthorizationHeader(messageContext, bearerHeader);
         if (log.isDebugEnabled()) {
             log.debug("Set new Authorization Header Value to: " + bearerHeader);
@@ -62,7 +62,7 @@ public class VickSignedJWTInjectionHandler extends AbstractHandler {
         return true;
     }
 
-    private String getVickJWT(MessageContext messageContext) {
+    private String getCelleryJWT(MessageContext messageContext) {
 
         return (String) getTransportHeaders(messageContext).get(JWT_ASSERTION_HEADER);
     }
@@ -72,7 +72,7 @@ public class VickSignedJWTInjectionHandler extends AbstractHandler {
         getTransportHeaders(messageContext).put(AUTHORIZATION_HEADER_NAME, value);
     }
 
-    private void removeVickSTSHeader(MessageContext messageContext) {
+    private void removeCellerySTSHeader(MessageContext messageContext) {
 
         getTransportHeaders(messageContext).remove(JWT_ASSERTION_HEADER);
     }

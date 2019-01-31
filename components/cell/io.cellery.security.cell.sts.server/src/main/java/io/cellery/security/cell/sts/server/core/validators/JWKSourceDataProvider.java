@@ -16,14 +16,14 @@
  * under the License.
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.vick.auth.cell.sts.exception.TokenValidationFailureException;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 
 import java.net.MalformedURLException;
 import java.net.URL;

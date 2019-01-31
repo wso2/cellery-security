@@ -17,12 +17,12 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization.opa;
+package io.cellery.security.cell.sts.server.authorization.opa;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-import org.wso2.vick.auth.cell.authorization.AuthorizationContext;
-import org.wso2.vick.auth.cell.authorization.AuthorizationFailedException;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationContext;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
 
 import java.text.ParseException;
 

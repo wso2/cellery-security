@@ -24,9 +24,9 @@ import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import io.cellery.security.extensions.util.Utils;
 
 /**
- * Key validation handler for Vick.O
+ * Key validation handler for Cellery
  */
-public class VickExtendedKeyValidationHandler extends DefaultKeyValidationHandler {
+public class CelleryExtendedKeyValidationHandler extends DefaultKeyValidationHandler {
 
     @Override
     public boolean validateSubscription(TokenValidationContext validationContext) throws APIKeyMgtException {

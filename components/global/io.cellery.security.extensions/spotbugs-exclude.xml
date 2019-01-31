@@ -17,6 +17,6 @@
   -->
 <FindBugsFilter>
     <Match>
-        <Package name="org.wso2.vick.telemetry.receiver.generated"/>
+        <Package name="io.cellery.security.telemetry.receiver.generated"/>
     </Match>
 </FindBugsFilter>

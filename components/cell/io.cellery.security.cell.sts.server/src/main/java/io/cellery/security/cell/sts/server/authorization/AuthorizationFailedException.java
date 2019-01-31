@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization;
+package io.cellery.security.cell.sts.server.authorization;
 
 /**
  * Conveys authorization failures.

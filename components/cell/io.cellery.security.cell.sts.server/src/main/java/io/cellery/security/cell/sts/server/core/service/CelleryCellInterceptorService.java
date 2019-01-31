@@ -46,11 +46,11 @@ import java.util.Map;
  * Intercepts inbound/outbound calls among sidecars within and out of the cells.
  * <p>
  * Inbound calls are intercepted to inject user attributes are headers to be consumed by services within the cell.
- * Outbound calls are intercepted to inject authorization token required for authentication.
+ * Outbound calls are intercepted to inject authorization security required for authentication.
  */
-public abstract class VickCellInterceptorService extends AuthorizationGrpc.AuthorizationImplBase {
+public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.AuthorizationImplBase {
 
-    private static final Logger log = LoggerFactory.getLogger(VickCellInterceptorService.class);
+    private static final Logger log = LoggerFactory.getLogger(CelleryCellInterceptorService.class);
 
     private static final String REQUEST_ID = "request.id";
     private static final String CELL_NAME = "cell.name";
@@ -60,9 +60,9 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
     private static final String ISTIO_ATTRIBUTES_HEADER = "x-istio-attributes";
     private static final String ISTIO_INGRESS_PREFIX = "istio-ingressgateway";
 
-    protected VickCellStsService cellStsService;
+    protected CelleryCellStsService cellStsService;
 
-    public VickCellInterceptorService(VickCellStsService cellStsService) throws VickCellSTSException {
+    public CelleryCellInterceptorService(CelleryCellStsService cellStsService) throws CelleryCellSTSException {
 
         this.cellStsService = cellStsService;
     }
@@ -105,7 +105,7 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
                     .build();
 
             log.debug("Response to istio-proxy (destination:{}):\n{}", destination, responseToProxy);
-        } catch (VickCellSTSException e) {
+        } catch (CelleryCellSTSException e) {
             log.error("Error while handling request from istio-proxy to (destination:{})",
                     getDestination(requestFromProxy), e);
             responseToProxy = buildErrorResponse();
@@ -118,7 +118,7 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
     }
 
     protected abstract void handleRequest(CellStsRequest cellStsRequest,
-                                          CellStsResponse cellStsResponse) throws VickCellSTSException;
+                                          CellStsResponse cellStsResponse) throws CelleryCellSTSException;
 
 
     private ExternalAuth.CheckResponse buildErrorResponse() {
@@ -141,11 +141,11 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
                 .build();
     }
 
-    private String getRequestId(ExternalAuth.CheckRequest request) throws VickCellSTSException {
+    private String getRequestId(ExternalAuth.CheckRequest request) throws CelleryCellSTSException {
 
         String id = request.getAttributes().getRequest().getHttp().getHeadersMap().get(REQUEST_ID_HEADER);
         if (StringUtils.isBlank(id)) {
-            throw new VickCellSTSException("Request Id cannot be found in the header: " + REQUEST_ID_HEADER);
+            throw new CelleryCellSTSException("Request Id cannot be found in the header: " + REQUEST_ID_HEADER);
         }
         return id;
     }
@@ -173,17 +173,17 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
         return destination;
     }
 
-    private String getMyCellName() throws VickCellSTSException {
+    private String getMyCellName() throws CelleryCellSTSException {
         // For now we pick the cell name from the environment variable. In future we need to figure out a way to derive
         // values from the authz request.
         String cellName = System.getenv(CELL_NAME_ENV_VARIABLE);
         if (StringUtils.isBlank(cellName)) {
-            throw new VickCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
+            throw new CelleryCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
         }
         return cellName;
     }
 
-    private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy) throws VickCellSTSException {
+    private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy) throws CelleryCellSTSException {
 
         return new CellStsRequest.CellStsRequestBuilder()
                 .setRequestId(getRequestId(requestFromProxy))
@@ -263,8 +263,8 @@ public abstract class VickCellInterceptorService extends AuthorizationGrpc.Autho
             destinationBuilder.setWorkload(destinationWorkloadName);
         }
 
-        if (CellStsUtils.isWorkloadExternalToVick(destinationWorkloadName)) {
-            destinationBuilder.setExternalToVick(true);
+        if (CellStsUtils.isWorkloadExternalToCellery(destinationWorkloadName)) {
+            destinationBuilder.setExternalToCellery(true);
         } else {
             destinationBuilder.setCellName(extractCellNameFromWorkloadName(destinationWorkloadName));
         }

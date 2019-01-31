@@ -45,16 +45,16 @@ import java.util.Map;
 /**
  * Generates a signed JWT with context information from API client authentication to be consumed by API backends.
  */
-public class VickSignedJWTGenerator extends JWTGenerator {
+public class CellerySignedJWTGenerator extends JWTGenerator {
 
-    private static final Log log = LogFactory.getLog(VickSignedJWTGenerator.class);
+    private static final Log log = LogFactory.getLog(CellerySignedJWTGenerator.class);
     private static final String CONSUMER_KEY_CLAIM = "consumerKey";
     private static final String CELL_NAME = "cell_name";
 
     @Override
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException {
 
-        VickSignedJWTBuilder jwtBuilder = new VickSignedJWTBuilder();
+        CellerySignedJWTBuilder jwtBuilder = new CellerySignedJWTBuilder();
         try {
             return jwtBuilder.subject(getEndUserName(validationContext))
                     .scopes(getScopes(validationContext))
@@ -99,7 +99,7 @@ public class VickSignedJWTGenerator extends JWTGenerator {
 
     private Map<String, Object> getClaimsFromSignedJWT(TokenValidationContext validationContext) {
 
-        // Get the signed JWT access token
+        // Get the signed JWT access security
         String accessToken = validationContext.getAccessToken();
         if (Utils.isSignedJWT(accessToken)) {
             try {
@@ -130,7 +130,7 @@ public class VickSignedJWTGenerator extends JWTGenerator {
             return destinationCell;
         } else {
             log.debug("Property:" + CELL_NAME + " was not found for the API. This API call is going to an API not " +
-                    "published by a VICK Cell.");
+                    "published by a Cellery Cell.");
             return null;
         }
     }

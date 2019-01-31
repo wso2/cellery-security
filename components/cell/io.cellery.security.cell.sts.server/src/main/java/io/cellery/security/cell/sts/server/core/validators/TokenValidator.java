@@ -16,21 +16,21 @@
  * under the License.
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
-import org.wso2.vick.auth.cell.sts.exception.TokenValidationFailureException;
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 
 /**
- * Token Validator Interface. A token validator will validate an incoming token
+ * Token Validator Interface. A security validator will validate an incoming security
  */
 
 public interface TokenValidator {
 
     /**
-     * Validates incoming token.
+     * Validates incoming security.
      *
-     * @param token          Incoming token.
+     * @param token          Incoming security.
      * @param cellStsRequest Request which reaches cell STS.
      * @throws TokenValidationFailureException TokenValidationFailureException.
      */

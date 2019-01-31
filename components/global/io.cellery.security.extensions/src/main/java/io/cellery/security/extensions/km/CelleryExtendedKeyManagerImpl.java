@@ -34,14 +34,14 @@ import java.util.Arrays;
 /**
  * Allows signed JWTs issued by trusted external IDPs to be used for API Authentication.
  */
-public class VickExtendedKeyManagerImpl extends AMDefaultKeyManagerImpl {
+public class CelleryExtendedKeyManagerImpl extends AMDefaultKeyManagerImpl {
 
     private static final String JWT_TOKEN_TYPE = "jwt";
 
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         if (!Utils.isSignedJWT(accessToken)) {
-            // If the access token is not a signed JWT we let AMDefaultKeyManagerImpl class handle it.
+            // If the access security is not a signed JWT we let AMDefaultKeyManagerImpl class handle it.
             return super.getTokenMetaData(accessToken);
         }
 
@@ -63,7 +63,7 @@ public class VickExtendedKeyManagerImpl extends AMDefaultKeyManagerImpl {
             // Convert Expiry Time to milliseconds.
             tokenInfo.setValidityPeriod(getExpiryPeriodInMillis(introspectionResponse));
 
-            // If token has am_application_scope, consider the token as an Application token.
+            // If security has am_application_scope, consider the security as an Application security.
             handleScopes(introspectionResponse, tokenInfo);
         }
         return tokenInfo;

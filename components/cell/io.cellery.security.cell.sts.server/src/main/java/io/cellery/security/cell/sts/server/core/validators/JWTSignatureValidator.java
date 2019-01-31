@@ -16,10 +16,10 @@
  * under the License.
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
 import com.nimbusds.jwt.JWT;
-import org.wso2.vick.auth.cell.sts.exception.TokenValidationFailureException;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 
 import java.util.Map;
 
@@ -35,20 +35,20 @@ public interface JWTSignatureValidator {
      * @param jwksUri   Identity provider's jwks_uri.
      * @param algorithm JWT signature algorithm.
      * @param opts      Optional values.
-     * @return whether the provided token is valid.
+     * @return whether the provided security is valid.
      * @throws TokenValidationFailureException
      */
     public boolean validateSignature(String jwt, String jwksUri, String algorithm, Map<String, Object> opts) throws
             TokenValidationFailureException;
 
     /**
-     * Validates a JWT token using jwks_uri.
+     * Validates a JWT security using jwks_uri.
      *
      * @param jwt       JWT.
      * @param jwksUri   Identity provider's jwks_uri.
      * @param algorithm JWT signature algorithm.
      * @param opts      Optional values.
-     * @return whether the provided token is valid.
+     * @return whether the provided security is valid.
      * @throws TokenValidationFailureException
      */
     public boolean validateSignature(JWT jwt, String jwksUri, String algorithm, Map<String, Object> opts) throws

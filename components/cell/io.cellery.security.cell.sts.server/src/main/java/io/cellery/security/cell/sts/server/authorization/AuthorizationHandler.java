@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization;
+package io.cellery.security.cell.sts.server.authorization;
 
 /**
  * Interface for authorization handling. Any authorization provider should override this interface.

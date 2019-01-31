@@ -5,7 +5,7 @@ metadata:
 spec:
   workloadLabels:
     # We filter the pods to apply this filter based on cell name. We expect the Pods within a cell to have this label.
-    vick.wso2.com/cell: employee
+    mesh.cellery.io/cell: employee
   filters:
   - insertPosition:
       index: FIRST

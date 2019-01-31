@@ -18,6 +18,6 @@
 
 # set to latest Ubuntu LTS
 FROM openjdk:8-alpine
-COPY ./target/org.wso2.vick.auth.cell.sts.server-*.jar /
-CMD java -jar /org.wso2.vick.auth.cell.sts.server-*.jar
+COPY ./io.cellery.security.cell.sts.server-*.jar /
+CMD java -jar /io.cellery.security.cell.sts.server-*.jar
 

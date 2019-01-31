@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.jwks;
+package io.cellery.security.cell.sts.server.jwks;
 
 import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.X500Name;

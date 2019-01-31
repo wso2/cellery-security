@@ -17,10 +17,10 @@
  *
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
-import org.wso2.vick.auth.cell.sts.exception.CellSTSRequestValidationFailedException;
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.exception.CellSTSRequestValidationFailedException;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 
 /**
  * Used to validate incoming STS request

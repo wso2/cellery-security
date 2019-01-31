@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.jwks;
+package io.cellery.security.cell.sts.server.jwks;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -26,7 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.utils.CertificateUtils;
+import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;

@@ -20,12 +20,12 @@
 /**
  * Service which handles authorization for incoming requests.
  */
-package org.wso2.vick.auth.cell.authorization;
+package io.cellery.security.cell.sts.server.authorization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.authorization.opa.OPAAuthorizationHandler;
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.authorization.opa.OPAAuthorizationHandler;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 
 public class AuthorizationService {
 

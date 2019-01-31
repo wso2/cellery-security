@@ -18,15 +18,15 @@
  */
 
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.sts.Constants;
-import org.wso2.vick.auth.cell.sts.VickCellSTSServer;
-import org.wso2.vick.auth.cell.sts.exception.CellSTSRequestValidationFailedException;
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.Constants;
+import io.cellery.security.cell.sts.server.core.CelleryCellSTSServer;
+import io.cellery.security.cell.sts.server.core.exception.CellSTSRequestValidationFailedException;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +36,7 @@ import java.util.Optional;
  */
 public class DefaultCellSTSReqValidator implements CellSTSRequestValidator {
 
-    private static final Logger log = LoggerFactory.getLogger(VickCellSTSServer.class);
+    private static final Logger log = LoggerFactory.getLogger(CelleryCellSTSServer.class);
     private List<String> unAuthenticatedAPIs;
 
     public DefaultCellSTSReqValidator(List<String> unAuthenticatedAPIs) {
@@ -47,10 +47,10 @@ public class DefaultCellSTSReqValidator implements CellSTSRequestValidator {
     @Override
     public void validate(CellStsRequest cellStsRequest) throws CellSTSRequestValidationFailedException {
 
-        String subject = cellStsRequest.getRequestHeaders().get(Constants.VICK_AUTH_SUBJECT_HEADER);
+        String subject = cellStsRequest.getRequestHeaders().get(Constants.CELLERY_AUTH_SUBJECT_HEADER);
         if (StringUtils.isNotBlank(subject)) {
             throw new CellSTSRequestValidationFailedException("A subject header is found in the inbound request," +
-                    " before token validation: " + subject);
+                    " before security validation: " + subject);
         }
     }
 

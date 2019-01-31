@@ -16,29 +16,29 @@
  *  under the License.
  */
 
-package org.wso2.vick.sts.core;
+package io.cellery.security.sts.endpoint.core;
 
 /**
  * This class holds the constants related STS.
  */
-public class VickSTSConstants {
+public class CellerySTSConstants {
 
-    private VickSTSConstants() {
+    private CellerySTSConstants() {
 
     }
 
     /**
-     * This inner class holds the constants related to Vick STS Response.
+     * This inner class holds the constants related to Cellery STS Response.
      */
-    public static class VickSTSResponse {
+    public static class CellerySTSResponse {
 
-        public static final String STS_TOKEN = "token";
+        public static final String STS_TOKEN = "security";
     }
 
     /**
-     * This inner class holds the constants related Vick STS Request.
+     * This inner class holds the constants related Cellery STS Request.
      */
-    public static class VickSTSRequest {
+    public static class CellerySTSRequest {
 
         public static final String SUBJECT = "subject";
         public static final String SCOPE = "scope";

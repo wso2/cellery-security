@@ -17,11 +17,11 @@
  *
  */
 
-package org.wso2.vick.auth.cell.sts;
+package io.cellery.security.cell.sts.server.core;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 
 /**
  * Token Generator used by Cell STS.
@@ -29,15 +29,15 @@ import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
 public class STSTokenGenerator {
 
     /**
-     * Generates a JWT token.
+     * Generates a JWT security.
      *
      * @param incomingJWT Incoming JWT.
      * @param audience    Audience which needs to be added to JWT.
      * @param issuer      Issuer of the JWT.
-     * @return JWT token as a String.
-     * @throws VickCellSTSException
+     * @return JWT security as a String.
+     * @throws CelleryCellSTSException
      */
-    public static String generateToken(String incomingJWT, String audience, String issuer) throws VickCellSTSException {
+    public static String generateToken(String incomingJWT, String audience, String issuer) throws CelleryCellSTSException {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         JWTClaimsSet jwtClaims = getJWTClaims(incomingJWT);
@@ -50,14 +50,14 @@ public class STSTokenGenerator {
     }
 
     /**
-     * Generates a JWT token.
+     * Generates a JWT security.
      *
      * @param audience Audience of the JWT to be issued.
      * @param issuer   Issuer of the JWT to be issued.
-     * @return JWT token as a String.
-     * @throws VickCellSTSException
+     * @return JWT security as a String.
+     * @throws CelleryCellSTSException
      */
-    public static String generateToken(String audience, String issuer) throws VickCellSTSException {
+    public static String generateToken(String audience, String issuer) throws CelleryCellSTSException {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         // Default 20 mins.
@@ -70,16 +70,16 @@ public class STSTokenGenerator {
     /**
      * Retrieve CalimSet of the parsed JWT.
      *
-     * @param jwt JWT token.
-     * @return JWTClaim Set of the input token.
-     * @throws VickCellSTSException
+     * @param jwt JWT security.
+     * @return JWTClaim Set of the input security.
+     * @throws CelleryCellSTSException
      */
-    public static JWTClaimsSet getJWTClaims(String jwt) throws VickCellSTSException {
+    public static JWTClaimsSet getJWTClaims(String jwt) throws CelleryCellSTSException {
 
         try {
             return SignedJWT.parse(jwt).getJWTClaimsSet();
         } catch (java.text.ParseException e) {
-            throw new VickCellSTSException("Error while parsing the Signed JWT in authorization header.", e);
+            throw new CelleryCellSTSException("Error while parsing the Signed JWT in authorization header.", e);
         }
     }
 }

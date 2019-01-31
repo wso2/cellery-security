@@ -20,16 +20,16 @@
 package io.cellery.security.extensions.exception;
 
 /**
- * This is the exception implementation, which is thrown during the authentication failure at vick.
+ * This is the exception implementation, which is thrown during the authentication failure at Cellery.
  */
-public class VickAuthException extends Exception {
+public class CelleryAuthException extends Exception {
 
-    public VickAuthException(String msg, Throwable throwable) {
+    public CelleryAuthException(String msg, Throwable throwable) {
 
         super(msg, throwable);
     }
 
-    public VickAuthException(Throwable throwable) {
+    public CelleryAuthException(Throwable throwable) {
 
         super(throwable);
     }

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -24,11 +24,11 @@ import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.sts.CellStsUtils;
-import org.wso2.vick.auth.cell.sts.exception.TokenValidationFailureException;
-import org.wso2.vick.auth.cell.sts.model.CellStsRequest;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
-import org.wso2.vick.auth.cell.sts.service.VickCellStsService;
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -41,12 +41,12 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
     private JWTSignatureValidator jwtValidator = new JWKSBasedJWTValidator();
     private static final Logger log = LoggerFactory.getLogger(SelfContainedTokenValidator.class);
-    private static String globalIssuer = "https://sts.vick.wso2.com";
+    private static String globalIssuer = "https://sts.cellery.io";
 
     /**
-     * Validates a self contained access token.
+     * Validates a self contained access security.
      *
-     * @param token          Incoming token. JWT to be validated.
+     * @param token          Incoming security. JWT to be validated.
      * @param cellStsRequest Request which reaches cell STS.
      * @throws TokenValidationFailureException TokenValidationFailureException.
      */
@@ -54,10 +54,10 @@ public class SelfContainedTokenValidator implements TokenValidator {
     public void validateToken(String token, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
 
         if (StringUtils.isEmpty(token)) {
-            throw new TokenValidationFailureException("No token found in the request.");
+            throw new TokenValidationFailureException("No security found in the request.");
         }
         try {
-            log.debug("Validating token: {}" + token);
+            log.debug("Validating security: {}" + token);
             SignedJWT parsedJWT = SignedJWT.parse(token);
             JWTClaimsSet jwtClaimsSet = parsedJWT.getJWTClaimsSet();
             validateIssuer(jwtClaimsSet, cellStsRequest);
@@ -82,7 +82,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             TokenValidationFailureException {
 
         if (jwtClaimsSet.getAudience().isEmpty()) {
-            throw new TokenValidationFailureException("No audiences found in the token");
+            throw new TokenValidationFailureException("No audiences found in the security");
         }
 
         try {
@@ -94,7 +94,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
                         cellAudience);
             }
             log.debug("Audience validation successful");
-        } catch (VickCellSTSException e) {
+        } catch (CelleryCellSTSException e) {
             throw new TokenValidationFailureException("Cannot infer cell name", e);
         }
 
@@ -119,7 +119,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
     private void validateSignature(JWT jwt, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
 
-        String jwkEndpoint = VickCellStsService.getCellStsConfiguration().getGlobalJWKEndpoint();
+        String jwkEndpoint = CelleryCellStsService.getCellStsConfiguration().getGlobalJWKEndpoint();
 
         if (StringUtils.isNotEmpty(cellStsRequest.getSource().getCellName())) {
             int port = resolvePort(cellStsRequest.getSource().getCellName());
@@ -128,10 +128,10 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
         log.debug("Calling JWKS endpoint: " + jwkEndpoint);
         try {
-            log.debug("Validating signature of the token");
+            log.debug("Validating signature of the security");
             jwtValidator.validateSignature(jwt, jwkEndpoint, jwt.getHeader().getAlgorithm().getName(), null);
         } catch (TokenValidationFailureException e) {
-            throw new TokenValidationFailureException("Error while validating signature of the token", e);
+            throw new TokenValidationFailureException("Error while validating signature of the security", e);
         }
         log.debug("Token signature validated successfully");
     }

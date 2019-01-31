@@ -26,18 +26,18 @@ import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
 /**
  * Intercepts inbounds calls to pods within the Cell.
  */
-public class VickCellInboundInterceptorService extends VickCellInterceptorService {
+public class CelleryCellInboundInterceptorService extends CelleryCellInterceptorService {
 
-    private Logger log = LoggerFactory.getLogger(VickCellInboundInterceptorService.class);
+    private Logger log = LoggerFactory.getLogger(CelleryCellInboundInterceptorService.class);
 
 
-    public VickCellInboundInterceptorService(VickCellStsService cellStsService) throws VickCellSTSException {
+    public CelleryCellInboundInterceptorService(CelleryCellStsService cellStsService) throws CelleryCellSTSException {
         super(cellStsService);
     }
 
     @Override
     protected void handleRequest(CellStsRequest cellStsRequest,
-                                 CellStsResponse cellStsResponse) throws VickCellSTSException {
+                                 CellStsResponse cellStsResponse) throws CelleryCellSTSException {
 
         log.debug("Intercepted Sidecar Inbound Request:\nSource:{}\nDestination:{}\n", cellStsRequest.getSource(),
                 cellStsRequest.getDestination());

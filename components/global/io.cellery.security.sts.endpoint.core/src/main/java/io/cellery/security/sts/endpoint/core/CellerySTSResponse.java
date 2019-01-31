@@ -16,14 +16,14 @@
  *  under the License.
  */
 
-package org.wso2.vick.sts.core;
+package io.cellery.security.sts.endpoint.core;
 
 import org.json.simple.JSONObject;
 
 /**
- * This is the POJO class that represents STS response in Vick.
+ * This is the POJO class that represents STS response in Cellery.
  */
-public class VickSTSResponse {
+public class CellerySTSResponse {
 
     private String stsToken;
 
@@ -40,7 +40,7 @@ public class VickSTSResponse {
     public String toJson() {
 
         JSONObject tokenResponse = new JSONObject();
-        tokenResponse.put(VickSTSConstants.VickSTSResponse.STS_TOKEN, stsToken);
+        tokenResponse.put(CellerySTSConstants.CellerySTSResponse.STS_TOKEN, stsToken);
         return tokenResponse.toString();
     }
 }

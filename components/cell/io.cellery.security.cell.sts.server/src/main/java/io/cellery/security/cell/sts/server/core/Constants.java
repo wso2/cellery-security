@@ -17,13 +17,13 @@
  *
  */
 
-package org.wso2.vick.auth.cell.sts;
+package io.cellery.security.cell.sts.server.core;
 
 /**
  * Constants for STS
  */
 public class Constants {
 
-    public static final String VICK_AUTH_SUBJECT_HEADER = "x-vick-auth-subject";
+    public static final String CELLERY_AUTH_SUBJECT_HEADER = "x-cellery-auth-subject";
 
 }

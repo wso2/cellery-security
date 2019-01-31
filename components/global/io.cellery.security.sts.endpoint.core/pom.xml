@@ -20,34 +20,44 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>org.wso2.vick</groupId>
-        <artifactId>org.wso2.vick.auth</artifactId>
+        <groupId>io.cellery.security</groupId>
+        <artifactId>cellery-seucirity</artifactId>
+        <relativePath>../../pom.xml</relativePath>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../../system/control-plane/global/components/auth/pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.wso2.vick.auth.sts.core</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>WSO2 VICK - Auth STS Core</name>
+    <artifactId>io.cellery.security.sts.endpoint.core</artifactId>
+    <name>WSO2 Cellery - core logic for token endpoint webapp</name>
     <modelVersion>4.0.0</modelVersion>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-            <version>6.4.50</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20160212</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.vick</groupId>
-            <artifactId>org.wso2.vick.auth.extensions</artifactId>
+            <groupId>io.cellery.security</groupId>
+            <artifactId>io.cellery.security.extensions</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

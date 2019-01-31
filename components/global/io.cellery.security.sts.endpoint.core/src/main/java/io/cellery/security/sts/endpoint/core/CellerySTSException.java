@@ -15,19 +15,19 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.wso2.vick.sts.core;
+package io.cellery.security.sts.endpoint.core;
 
 /**
  * Exception thrown during the STS validation failure.
  */
-public class VickStsException extends Exception {
+public class CellerySTSException extends Exception {
 
-    VickStsException(String msg, Throwable e) {
+    CellerySTSException(String msg, Throwable e) {
 
         super(msg, e);
     }
 
-    VickStsException(String msg) {
+    CellerySTSException(String msg) {
 
         super(msg);
     }

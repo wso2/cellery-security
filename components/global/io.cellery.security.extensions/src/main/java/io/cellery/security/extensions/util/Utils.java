@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.vick.auth.util;
+package io.cellery.security.extensions.util;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * This is the Utils class for token validations.
+ * This is the Utils class for security validations.
  */
 public class Utils {
 
@@ -71,12 +71,12 @@ public class Utils {
 
     }
 
-    public static IdentityProvider getVickIdp() throws IdentityProviderManagementException {
+    public static IdentityProvider getCelleryIDP() throws IdentityProviderManagementException {
         return IdentityProviderManager.getInstance().getResidentIdP(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     public static boolean isSignedJWT(String jwtToTest) {
-        // Signed JWT token contains 3 base64 encoded components separated by periods.
+        // Signed JWT security contains 3 base64 encoded components separated by periods.
         return StringUtils.countMatches(jwtToTest, ".") == 2;
     }
 

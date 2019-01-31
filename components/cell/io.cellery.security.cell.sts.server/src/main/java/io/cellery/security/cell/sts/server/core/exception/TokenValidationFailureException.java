@@ -17,10 +17,10 @@
  *
  */
 
-package org.wso2.vick.auth.cell.sts.exception;
+package io.cellery.security.cell.sts.server.core.exception;
 
 /**
- * Checked exception for token validation.
+ * Checked exception for security validation.
  */
 public class TokenValidationFailureException extends Exception {
 

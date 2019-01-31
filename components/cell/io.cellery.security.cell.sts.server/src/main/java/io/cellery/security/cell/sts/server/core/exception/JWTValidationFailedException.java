@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.sts.exception;
+package io.cellery.security.cell.sts.server.core.exception;
 
 /**
  * Exception used to convey JWT validation failures.

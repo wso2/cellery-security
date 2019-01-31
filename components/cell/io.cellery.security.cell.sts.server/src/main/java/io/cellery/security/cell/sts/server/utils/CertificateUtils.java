@@ -17,14 +17,14 @@
  *
  */
 
-package org.wso2.vick.auth.cell.utils;
+package io.cellery.security.cell.sts.server.utils;
 
 import org.apache.commons.codec.binary.Base64;
-import org.wso2.vick.auth.cell.jwks.KeyResolver;
-import org.wso2.vick.auth.cell.jwks.KeyResolverException;
-import org.wso2.vick.auth.cell.jwks.SelfSignedKeyResolver;
-import org.wso2.vick.auth.cell.sts.CellStsUtils;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
+import io.cellery.security.cell.sts.server.jwks.KeyResolver;
+import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
+import io.cellery.security.cell.sts.server.jwks.SelfSignedKeyResolver;
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -75,7 +75,7 @@ public class CertificateUtils {
         if (keyResolver == null) {
             try {
                 keyResolver = new SelfSignedKeyResolver(CellStsUtils.getMyCellName());
-            } catch (VickCellSTSException e) {
+            } catch (CelleryCellSTSException e) {
                 throw new KeyResolverException("Error while retriving key resolver", e);
             }
         }

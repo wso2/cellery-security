@@ -18,19 +18,19 @@
  */
 package io.cellery.security.cell.sts.server.core.service;
 
-public class VickCellSTSException extends Exception {
+public class CelleryCellSTSException extends Exception {
 
-    public VickCellSTSException(String message) {
+    public CelleryCellSTSException(String message) {
 
         super(message);
     }
 
-    public VickCellSTSException(Throwable e) {
+    public CelleryCellSTSException(Throwable e) {
 
         super(e);
     }
 
-    public VickCellSTSException(String errorMessage, Throwable e) {
+    public CelleryCellSTSException(String errorMessage, Throwable e) {
 
         super(errorMessage, e);
     }

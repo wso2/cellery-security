@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.vick.auth.cell.authorization.opa;
+package io.cellery.security.cell.sts.server.authorization.opa;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -27,12 +27,12 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.vick.auth.cell.authorization.AuthorizationFailedException;
-import org.wso2.vick.auth.cell.authorization.AuthorizationHandler;
-import org.wso2.vick.auth.cell.authorization.AuthorizationUtils;
-import org.wso2.vick.auth.cell.authorization.AuthorizeRequest;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
-import org.wso2.vick.auth.cell.utils.LambdaExceptionUtils;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationHandler;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationUtils;
+import io.cellery.security.cell.sts.server.authorization.AuthorizeRequest;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.utils.LambdaExceptionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
             }));
 
             log.info("Authorization successfully completed for request: ", request.getRequestId());
-        } catch (UnirestException | VickCellSTSException e) {
+        } catch (UnirestException | CelleryCellSTSException e) {
             throw new AuthorizationFailedException("Error while sending authorization request to OPA", e);
         }
     }

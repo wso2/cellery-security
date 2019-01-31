@@ -1,4 +1,4 @@
-package org.wso2.vick.auth.cell.sts.generated.envoy.service.auth.v2alpha;
+package io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 import static io.grpc.stub.ClientCalls.asyncUnaryCall;

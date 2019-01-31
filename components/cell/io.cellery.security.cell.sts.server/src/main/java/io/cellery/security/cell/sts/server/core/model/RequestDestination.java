@@ -16,9 +16,9 @@
  * under the License.
  *
  */
-package org.wso2.vick.auth.cell.sts.model;
+package io.cellery.security.cell.sts.server.core.model;
 
-import org.wso2.vick.auth.cell.sts.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class RequestDestination {
 
     private String cellName;
     private String workload;
-    private boolean isExternalToVick;
+    private boolean isExternalToCellery;
 
     private RequestDestination() {
     }
@@ -40,8 +40,8 @@ public class RequestDestination {
         return workload;
     }
 
-    public boolean isExternalToVick() {
-        return isExternalToVick;
+    public boolean isExternalToCellery() {
+        return isExternalToCellery;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RequestDestination {
     public static class RequestDestinationBuilder {
         private String cellName;
         private String workload;
-        private boolean isExternalToVick;
+        private boolean isExternalToCellery;
 
         public RequestDestinationBuilder setCellName(String cellName) {
             this.cellName = cellName;
@@ -68,8 +68,8 @@ public class RequestDestination {
             return this;
         }
 
-        public RequestDestinationBuilder setExternalToVick(boolean externalToVick) {
-            isExternalToVick = externalToVick;
+        public RequestDestinationBuilder setExternalToCellery(boolean externalToCellery) {
+            isExternalToCellery = externalToCellery;
             return this;
         }
 
@@ -77,7 +77,7 @@ public class RequestDestination {
             RequestDestination destination = new RequestDestination();
             destination.cellName = cellName;
             destination.workload = workload;
-            destination.isExternalToVick = isExternalToVick;
+            destination.isExternalToCellery = isExternalToCellery;
 
             return destination;
         }

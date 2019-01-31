@@ -16,7 +16,7 @@
  * under the License.
  *
  */
-package org.wso2.vick.auth.cell.sts.model;
+package io.cellery.security.cell.sts.server.core.model;
 
 import java.util.Collections;
 import java.util.HashMap;

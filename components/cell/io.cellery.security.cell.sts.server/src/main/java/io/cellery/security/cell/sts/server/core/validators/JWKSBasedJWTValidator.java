@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.vick.auth.cell.sts.validators;
+package io.cellery.security.cell.sts.server.core.validators;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -35,7 +35,7 @@ import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.vick.auth.cell.sts.exception.TokenValidationFailureException;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 
 import java.net.MalformedURLException;
 import java.text.ParseException;
@@ -80,7 +80,7 @@ public class JWKSBasedJWTValidator implements JWTSignatureValidator {
             // set the Key Selector for the jwks_uri.
             setJWKeySelector(jwksUri, algorithm);
 
-            // Process the token, set optional context parameters.
+            // Process the security, set optional context parameters.
             SecurityContext securityContext = null;
             if (opts != null && !opts.isEmpty()) {
                 securityContext = new SimpleSecurityContext();

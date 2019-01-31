@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.vick.auth.cell.sts;
+package io.cellery.security.cell.sts.server.core;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -27,9 +27,9 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang.StringUtils;
-import org.wso2.vick.auth.cell.jwks.KeyResolverException;
-import org.wso2.vick.auth.cell.sts.service.VickCellSTSException;
-import org.wso2.vick.auth.cell.utils.CertificateUtils;
+import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -42,12 +42,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * The JWT token builder for VICK.
+ * The JWT security builder for Cellery.
  */
 public class STSJWTBuilder {
 
-    private static final String MICRO_GATEWAY_DEFAULT_AUDIENCE_VALUE = "http://org.wso2.apimgt/gateway";
-    private static final String VICK_STS_ISSUER_CONFIG = "Vick.STS.Issuer";
+    private static final String MICRO_GATEWAY_DEFAULT_AUDIENCE_VALUE = "http://org.cellery.apimgt/gateway";
     private static final String SCOPE_CLAIM = "scope";
     private static final String KEY_TYPE_CLAIM = "keytype";
     private static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
@@ -58,7 +57,7 @@ public class STSJWTBuilder {
     // By default we set this to 20m
     private long expiryInSeconds = 1200L;
     private List<String> audience = new ArrayList<>();
-    private static String issuer = "https://sts.vick.wso2.com";
+    private static String issuer = "https://sts.cellry.io";
 
     public STSJWTBuilder subject(String subject) {
 
@@ -109,13 +108,13 @@ public class STSJWTBuilder {
         return this;
     }
 
-    public String build() throws VickCellSTSException {
+    public String build() throws CelleryCellSTSException {
 
         JWSHeader jwsHeader = null;
         try {
             jwsHeader = buildJWSHeader();
         } catch (KeyResolverException | CertificateEncodingException | NoSuchAlgorithmException e) {
-            throw new VickCellSTSException("Error while building JWS header", e);
+            throw new CelleryCellSTSException("Error while building JWS header", e);
         }
         // Add mandatory claims
         addMandatoryClaims(claimSetBuilder);
@@ -127,7 +126,7 @@ public class STSJWTBuilder {
             JWSSigner signer = new RSASSASigner(CertificateUtils.getKeyResolver().getPrivateKey());
             signedJWT.sign(signer);
         } catch (JOSEException | KeyResolverException e) {
-            throw new VickCellSTSException("Error while signing JWT", e);
+            throw new CelleryCellSTSException("Error while signing JWT", e);
         }
         return signedJWT.serialize();
     }
