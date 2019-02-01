@@ -23,8 +23,8 @@
     <version>1.0.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>Cellery security components</name>
-    <description>Cellery security components.</description>
+    <name>Cellery Security Components</name>
+    <description>Cellery security implementations.</description>
 
 
     <repositories>
@@ -38,7 +38,6 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
-
         <repository>
             <id>wso2.releases</id>
             <name>WSO2 internal Repository</name>
@@ -49,7 +48,6 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
-
         <repository>
             <id>wso2.snapshots</id>
             <name>Apache Snapshot Repository</name>
@@ -62,7 +60,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-
     </repositories>
 
     <pluginRepositories>
@@ -169,57 +166,47 @@
             <dependency>
                 <groupId>io.cellery.security</groupId>
                 <artifactId>gogoproto-java</artifactId>
-                <version>${cerllery.security.version}</version>
+                <version>${cellery.security.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>LATEST</version>
-                <scope>compile</scope>
+                <version>${nimbus.josejwt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-                <version>6.0.52</version>
+                <version>${carbon.identity.inbound.auth.oauth.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.synapse</groupId>
                 <artifactId>synapse-core</artifactId>
-                <version>2.1.7-wso2v10</version>
-                <scope>provided</scope>
+                <version>${synapse.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.synapse</groupId>
                 <artifactId>synapse-commons</artifactId>
-                <version>2.1.7-wso2v10</version>
-                <scope>provided</scope>
+                <version>${synapse.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-                <version>6.4.50</version>
-                <scope>provided</scope>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-                <version>6.4.50</version>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-                <version>6.4.50</version>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20160212</version>
-            </dependency>
-            <dependency>
-                <groupId>io.cellery.security</groupId>
-                <artifactId>io.cellery.security.extensions</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
-                <scope>provided</scope>
+                <version>${org.json.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
@@ -247,7 +234,6 @@
                 <version>${servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
@@ -272,10 +258,13 @@
                 <groupId>io.cellery.security</groupId>
                 <artifactId>io.cellery.security.sts.endpoint.core</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
-                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cellery.security</groupId>
+                <artifactId>io.cellery.security.extensions</artifactId>
+                <version>${cellery.security.version}</version>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
 
     <properties>
@@ -313,7 +302,12 @@
         <servlet-api.version>2.5</servlet-api.version>
         <java.version>1.8</java.version>
         <grpc.version>1.15.0</grpc.version>
-        <cerllery.security.version>${project.version}</cerllery.security.version>
+        <nimbus.josejwt.version>LATEST</nimbus.josejwt.version>
+        <carbon.identity.inbound.auth.oauth.version>6.0.52</carbon.identity.inbound.auth.oauth.version>
+        <carbon.apimgt.version>6.4.50</carbon.apimgt.version>
+        <synapse.version>2.1.7-wso2v10</synapse.version>
+        <org.json.version>20160212</org.json.version>
+        <cellery.security.version>${project.version}</cellery.security.version>
     </properties>
 
 </project>
