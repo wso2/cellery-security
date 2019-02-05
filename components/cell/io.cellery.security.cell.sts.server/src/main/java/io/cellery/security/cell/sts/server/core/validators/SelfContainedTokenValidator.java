@@ -54,7 +54,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
     public void validateToken(String token, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
 
         if (StringUtils.isEmpty(token)) {
-            throw new TokenValidationFailureException("No security found in the request.");
+            throw new TokenValidationFailureException("No security token found in the request.");
         }
         try {
             log.debug("Validating security: {}" + token);

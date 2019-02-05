@@ -7968,8 +7968,8 @@ public final class AttributesOuterClass {
       "\002 \001(\0132\031.istio.mixer.v1.StringMap:\0028\001\"t\n\t" +
       "StringMap\0227\n\007entries\030\001 \003(\0132&.istio.mixer" +
       ".v1.StringMap.EntriesEntry\032.\n\014EntriesEnt" +
-      "ry\022\013\n\003key\030\001 \001(\021\022\r\n\005value\030\002 \001(\021:\0028\001BM\n%io" +
-      "cellery.security.telemetry.receiver.coreZ\025ist" +
+              "ry\022\013\n\003key\030\001 \001(\021\022\r\n\005value\030\002 \001(\021:\0028\001BM\n%or" +
+              "g.wso2.vick.telemetry.receiver.coreZ\025ist" +
       "io.io/api/mixer/v1\370\001\001\310\341\036\000\250\342\036\000\360\341\036\000b\006proto" +
       "3"
     };
