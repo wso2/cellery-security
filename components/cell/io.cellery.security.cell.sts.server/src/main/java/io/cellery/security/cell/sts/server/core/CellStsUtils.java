@@ -63,7 +63,7 @@ public class CellStsUtils {
      */
     public static String getIssuerName(String cellName) {
 
-        return cellName + "--core-service";
+        return cellName + "--sts-service";
     }
 
 }
