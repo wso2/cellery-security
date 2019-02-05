@@ -47,7 +47,7 @@ public class CelleryCellSTSServer {
 
     private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
     private static final String STS_CONFIG_PATH_ENV_VARIABLE = "CONF_PATH";
-    private static final String CONFIG_FILE_PATH = "/etc/config/core.json";
+    private static final String CONFIG_FILE_PATH = "/etc/config/sts.json";
 
     private static final String CONFIG_STS_ENDPOINT = "endpoint";
     private static final String CONFIG_AUTH_USERNAME = "username";
