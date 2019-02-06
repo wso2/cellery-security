@@ -57,7 +57,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             throw new TokenValidationFailureException("No security token found in the request.");
         }
         try {
-            log.debug("Validating security: {}" + token);
+            log.debug("Validating security: {}", token);
             SignedJWT parsedJWT = SignedJWT.parse(token);
             JWTClaimsSet jwtClaimsSet = parsedJWT.getJWTClaimsSet();
             validateIssuer(jwtClaimsSet, cellStsRequest);
@@ -114,7 +114,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             throw new TokenValidationFailureException("Issuer validation failed. Expected issuer : " + issuer + ". " +
                     "Received issuer: " + issuerInToken);
         }
-        log.debug("Issuer validated successfully. Issuer : {}" + issuer);
+        log.debug("Issuer validated successfully. Issuer : {}", issuer);
     }
 
     private void validateSignature(JWT jwt, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
