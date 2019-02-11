@@ -20,6 +20,7 @@
 package io.cellery.security.cell.sts.server.authorization.opa;
 
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationContext;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
@@ -28,14 +29,14 @@ import java.text.ParseException;
 
 public class OPAAuthorizationContext extends AuthorizationContext {
 
-    private String jwtContent;
+    private JWTClaimsSet jwtContent;
 
     public OPAAuthorizationContext(String jwt) throws AuthorizationFailedException {
 
         super(jwt);
         try {
             JWT parsedJWT = JWTParser.parse(jwt);
-            jwtContent = parsedJWT.getJWTClaimsSet().toJSONObject().toJSONString();
+            jwtContent = parsedJWT.getJWTClaimsSet();
         } catch (ParseException e) {
             throw new AuthorizationFailedException("Error while parsing JWT", e);
         }

@@ -25,14 +25,14 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationHandler;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationUtils;
 import io.cellery.security.cell.sts.server.authorization.AuthorizeRequest;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import io.cellery.security.cell.sts.server.utils.LambdaExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,10 +46,12 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
 
     @Override
     public void authorize(AuthorizeRequest request) throws AuthorizationFailedException {
+
         log.debug("OPA authorization handler invoked for request id: {}", request.getRequestId());
         request.setAuthorizationContext(new OPAAuthorizationContext(request.getAuthorizationContext().getJwt()));
         Gson gson = new Gson();
         String requestString = gson.toJson(request);
+        requestString = "{ \"input\" :" + requestString + "}";
         HttpResponse<JsonNode> apiResponse = null;
         log.info("Reqesut to OPA server : {}", requestString);
         try {
