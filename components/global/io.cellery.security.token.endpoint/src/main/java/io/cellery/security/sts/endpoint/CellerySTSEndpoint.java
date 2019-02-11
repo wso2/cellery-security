@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
 /**
  * This is the REST service that is exposed to get the STS security.
  */
-@Path("/core")
+@Path("/sts")
 public class CellerySTSEndpoint {
 
     private static final Log log = LogFactory.getLog(CellerySTSEndpoint.class);
@@ -50,7 +50,7 @@ public class CellerySTSEndpoint {
     private CellerySecureTokenService tokenService = new CellerySecureTokenService();
 
     @POST
-    @Path("/security")
+    @Path("/token")
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
     public Response getStsToken(@Context HttpServletRequest request, MultivaluedMap<String, String> form) {
