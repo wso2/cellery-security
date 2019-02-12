@@ -19,6 +19,14 @@
 
 package io.cellery.security.cell.sts.server.core;
 
+import io.cellery.security.cell.sts.server.core.context.store.UserContextStore;
+import io.cellery.security.cell.sts.server.core.context.store.UserContextStoreImpl;
+import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellInboundInterceptorService;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellOutboundInterceptorService;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
+import io.cellery.security.cell.sts.server.jwks.JWKSServer;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -27,14 +35,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.cellery.security.cell.sts.server.jwks.JWKSServer;
-import io.cellery.security.cell.sts.server.core.context.store.UserContextStore;
-import io.cellery.security.cell.sts.server.core.context.store.UserContextStoreImpl;
-import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellInboundInterceptorService;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellOutboundInterceptorService;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,6 +53,9 @@ public class CelleryCellSTSServer {
     private static final String CONFIG_AUTH_USERNAME = "username";
     private static final String CONFIG_AUTH_PASSWORD = "password";
     private static final String CONFIG_GLOBAL_JWKS = "globalJWKS";
+    private static final String CONFIG_SIGNATURE_VALIDATION_ENABLED = "enableSignatureValidation";
+    private static final String CONFIG_ISSUER_VALIDATION_ENABLED = "enableIssuerValidation";
+    private static final String CONFIG_AUDIENCE_VALIDATION_ENABLED = "enableAudienceValidation";
 
     private static final Logger log = LoggerFactory.getLogger(CelleryCellSTSServer.class);
     private final int inboundListeningPort;
@@ -94,7 +97,13 @@ public class CelleryCellSTSServer {
                     .setStsEndpoint((String) config.get(CONFIG_STS_ENDPOINT))
                     .setUsername((String) config.get(CONFIG_AUTH_USERNAME))
                     .setPassword((String) config.get(CONFIG_AUTH_PASSWORD))
-                    .setGlobalJWKEndpoint((String) config.get(CONFIG_GLOBAL_JWKS));
+                    .setGlobalJWKEndpoint((String) config.get(CONFIG_GLOBAL_JWKS))
+                    .setSignatureValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (CONFIG_SIGNATURE_VALIDATION_ENABLED))))
+                    .setAudienceValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (CONFIG_AUDIENCE_VALIDATION_ENABLED))))
+                    .setIssuerValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (CONFIG_ISSUER_VALIDATION_ENABLED))));
         } catch (ParseException | IOException e) {
             throw new CelleryCellSTSException("Error while setting up STS configurations", e);
         }

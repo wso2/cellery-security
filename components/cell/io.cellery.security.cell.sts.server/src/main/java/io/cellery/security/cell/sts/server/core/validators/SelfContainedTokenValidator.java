@@ -21,14 +21,14 @@ package io.cellery.security.cell.sts.server.core.validators;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -71,6 +71,12 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
     private void ValidateExpiry(JWTClaimsSet jwtClaimsSet) throws TokenValidationFailureException {
 
+        // Validating expiery is a part of signature validation. TODO : Check whether this is happening in signature
+        // validation.
+        if (!CelleryCellStsService.getCellStsConfiguration().isSignatureValidationEnabled()) {
+            log.debug("Issuer validation turned off.");
+            return;
+        }
         if (jwtClaimsSet.getExpirationTime().before(new Date(System.currentTimeMillis()))) {
             throw new TokenValidationFailureException("Token has expired. Expiry time: " + jwtClaimsSet
                     .getExpirationTime());
@@ -80,6 +86,11 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
     private void validateAudience(JWTClaimsSet jwtClaimsSet, CellStsRequest cellStsRequest) throws
             TokenValidationFailureException {
+
+        if(!CelleryCellStsService.getCellStsConfiguration().isAudienceValidationEnabled()) {
+            log.debug("Audience validation turned off.");
+            return;
+        }
 
         if (jwtClaimsSet.getAudience().isEmpty()) {
             throw new TokenValidationFailureException("No audiences found in the security");
@@ -102,6 +113,10 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
     private void validateIssuer(JWTClaimsSet claimsSet, CellStsRequest request) throws TokenValidationFailureException {
 
+        if(!CelleryCellStsService.getCellStsConfiguration().isIssuerValidationEnabled()) {
+            log.debug("Issuer validation turned off.");
+            return;
+        }
         String issuer = globalIssuer;
         if (StringUtils.isNotEmpty(request.getSource().getCellName())) {
             issuer = CellStsUtils.getIssuerName(request.getSource().getCellName());
@@ -118,6 +133,11 @@ public class SelfContainedTokenValidator implements TokenValidator {
     }
 
     private void validateSignature(JWT jwt, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
+
+        if(!CelleryCellStsService.getCellStsConfiguration().isSignatureValidationEnabled()) {
+            log.debug("Signature validation turned off.");
+            return;
+        }
 
         String jwkEndpoint = CelleryCellStsService.getCellStsConfiguration().getGlobalJWKEndpoint();
 

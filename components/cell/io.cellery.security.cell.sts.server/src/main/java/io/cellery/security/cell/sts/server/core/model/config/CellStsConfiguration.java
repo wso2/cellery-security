@@ -33,66 +33,116 @@ public class CellStsConfiguration {
 
     private String cellName;
 
-    private String globalJWKEndpoint;
+    private String globalJWKSEndpoint;
+
+    private boolean signatureValidationEnabled;
+
+    private boolean audienceValidationEnabled;
+
+    private boolean issuerValidationEnabled;
+
+    public boolean isSignatureValidationEnabled() {
+
+        return signatureValidationEnabled;
+    }
+
+    public CellStsConfiguration setSignatureValidationEnabled(boolean signatureValidationEnbled) {
+
+        this.signatureValidationEnabled = signatureValidationEnbled;
+        return this;
+    }
+
+    public boolean isAudienceValidationEnabled() {
+
+        return audienceValidationEnabled;
+    }
+
+    public CellStsConfiguration setAudienceValidationEnabled(boolean audienceValidationEnabled) {
+
+        this.audienceValidationEnabled = audienceValidationEnabled;
+        return this;
+    }
+
+    public boolean isIssuerValidationEnabled() {
+
+        return issuerValidationEnabled;
+    }
+
+    public CellStsConfiguration setIssuerValidationEnabled(boolean issuerValidationEnabled) {
+
+        this.issuerValidationEnabled = issuerValidationEnabled;
+        return this;
+    }
 
     /**
      * Get the global JWKS endpoint
+     *
      * @return Global JWKS endpoint
      */
     public String getGlobalJWKEndpoint() {
 
-        return globalJWKEndpoint;
+        return globalJWKSEndpoint;
     }
 
     /**
      * Set global JWKS endpoint.
-     * @param globalJWKEndpoint.
+     *
+     * @param globalJWKSEndpoint.
      * @return CellStsConfiguration.
      */
-    public CellStsConfiguration setGlobalJWKEndpoint(String globalJWKEndpoint) {
+    public CellStsConfiguration setGlobalJWKEndpoint(String globalJWKSEndpoint) {
 
-        this.globalJWKEndpoint = globalJWKEndpoint;
+        this.globalJWKSEndpoint = globalJWKSEndpoint;
         return this;
     }
 
     public String getStsEndpoint() {
+
         return stsEndpoint;
     }
 
     public CellStsConfiguration setStsEndpoint(String stsEndpoint) {
+
         this.stsEndpoint = stsEndpoint;
         return this;
     }
 
     public String getUsername() {
+
         return username;
     }
 
     public CellStsConfiguration setUsername(String username) {
+
         this.username = username;
         return this;
     }
 
     public String getPassword() {
+
         return password;
     }
 
     public CellStsConfiguration setPassword(String password) {
+
         this.password = password;
         return this;
     }
 
     public String getCellName() {
+
         return cellName;
     }
 
     public CellStsConfiguration setCellName(String cellName) {
+
         this.cellName = cellName;
         return this;
     }
 
     @Override
     public String toString() {
+
         Map<String, String> configJson = new HashMap<>();
         configJson.put("Global STS Endpoint", stsEndpoint);
         configJson.put("Cell Name", cellName);
