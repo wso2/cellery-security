@@ -41,6 +41,17 @@ public class CellStsConfiguration {
 
     private boolean issuerValidationEnabled;
 
+    private static CellStsConfiguration instance = new CellStsConfiguration();
+
+    private CellStsConfiguration() {
+
+    }
+
+    public static CellStsConfiguration getInstance() {
+
+        return instance;
+    }
+
     public boolean isSignatureValidationEnabled() {
 
         return signatureValidationEnabled;

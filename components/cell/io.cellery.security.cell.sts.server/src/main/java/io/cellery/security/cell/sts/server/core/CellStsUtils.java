@@ -20,15 +20,23 @@ package io.cellery.security.cell.sts.server.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
+import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class CellStsUtils {
 
     private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
+    private static final String STS_CONFIG_PATH_ENV_VARIABLE = "CONF_PATH";
+    private static final String CONFIG_FILE_PATH = "/etc/config/sts.json";
 
     public static String getMyCellName() throws CelleryCellSTSException {
         // For now we pick the cell name from the environment variable.
@@ -49,6 +57,7 @@ public class CellStsUtils {
     }
 
     public static String getPrettyPrintJson(Map<String, String> attributes) {
+
         JSONObject configJson = new JSONObject();
         attributes.forEach((key, value) -> configJson.put(key, value));
 
@@ -58,12 +67,43 @@ public class CellStsUtils {
 
     /**
      * Returns the issuer name.
-     * @param cellName  Name of the cell.
+     *
+     * @param cellName Name of the cell.
      * @return Issuer name of the respective cell.
      */
     public static String getIssuerName(String cellName) {
 
         return cellName + "--sts-service";
+    }
+
+    public static String getConfigFilePath() {
+
+        String configPath = System.getenv(STS_CONFIG_PATH_ENV_VARIABLE);
+        return StringUtils.isNotBlank(configPath) ? configPath : CONFIG_FILE_PATH;
+    }
+
+    public static void buildCellStsConfiguration() throws CelleryCellSTSException {
+
+        try {
+            String configFilePath = CellStsUtils.getConfigFilePath();
+            String content = new String(Files.readAllBytes(Paths.get(configFilePath)));
+            JSONObject config = (JSONObject) new JSONParser().parse(content);
+
+            CellStsConfiguration.getInstance()
+                    .setCellName(getMyCellName())
+                    .setStsEndpoint((String) config.get(Constants.Configs.CONFIG_STS_ENDPOINT))
+                    .setUsername((String) config.get(Constants.Configs.CONFIG_AUTH_USERNAME))
+                    .setPassword((String) config.get(Constants.Configs.CONFIG_AUTH_PASSWORD))
+                    .setGlobalJWKEndpoint((String) config.get(Constants.Configs.CONFIG_GLOBAL_JWKS))
+                    .setSignatureValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (Constants.Configs.CONFIG_SIGNATURE_VALIDATION_ENABLED))))
+                    .setAudienceValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (Constants.Configs.CONFIG_AUDIENCE_VALIDATION_ENABLED))))
+                    .setIssuerValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (Constants.Configs.CONFIG_ISSUER_VALIDATION_ENABLED))));
+        } catch (ParseException | IOException e) {
+            throw new CelleryCellSTSException("Error while setting up STS configurations", e);
+        }
     }
 
 }

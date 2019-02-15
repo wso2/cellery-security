@@ -22,12 +22,6 @@ import com.mashape.unirest.http.Unirest;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationService;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
@@ -44,6 +38,12 @@ import io.cellery.security.cell.sts.server.core.validators.CellSTSRequestValidat
 import io.cellery.security.cell.sts.server.core.validators.DefaultCellSTSReqValidator;
 import io.cellery.security.cell.sts.server.core.validators.SelfContainedTokenValidator;
 import io.cellery.security.cell.sts.server.core.validators.TokenValidator;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -73,14 +73,10 @@ public class CelleryCellStsService {
     private UserContextStore userContextStore;
     private UserContextStore localContextStore;
 
-    private static CellStsConfiguration cellStsConfiguration;
-
-    public CelleryCellStsService(CellStsConfiguration stsConfig,
-                                 UserContextStore contextStore, UserContextStore localContextStore)
+    public CelleryCellStsService(UserContextStore contextStore, UserContextStore localContextStore)
             throws CelleryCellSTSException {
 
         this.userContextStore = contextStore;
-        cellStsConfiguration = stsConfig;
         this.localContextStore = localContextStore;
 
         setHttpClientProperties();
@@ -116,7 +112,7 @@ public class CelleryCellStsService {
         } else {
             jwtClaims = handleInternalRequest(cellStsRequest, requestId, jwt);
         }
-          // TODO : Integrate OPA and enable authorization.
+        // TODO : Integrate OPA and enable authorization.
         try {
             authorizationService.authorize(cellStsRequest, jwt);
         } catch (AuthorizationFailedException e) {
@@ -205,7 +201,7 @@ public class CelleryCellStsService {
             String stsToken = getStsToken(cellStsRequest);
             if (StringUtils.isEmpty(stsToken)) {
                 throw new CelleryCellSTSException("No JWT security received from the STS endpoint: "
-                        + cellStsConfiguration.getStsEndpoint());
+                        + CellStsConfiguration.getInstance().getStsEndpoint());
             }
             log.debug("Attaching jwt to outbound request : {}", stsToken);
             // Set the authorization header
@@ -371,10 +367,5 @@ public class CelleryCellStsService {
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             throw new CelleryCellSTSException("Error initializing the http client.", e);
         }
-    }
-
-    public static CellStsConfiguration getCellStsConfiguration() {
-
-        return cellStsConfiguration;
     }
 }
