@@ -41,6 +41,10 @@ public class CellStsConfiguration {
 
     private boolean issuerValidationEnabled;
 
+    private boolean authorizationEnabled;
+
+    private String stsOPAQueryPrefix;
+
     private static CellStsConfiguration instance = new CellStsConfiguration();
 
     private CellStsConfiguration() {
@@ -60,6 +64,28 @@ public class CellStsConfiguration {
     public CellStsConfiguration setSignatureValidationEnabled(boolean signatureValidationEnbled) {
 
         this.signatureValidationEnabled = signatureValidationEnbled;
+        return this;
+    }
+
+    public boolean isAuthorizationEnabled() {
+
+        return authorizationEnabled;
+    }
+
+    public CellStsConfiguration setAuthorizationEnabled(boolean authorizationEnabled) {
+
+        this.authorizationEnabled = authorizationEnabled;
+        return this;
+    }
+
+    public String getSTSOPAQueryPrefix() {
+
+        return stsOPAQueryPrefix;
+    }
+
+    public CellStsConfiguration setSTSOPAQueryPrefix(String stsOPAQueryPrefix) {
+
+        this.stsOPAQueryPrefix = stsOPAQueryPrefix;
         return this;
     }
 

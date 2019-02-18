@@ -100,7 +100,10 @@ public class CellStsUtils {
                     .setAudienceValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
                             (Constants.Configs.CONFIG_AUDIENCE_VALIDATION_ENABLED))))
                     .setIssuerValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
-                            (Constants.Configs.CONFIG_ISSUER_VALIDATION_ENABLED))));
+                            (Constants.Configs.CONFIG_ISSUER_VALIDATION_ENABLED))))
+                    .setSTSOPAQueryPrefix((String)config.get(Constants.Configs.CONFIG_OPA_PREFIX))
+                    .setAuthorizationEnabled(Boolean.parseBoolean(String.valueOf(config.get
+                            (Constants.Configs.CONFIG_AUTHORIZATION_ENABLED))));
         } catch (ParseException | IOException e) {
             throw new CelleryCellSTSException("Error while setting up STS configurations", e);
         }

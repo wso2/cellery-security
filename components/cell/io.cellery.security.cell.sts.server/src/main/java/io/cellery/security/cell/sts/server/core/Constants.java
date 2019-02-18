@@ -35,6 +35,8 @@ public class Constants {
         public static final String CONFIG_SIGNATURE_VALIDATION_ENABLED = "enableSignatureValidation";
         public static final String CONFIG_ISSUER_VALIDATION_ENABLED = "enableIssuerValidation";
         public static final String CONFIG_AUDIENCE_VALIDATION_ENABLED = "enableAudienceValidation";
+        public static final String CONFIG_AUTHORIZATION_ENABLED = "enableAuthorization";
+        public static final String CONFIG_OPA_PREFIX = "OPAQueryPrefix";
     }
 
 }
