@@ -19,8 +19,9 @@
 
 package io.cellery.security.cell.sts.server.authorization;
 
-import org.apache.commons.lang.StringUtils;
+import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import org.apache.commons.lang.StringUtils;
 
 public class AuthorizationUtils {
 
@@ -42,6 +43,11 @@ public class AuthorizationUtils {
         if (StringUtils.isNotEmpty(opaHostConfig)) {
             opaHost = opaHostConfig;
         }
-        return "http://" + opaHost + ":" + opaPort + "/v1/data";
+
+        String opaPrefix = CellStsConfiguration.getInstance().getSTSOPAQueryPrefix();
+        if (StringUtils.isEmpty(opaPrefix)) {
+            opaPrefix = "/data/cellery/io";
+        }
+        return "http://" + opaHost + ":" + opaPort + "/v1/" + opaPrefix;
     }
 }

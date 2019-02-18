@@ -20,7 +20,6 @@
 package io.cellery.security.cell.sts.server.authorization.opa;
 
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -30,12 +29,10 @@ import io.cellery.security.cell.sts.server.authorization.AuthorizationHandler;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationUtils;
 import io.cellery.security.cell.sts.server.authorization.AuthorizeRequest;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
-import io.cellery.security.cell.sts.server.utils.LambdaExceptionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Calls local OPA server and validate the request.
@@ -53,23 +50,38 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
         String requestString = gson.toJson(request);
         requestString = "{ \"input\" :" + requestString + "}";
         HttpResponse<JsonNode> apiResponse = null;
-        log.info("Reqesut to OPA server : {}", requestString);
+        log.info("Request to OPA server : {}", requestString);
         try {
-            apiResponse = Unirest.post(AuthorizationUtils.getOPAEndpoint()).body(requestString).asJson();
-            log.info("Response from OPA server: {}" + apiResponse.getBody().toString());
-            Object results = apiResponse.getBody().getObject().get("result");
-
-            Map resultsMap = gson.fromJson(results.toString(), HashMap.class);
-            resultsMap.forEach(LambdaExceptionUtils.rethrowBiConsumer((key, value) -> {
-                if (Boolean.parseBoolean(((LinkedTreeMap) value).getOrDefault("deny", false).toString())) {
+            String query = buildEndpoint(AuthorizationUtils.getOPAEndpoint(), request.getDestination().getWorkload());
+            log.info("Querying OPA from {}", query);
+            apiResponse = Unirest.post(query).body(requestString).asJson();
+            log.info("Response from OPA server: {}", apiResponse.getBody().toString());
+            try {
+                Boolean allow = apiResponse.getBody().getObject().getBoolean("result");
+                if (!allow) {
                     throw new AuthorizationFailedException("Error while authorizing request. Decision found : " +
-                            value);
+                            apiResponse.getBody().toString());
                 }
-            }));
+            } catch (JSONException e) {
+                // Ignoring sicne this is due to not having proper policies configured.
+                log.debug("Proper policies which returns {\"result\" : boolean} are not defined for query {}",
+                        query);
+            }
 
             log.info("Authorization successfully completed for request: ", request.getRequestId());
         } catch (UnirestException | CelleryCellSTSException e) {
             throw new AuthorizationFailedException("Error while sending authorization request to OPA", e);
         }
+    }
+
+    private String buildEndpoint(String endpointAddress, String destinationService) {
+
+        if (StringUtils.isEmpty(destinationService)) {
+            return endpointAddress;
+        }
+        // "-" is a special character in OPA
+        String sanitizedService = destinationService.replace("-", "_").split(":")
+                [0].concat("_allow");
+        return endpointAddress + "/" + sanitizedService;
     }
 }

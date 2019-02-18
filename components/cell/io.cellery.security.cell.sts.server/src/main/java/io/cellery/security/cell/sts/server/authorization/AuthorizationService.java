@@ -22,10 +22,11 @@
  */
 package io.cellery.security.cell.sts.server.authorization;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.cellery.security.cell.sts.server.authorization.opa.OPAAuthorizationHandler;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuthorizationService {
 
@@ -39,6 +40,11 @@ public class AuthorizationService {
      * @throws AuthorizationFailedException
      */
     public void authorize(CellStsRequest request, String jwt) throws AuthorizationFailedException {
+
+        if (!CellStsConfiguration.getInstance().isAuthorizationEnabled()) {
+            log.debug("Authorization is disabled. Hence returning without evaluating policies");
+            return;
+        }
         log.info("Authorization service is invoked for request: {}", request.getRequestId());
         authorizationHandler.authorize(buildAuthorizeRequest(request, jwt));
 
@@ -46,7 +52,8 @@ public class AuthorizationService {
 
     private AuthorizeRequest buildAuthorizeRequest(CellStsRequest request, String jwt) throws
             AuthorizationFailedException {
-        log.info("Building authorize request with jwt: "  + jwt);
+
+        log.info("Building authorize request with jwt: " + jwt);
         AuthorizationContext authorizationContext = new AuthorizationContext(jwt);
         AuthorizeRequest authorizeRequest = new AuthorizeRequest(request, authorizationContext);
         return authorizeRequest;
