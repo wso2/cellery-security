@@ -26,4 +26,15 @@ public class Constants {
 
     public static final String CELLERY_AUTH_SUBJECT_HEADER = "x-cellery-auth-subject";
 
+    public class Configs {
+
+        public static final String CONFIG_STS_ENDPOINT = "endpoint";
+        public static final String CONFIG_AUTH_USERNAME = "username";
+        public static final String CONFIG_AUTH_PASSWORD = "password";
+        public static final String CONFIG_GLOBAL_JWKS = "globalJWKS";
+        public static final String CONFIG_SIGNATURE_VALIDATION_ENABLED = "enableSignatureValidation";
+        public static final String CONFIG_ISSUER_VALIDATION_ENABLED = "enableIssuerValidation";
+        public static final String CONFIG_AUDIENCE_VALIDATION_ENABLED = "enableAudienceValidation";
+    }
+
 }
