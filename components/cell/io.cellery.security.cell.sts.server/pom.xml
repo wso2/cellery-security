@@ -12,6 +12,8 @@
     </parent>
 
     <artifactId>io.cellery.security.cell.sts.server</artifactId>
+    <name>Cellery STS Server</name>
+    <description>Cell STS Server</description>
 
     <build>
         <plugins>
