@@ -361,6 +361,7 @@
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <maven.docker.version>1.4.10</maven.docker.version>
         <docker.repo.name>celleryio</docker.repo.name>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
 </project>
