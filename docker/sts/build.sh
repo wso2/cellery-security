@@ -13,7 +13,7 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 
-cp Dockerfile ./../components/cell/io.cellery.security.cell.sts.server/target/
-docker build -t celleryio/cell-sts:latest ./../components/cell/io.cellery.security.cell.sts.server/target/
+cp Dockerfile ./../../components/cell/io.cellery.security.cell.sts.server/target/
+docker build -t celleryio/cell-sts:latest ./../../components/cell/io.cellery.security.cell.sts.server/target/
 docker push celleryio/cell-sts:latest
 

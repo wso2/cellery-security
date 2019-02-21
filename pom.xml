@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <groupId>io.cellery.security</groupId>
+    <artifactId>cellery-seucirity-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <name>Cellery Security</name>
+    <description>Cellery Security Implementations.</description>
+
+    <scm>
+        <url>https://github.com/cellery-io/mesh-security.git</url>
+        <developerConnection>scm:git:https://github.com/cellery-io/mesh-security.git</developerConnection>
+        <connection>scm:git:https://github.com/cellery-io/mesh-security.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>wso2-nexus</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.releases</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>wso2.releases</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>wso2.snapshots</id>
+            <name>WSO2 Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>wso2-nexus</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <modules>
+        <module>components</module>
+        <module>docker/sts</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${google.protobuf.java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.api.grpc</groupId>
+                <artifactId>proto-google-common-protos</artifactId>
+                <version>${proto.google.common.protos.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>${json.simple.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons.lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mashape.unirest</groupId>
+                <artifactId>unirest-java</artifactId>
+                <version>${unirest.java}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-alts</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.slf4j.impl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cellery.security</groupId>
+                <artifactId>gogoproto-java</artifactId>
+                <version>${cellery.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus.josejwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+                <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+                <version>${carbon.identity.inbound.auth.oauth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-core</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-commons</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                <version>${org.apache.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-rs-service-description</artifactId>
+                <version>${org.apache.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>jsr311-api</artifactId>
+                <version>${jaxrx.jsr311.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+                <version>${org.codehaus.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>${org.codehaus.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-jaxrs</artifactId>
+                <version>${org.codehaus.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cellery.security</groupId>
+                <artifactId>io.cellery.security.sts.endpoint.core</artifactId>
+                <version>${cellery.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cellery.security</groupId>
+                <artifactId>io.cellery.security.extensions</artifactId>
+                <version>${cellery.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cellery.security</groupId>
+                <artifactId>io.cellery.security.cell.sts.server</artifactId>
+                <version>${cellery.security.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven.release.plugin.version}</version>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven.deploy.plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>${maven.buildnumber.plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <google.protobuf.java.version>3.6.1</google.protobuf.java.version>
+        <proto.google.common.protos.version>1.12.0</proto.google.common.protos.version>
+        <json.simple.version>1.1.1</json.simple.version>
+        <commons.lang.version>2.6</commons.lang.version>
+        <unirest.java>1.4.9</unirest.java>
+        <guava.version>27.0-jre</guava.version>
+        <log4j.slf4j.impl.version>2.11.1</log4j.slf4j.impl.version>
+
+        <swagger.jaxrs.version>1.5.20</swagger.jaxrs.version>
+
+        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+        <org.apache.felix.annotations.version>1.2.4</org.apache.felix.annotations.version>
+        <eclipse.osgi.version>3.5.100.v20160504-1419</eclipse.osgi.version>
+        <carbon.core.version>4.4.32</carbon.core.version>
+        <slf4j.api.version>1.6.1</slf4j.api.version>
+        <jaxrx.jsr311.api.version>1.1.1</jaxrx.jsr311.api.version>
+        <springframework.version>4.1.6.RELEASE</springframework.version>
+        <org.apache.cxf.version>3.1.16</org.apache.cxf.version>
+        <fasterxml.jackson.version>2.9.6</fasterxml.jackson.version>
+        <org.codehaus.jackson.version>1.8.6</org.codehaus.jackson.version>
+        <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
+        <maven.scr.plugin.version>1.22.0</maven.scr.plugin.version>
+        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
+        <maven.war.plugin.version>2.2</maven.war.plugin.version>
+        <build.helper.plugin.version>3.0.0</build.helper.plugin.version>
+        <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
+        <axis2.wso2.version>1.6.1.wso2v12</axis2.wso2.version>
+        <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
+        <apache.httpclient.version>4.3.1</apache.httpclient.version>
+        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
+        <com.google.code.gson.version>2.3.1</com.google.code.gson.version>
+        <servlet-api.version>2.5</servlet-api.version>
+        <java.version>1.8</java.version>
+        <grpc.version>1.15.0</grpc.version>
+        <nimbus.josejwt.version>LATEST</nimbus.josejwt.version>
+        <carbon.identity.inbound.auth.oauth.version>6.0.52</carbon.identity.inbound.auth.oauth.version>
+        <carbon.apimgt.version>6.4.50</carbon.apimgt.version>
+        <synapse.version>2.1.7-wso2v10</synapse.version>
+        <org.json.version>20160212</org.json.version>
+        <cellery.security.version>${project.version}</cellery.security.version>
+
+        <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
+        <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+        <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
+        <maven.docker.version>1.4.10</maven.docker.version>
+
+        <docker.repo.name>celleryio</docker.repo.name>
+    </properties>
+
+</project>

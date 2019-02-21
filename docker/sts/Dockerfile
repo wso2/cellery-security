@@ -18,6 +18,6 @@
 
 # set to latest Ubuntu LTS
 FROM openjdk:8-alpine
-COPY ./io.cellery.security.cell.sts.server-*.jar /
+COPY ./target/files/io.cellery.security.cell.sts.server-*.jar /
 CMD java -jar /io.cellery.security.cell.sts.server-*.jar
 
