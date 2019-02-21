@@ -21,7 +21,7 @@ build-java-components:
 
 .PHONY: build-sts-server-docker
 build-sts-server-docker:
-	cd ./docker; \
+	cd ./docker/sts; \
 	bash build.sh;
 
 .PHONY: build-all
