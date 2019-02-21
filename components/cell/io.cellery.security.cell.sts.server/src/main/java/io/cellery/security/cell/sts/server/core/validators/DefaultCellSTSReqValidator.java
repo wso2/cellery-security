@@ -17,16 +17,15 @@
  *
  */
 
-
 package io.cellery.security.cell.sts.server.core.validators;
 
+import io.cellery.security.cell.sts.server.core.CelleryCellSTSServer;
+import io.cellery.security.cell.sts.server.core.Constants;
+import io.cellery.security.cell.sts.server.core.exception.CellSTSRequestValidationFailedException;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.cellery.security.cell.sts.server.core.Constants;
-import io.cellery.security.cell.sts.server.core.CelleryCellSTSServer;
-import io.cellery.security.cell.sts.server.core.exception.CellSTSRequestValidationFailedException;
-import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 
 import java.util.List;
 import java.util.Optional;

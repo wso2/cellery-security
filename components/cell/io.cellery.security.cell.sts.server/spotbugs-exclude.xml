@@ -17,6 +17,12 @@
   -->
 <FindBugsFilter>
     <Match>
-        <Package name="io.cellery.security.telemetry.receiver.generated"/>
+        <Package name="~io\.cellery\.security\.cell\.sts\.server\.core\.generated.*"/>
+    </Match>
+    <Match>
+        <Class name="io.cellery.security.cell.sts.server.core.service.CelleryCellStsService$1"/>
+    </Match>
+    <Match>
+        <Class name="io.cellery.security.cell.sts.server.core.service.CelleryCellStsService$2"/>
     </Match>
 </FindBugsFilter>

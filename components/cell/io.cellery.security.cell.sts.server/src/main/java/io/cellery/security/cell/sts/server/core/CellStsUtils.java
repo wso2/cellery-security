@@ -28,10 +28,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
+/**
+ * Utilities for Cell STS.
+ */
 public class CellStsUtils {
 
     private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
@@ -86,7 +90,7 @@ public class CellStsUtils {
 
         try {
             String configFilePath = CellStsUtils.getConfigFilePath();
-            String content = new String(Files.readAllBytes(Paths.get(configFilePath)));
+            String content = new String(Files.readAllBytes(Paths.get(configFilePath)), StandardCharsets.UTF_8);
             JSONObject config = (JSONObject) new JSONParser().parse(content);
 
             CellStsConfiguration.getInstance()
@@ -101,7 +105,7 @@ public class CellStsUtils {
                             (Constants.Configs.CONFIG_AUDIENCE_VALIDATION_ENABLED))))
                     .setIssuerValidationEnabled(Boolean.parseBoolean(String.valueOf(config.get
                             (Constants.Configs.CONFIG_ISSUER_VALIDATION_ENABLED))))
-                    .setSTSOPAQueryPrefix((String)config.get(Constants.Configs.CONFIG_OPA_PREFIX))
+                    .setSTSOPAQueryPrefix((String) config.get(Constants.Configs.CONFIG_OPA_PREFIX))
                     .setAuthorizationEnabled(Boolean.parseBoolean(String.valueOf(config.get
                             (Constants.Configs.CONFIG_AUTHORIZATION_ENABLED))));
         } catch (ParseException | IOException e) {

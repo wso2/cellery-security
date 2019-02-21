@@ -22,11 +22,11 @@ package io.cellery.security.cell.sts.server.jwks;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
+import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -55,18 +55,18 @@ public class JWKSResponseBuilder {
     public static String buildResponse(PublicKey publicKey, Certificate certificate) throws CertificateException,
             NoSuchAlgorithmException, ParseException {
 
-        String KEY_USE = "sig";
-        String KEYS = "keys";
         JSONArray jwksArray = new JSONArray();
         JSONObject jwksJson = new JSONObject();
 
-        RSAKey.Builder jwk = new RSAKey.Builder((RSAPublicKey) publicKey);
-        jwk.keyID(CertificateUtils.getThumbPrint(certificate));
-        jwk.algorithm(JWSAlgorithm.RS256);
-        jwk.keyUse(KeyUse.parse(KEY_USE));
-        jwksArray.put(jwk.build().toJSONObject());
-        jwksJson.put(KEYS, jwksArray);
-        log.debug(jwksJson.toString());
+        if (publicKey instanceof RSAPublicKey) {
+            RSAKey.Builder jwk = new RSAKey.Builder((RSAPublicKey) publicKey);
+            jwk.keyID(CertificateUtils.getThumbPrint(certificate));
+            jwk.algorithm(JWSAlgorithm.RS256);
+            jwk.keyUse(KeyUse.parse("sig"));
+            jwksArray.put(jwk.build().toJSONObject());
+            jwksJson.put("keys", jwksArray);
+            log.debug(jwksJson.toString());
+        }
         return jwksJson.toString();
     }
 

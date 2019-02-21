@@ -22,13 +22,14 @@ package io.cellery.security.cell.sts.server.jwks;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.cellery.security.cell.sts.server.utils.CertificateUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
@@ -39,7 +40,7 @@ import java.text.ParseException;
 public class JWKSServer {
 
     private static final Logger log = LoggerFactory.getLogger(JWKSServer.class);
-    private static KeyResolver keyResolver;
+    private static KeyResolver keyResolver = CertificateUtils.getKeyResolver();
     private int port;
 
     public JWKSServer(int port) {
@@ -49,7 +50,6 @@ public class JWKSServer {
 
     public void startServer() throws IOException, KeyResolverException {
 
-        keyResolver = CertificateUtils.getKeyResolver();
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         HttpContext context = server.createContext("/");
         context.setHandler(JWKSServer::handleRequest);
@@ -59,15 +59,15 @@ public class JWKSServer {
 
     private static void handleRequest(HttpExchange exchange) throws IOException {
 
-        String response = null;
+        String response;
         try {
             response = JWKSResponseBuilder.buildResponse(keyResolver.getPublicKey(), keyResolver.getCertificate());
         } catch (CertificateException | NoSuchAlgorithmException | ParseException | KeyResolverException e) {
             throw new IOException("Error while building response from JWKS endpoint");
         }
-        exchange.sendResponseHeaders(200, response.getBytes().length);//response code and length
+        exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length); //response code and length
         OutputStream os = exchange.getResponseBody();
-        os.write(response.getBytes());
+        os.write(response.getBytes(StandardCharsets.UTF_8));
         os.close();
     }
 }

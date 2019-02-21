@@ -27,6 +27,9 @@ import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedExce
 
 import java.text.ParseException;
 
+/**
+ * Context information which are to be sent to OPA for authorization.
+ */
 public class OPAAuthorizationContext extends AuthorizationContext {
 
     private JWTClaimsSet jwtContent;
@@ -41,5 +44,10 @@ public class OPAAuthorizationContext extends AuthorizationContext {
             throw new AuthorizationFailedException("Error while parsing JWT", e);
         }
 
+    }
+
+    public JWTClaimsSet getJwtContent() {
+
+        return jwtContent;
     }
 }

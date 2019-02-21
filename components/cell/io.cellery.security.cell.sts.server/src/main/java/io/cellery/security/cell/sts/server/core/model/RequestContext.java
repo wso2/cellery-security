@@ -18,6 +18,9 @@
  */
 package io.cellery.security.cell.sts.server.core.model;
 
+/**
+ * Built content of the incoming GRPC request
+ */
 public class RequestContext {
 
     private String host;

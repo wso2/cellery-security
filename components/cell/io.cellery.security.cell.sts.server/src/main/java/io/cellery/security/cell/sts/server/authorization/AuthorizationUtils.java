@@ -23,11 +23,14 @@ import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguratio
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * Utilities for authorization functionality.
+ */
 public class AuthorizationUtils {
 
     /**
      *
-     * @return
+     * @return Endpoint address
      * @throws CelleryCellSTSException
      */
     public static String getOPAEndpoint() throws CelleryCellSTSException {

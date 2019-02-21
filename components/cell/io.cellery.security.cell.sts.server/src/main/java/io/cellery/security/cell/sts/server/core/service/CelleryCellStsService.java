@@ -59,6 +59,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * Cellery Token Service.
+ */
 public class CelleryCellStsService {
 
     private static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
@@ -226,12 +229,6 @@ public class CelleryCellStsService {
         return getJWTClaims(jwt);
     }
 
-    private JWTClaimsSet getUserClaimsFromContextStore(String requestId) throws CelleryCellSTSException {
-
-        String jwt = userContextStore.get(requestId);
-        return getJWTClaims(jwt);
-    }
-
     private String extractJwtFromAuthzHeader(String authzHeader) {
 
         if (StringUtils.isBlank(authzHeader)) {
@@ -266,7 +263,8 @@ public class CelleryCellStsService {
                 return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName());
             } else if (isIntraCellCall(request) && localContextStore.get(requestId) != null) {
                 log.debug("Intra cell request with ID: {} from source workload {} to destination workload {} within " +
-                        "cell {}", requestId, request.getSource().getWorkload(), request.getDestination().getWorkload());
+                                "cell {}", requestId, request.getSource().getWorkload(),
+                        request.getDestination().getWorkload());
                 return localContextStore.get(requestId);
             } else if (!isIntraCellCall(request) && localContextStore.get(requestId) != null) {
                 jwt = localContextStore.get(requestId);
@@ -360,7 +358,8 @@ public class CelleryCellStsService {
 
             // TODO add the correct certs for hostname verification..
             Unirest.setHttpClient(HttpClients.custom()
-                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, (x509Certificates, s) -> true).build())
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, (x509Certificates, s)
+                            -> true).build())
                     .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .disableRedirectHandling()
                     .build());

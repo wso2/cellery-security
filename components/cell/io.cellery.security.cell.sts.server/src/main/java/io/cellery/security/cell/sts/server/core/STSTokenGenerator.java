@@ -37,7 +37,8 @@ public class STSTokenGenerator {
      * @return JWT security as a String.
      * @throws CelleryCellSTSException
      */
-    public static String generateToken(String incomingJWT, String audience, String issuer) throws CelleryCellSTSException {
+    public static String generateToken(String incomingJWT, String audience, String issuer) throws
+            CelleryCellSTSException {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         JWTClaimsSet jwtClaims = getJWTClaims(incomingJWT);

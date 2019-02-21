@@ -20,6 +20,8 @@ package io.cellery.security.extensions.jwt;
 
 import com.nimbusds.jwt.SignedJWT;
 import edu.emory.mathcs.backport.java.util.Arrays;
+import io.cellery.security.extensions.exception.CelleryAuthException;
+import io.cellery.security.extensions.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,8 +36,6 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import io.cellery.security.extensions.exception.CelleryAuthException;
-import io.cellery.security.extensions.util.Utils;
 
 import java.text.ParseException;
 import java.util.Collections;
@@ -136,6 +136,7 @@ public class CellerySignedJWTGenerator extends JWTGenerator {
     }
 
     private String removeDefaultVersion(TokenValidationContext validationContext) {
+
         return validationContext.getVersion().replace("_default_", "");
     }
 }

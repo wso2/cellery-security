@@ -23,6 +23,9 @@ import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Configuration holder for cell STS.
+ */
 public class CellStsConfiguration {
 
     private String stsEndpoint;

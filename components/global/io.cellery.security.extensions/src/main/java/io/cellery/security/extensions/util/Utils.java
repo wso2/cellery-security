@@ -72,6 +72,7 @@ public class Utils {
     }
 
     public static IdentityProvider getCelleryIDP() throws IdentityProviderManagementException {
+
         return IdentityProviderManager.getInstance().getResidentIdP(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
@@ -81,6 +82,7 @@ public class Utils {
     }
 
     public static Map<String, Object> getCustomClaims(SignedJWT signedJWT) throws ParseException {
+
         return signedJWT.getJWTClaimsSet().getClaims().entrySet()
                 .stream()
                 .filter(x -> !FILTERED_CLAIMS.contains(x.getKey()))

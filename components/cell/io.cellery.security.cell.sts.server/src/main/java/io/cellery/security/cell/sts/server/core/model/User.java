@@ -34,4 +34,14 @@ public class User {
         this.subject = subject;
         this.attributes = attributes;
     }
+
+    public String getSubject() {
+
+        return subject;
+    }
+
+    public Map<String, Object> getAttributes() {
+
+        return attributes;
+    }
 }

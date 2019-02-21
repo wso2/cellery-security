@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Model object to store Response from STS.
+ */
 public class CellStsResponse {
 
     private Map<String, String> responseHeaders = new HashMap<>();
