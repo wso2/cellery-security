@@ -357,6 +357,7 @@
         <maven.docker.version>1.4.10</maven.docker.version>
 
         <docker.repo.name>celleryio</docker.repo.name>
+        <project.scm.id>my-scm-server</project.scm.id>
     </properties>
 
 </project>
