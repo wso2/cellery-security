@@ -169,7 +169,7 @@
             <dependency>
                 <groupId>io.cellery.security</groupId>
                 <artifactId>gogoproto-java</artifactId>
-                <version>${cellery.security.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
@@ -260,17 +260,17 @@
             <dependency>
                 <groupId>io.cellery.security</groupId>
                 <artifactId>io.cellery.security.sts.endpoint.core</artifactId>
-                <version>${cellery.security.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.cellery.security</groupId>
                 <artifactId>io.cellery.security.extensions</artifactId>
-                <version>${cellery.security.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.cellery.security</groupId>
                 <artifactId>io.cellery.security.cell.sts.server</artifactId>
-                <version>${cellery.security.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -350,7 +350,6 @@
         <carbon.apimgt.version>6.4.50</carbon.apimgt.version>
         <synapse.version>2.1.7-wso2v10</synapse.version>
         <org.json.version>20160212</org.json.version>
-        <cellery.security.version>${project.version}</cellery.security.version>
 
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
