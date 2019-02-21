@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Processed request to Cell STS.
+ */
 public class CellStsRequest {
 
     private String requestId;
@@ -31,28 +34,37 @@ public class CellStsRequest {
     private Map<String, String> requestHeaders = new HashMap<>();
 
     public RequestSource getSource() {
+
         return source;
     }
 
     public RequestDestination getDestination() {
+
         return destination;
     }
 
     public RequestContext getRequestContext() {
+
         return requestContext;
     }
 
     public Map<String, String> getRequestHeaders() {
+
         return Collections.unmodifiableMap(requestHeaders);
     }
 
     public String getRequestId() {
+
         return requestId;
     }
 
     private CellStsRequest() {
+
     }
 
+    /**
+     * Request Builder
+     */
     public static class CellStsRequestBuilder {
 
         private String requestId;
@@ -61,33 +73,38 @@ public class CellStsRequest {
         private RequestContext requestContext;
         private Map<String, String> requestHeaders = new HashMap<>();
 
-
         public CellStsRequestBuilder setSource(RequestSource source) {
+
             this.source = source;
             return this;
         }
 
         public CellStsRequestBuilder setDestination(RequestDestination destination) {
+
             this.destination = destination;
             return this;
         }
 
         public CellStsRequestBuilder setRequestContext(RequestContext requestContext) {
+
             this.requestContext = requestContext;
             return this;
         }
 
         public CellStsRequestBuilder setRequestHeaders(Map<String, String> requestHeaders) {
+
             this.requestHeaders = requestHeaders;
             return this;
         }
 
         public CellStsRequestBuilder setRequestId(String requestId) {
+
             this.requestId = requestId;
             return this;
         }
 
         public CellStsRequest build() {
+
             CellStsRequest request = new CellStsRequest();
             request.requestId = requestId;
             request.source = source;
@@ -97,6 +114,6 @@ public class CellStsRequest {
 
             return request;
         }
-     }
+    }
 
 }

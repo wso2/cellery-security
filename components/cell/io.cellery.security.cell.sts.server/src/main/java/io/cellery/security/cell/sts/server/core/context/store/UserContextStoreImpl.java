@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementation of local user store.
+ */
 public class UserContextStoreImpl implements UserContextStore {
 
     private static final String USER_CONTEXT_EXPIRY_IN_SECONDS = "USER_CONTEXT_EXPIRY_SECONDS";

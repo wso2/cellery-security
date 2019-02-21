@@ -17,6 +17,9 @@
  */
 package io.cellery.security.cell.sts.server.core.context.store;
 
+/**
+ * Local storage for keeping user information.
+ */
 public interface UserContextStore {
 
     String get(String contextId);

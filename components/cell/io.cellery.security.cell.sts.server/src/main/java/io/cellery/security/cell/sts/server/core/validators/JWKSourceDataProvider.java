@@ -21,9 +21,9 @@ package io.cellery.security.cell.sts.server.core.validators;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 
 import java.net.MalformedURLException;
 import java.net.URL;

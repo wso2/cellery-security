@@ -20,6 +20,7 @@ package io.cellery.security.extensions.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.cellery.security.extensions.util.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +37,6 @@ import org.wso2.carbon.identity.oauth2.validators.OAuth2JWTTokenValidator;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageContext;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
-import io.cellery.security.extensions.util.Utils;
 
 import java.text.ParseException;
 import java.util.Date;

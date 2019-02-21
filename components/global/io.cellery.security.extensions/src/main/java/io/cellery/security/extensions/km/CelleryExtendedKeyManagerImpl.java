@@ -18,6 +18,7 @@
 
 package io.cellery.security.extensions.km;
 
+import io.cellery.security.extensions.util.Utils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -27,7 +28,6 @@ import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2IntrospectionResponseDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
-import io.cellery.security.extensions.util.Utils;
 
 import java.util.Arrays;
 

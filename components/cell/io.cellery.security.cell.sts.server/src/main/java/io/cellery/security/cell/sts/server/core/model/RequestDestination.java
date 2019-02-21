@@ -23,6 +23,9 @@ import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Model object to store destination information of the request.
+ */
 public class RequestDestination {
 
     private String cellName;
@@ -53,6 +56,9 @@ public class RequestDestination {
         return CellStsUtils.getPrettyPrintJson(configJson);
     }
 
+    /**
+     * Builder class for Request Destination.
+     */
     public static class RequestDestinationBuilder {
         private String cellName;
         private String workload;

@@ -18,6 +18,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+    <parent>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>5</version>
+    </parent>
+
     <groupId>io.cellery.security</groupId>
     <artifactId>cellery-seucirity-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
@@ -107,19 +113,6 @@
         <module>components</module>
         <module>docker/sts</module>
     </modules>
-
-    <distributionManagement>
-        <repository>
-            <id>nexus-releases</id>
-            <name>WSO2 Nexus Release Repository</name>
-            <url>http://maven.wso2.org/nexus/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>wso2.snapshots</id>
-            <name>WSO2 Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -346,7 +339,6 @@
         <org.codehaus.jackson.version>1.8.6</org.codehaus.jackson.version>
         <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
         <maven.scr.plugin.version>1.22.0</maven.scr.plugin.version>
-        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
         <maven.war.plugin.version>2.2</maven.war.plugin.version>
         <build.helper.plugin.version>3.0.0</build.helper.plugin.version>
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
@@ -368,9 +360,7 @@
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <maven.docker.version>1.4.10</maven.docker.version>
-
         <docker.repo.name>celleryio</docker.repo.name>
-        <project.scm.id>my-scm-server</project.scm.id>
     </properties>
 
 </project>

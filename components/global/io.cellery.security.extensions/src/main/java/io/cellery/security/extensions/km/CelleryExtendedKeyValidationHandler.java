@@ -18,10 +18,10 @@
 
 package io.cellery.security.extensions.km;
 
+import io.cellery.security.extensions.util.Utils;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import io.cellery.security.extensions.util.Utils;
 
 /**
  * Key validation handler for Cellery

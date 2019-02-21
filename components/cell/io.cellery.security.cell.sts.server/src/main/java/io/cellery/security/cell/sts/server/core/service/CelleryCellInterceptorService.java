@@ -21,11 +21,6 @@ package io.cellery.security.cell.sts.server.core.service;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import io.grpc.stub.StreamObserver;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import io.cellery.security.cell.sts.server.core.generated.envoy.core.Base;
 import io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha.AttributeContextOuterClass;
@@ -37,7 +32,13 @@ import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
 import io.cellery.security.cell.sts.server.core.model.RequestContext;
 import io.cellery.security.cell.sts.server.core.model.RequestDestination;
 import io.cellery.security.cell.sts.server.core.model.RequestSource;
+import io.grpc.stub.StreamObserver;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
@@ -120,8 +121,8 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     protected abstract void handleRequest(CellStsRequest cellStsRequest,
                                           CellStsResponse cellStsResponse) throws CelleryCellSTSException;
 
-
     private ExternalAuth.CheckResponse buildErrorResponse() {
+
         return ExternalAuth.CheckResponse.newBuilder()
                 .setStatus(Status.newBuilder().setCode(Code.PERMISSION_DENIED_VALUE).build())
                 .build();
@@ -183,7 +184,8 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return cellName;
     }
 
-    private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy) throws CelleryCellSTSException {
+    private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
+            throws CelleryCellSTSException {
 
         return new CellStsRequest.CellStsRequestBuilder()
                 .setRequestId(getRequestId(requestFromProxy))
@@ -199,7 +201,8 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         String mixerAttributesHeaderValue = getMixerAttributesHeader(requestFromProxy);
 
         if (StringUtils.isNotBlank(mixerAttributesHeaderValue)) {
-            byte[] decodeHeader = Base64.getDecoder().decode(mixerAttributesHeaderValue.getBytes());
+            byte[] decodeHeader = Base64.getDecoder().
+                    decode(mixerAttributesHeaderValue.getBytes(StandardCharsets.UTF_8));
             try {
                 return AttributesOuterClass.Attributes.parseFrom(decodeHeader);
             } catch (InvalidProtocolBufferException e) {
@@ -210,6 +213,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     }
 
     private String getMixerAttributesHeader(ExternalAuth.CheckRequest requestFromProxy) {
+
         return requestFromProxy.getAttributes().getRequest().getHttp().getHeadersMap().get(ISTIO_ATTRIBUTES_HEADER);
     }
 
@@ -226,6 +230,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     }
 
     private RequestSource buildRequestSource(ExternalAuth.CheckRequest checkRequest) {
+
         AttributesOuterClass.Attributes attributesFromRequest = getAttributesFromRequest(checkRequest);
         RequestSource.RequestSourceBuilder requestSourceBuilder = new RequestSource.RequestSourceBuilder();
         if (attributesFromRequest != null) {
@@ -255,6 +260,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     }
 
     private RequestDestination buildRequestDestination(ExternalAuth.CheckRequest checkRequest) {
+
         RequestDestination.RequestDestinationBuilder destinationBuilder =
                 new RequestDestination.RequestDestinationBuilder();
 

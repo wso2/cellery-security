@@ -18,6 +18,9 @@
  */
 package io.cellery.security.cell.sts.server.core.service;
 
+/**
+ * General exception in cell STS
+ */
 public class CelleryCellSTSException extends Exception {
 
     public CelleryCellSTSException(String message) {

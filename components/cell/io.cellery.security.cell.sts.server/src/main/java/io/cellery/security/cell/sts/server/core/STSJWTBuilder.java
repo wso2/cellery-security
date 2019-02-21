@@ -26,10 +26,10 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.commons.lang.StringUtils;
-import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
 import io.cellery.security.cell.sts.server.utils.CertificateUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -57,7 +57,7 @@ public class STSJWTBuilder {
     // By default we set this to 20m
     private long expiryInSeconds = 1200L;
     private List<String> audience = new ArrayList<>();
-    private static String issuer = "https://sts.cellry.io";
+    private String issuer = "https://sts.cellry.io";
 
     public STSJWTBuilder subject(String subject) {
 

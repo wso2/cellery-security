@@ -26,13 +26,13 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.cellery.security.extensions.exception.CelleryAuthException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import io.cellery.security.extensions.exception.CelleryAuthException;
 
 import java.security.Key;
 import java.security.interfaces.RSAPrivateKey;

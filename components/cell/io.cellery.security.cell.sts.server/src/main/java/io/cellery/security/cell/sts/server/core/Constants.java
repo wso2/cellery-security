@@ -26,7 +26,10 @@ public class Constants {
 
     public static final String CELLERY_AUTH_SUBJECT_HEADER = "x-cellery-auth-subject";
 
-    public class Configs {
+    /**
+     * Configuration constants.
+     */
+    public static class Configs {
 
         public static final String CONFIG_STS_ENDPOINT = "endpoint";
         public static final String CONFIG_AUTH_USERNAME = "username";

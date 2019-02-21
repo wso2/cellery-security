@@ -33,9 +33,9 @@ import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 
 import java.net.MalformedURLException;
 import java.text.ParseException;

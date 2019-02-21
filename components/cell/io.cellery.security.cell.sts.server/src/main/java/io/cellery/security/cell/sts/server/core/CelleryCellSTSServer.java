@@ -26,6 +26,7 @@ import io.cellery.security.cell.sts.server.core.service.CelleryCellOutboundInter
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
 import io.cellery.security.cell.sts.server.jwks.JWKSServer;
+import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -66,15 +67,6 @@ public class CelleryCellSTSServer {
                 .build();
     }
 
-    private String getMyCellName() throws CelleryCellSTSException {
-        // For now we pick the cell name from the environment variable.
-        String cellName = System.getenv(CELL_NAME_ENV_VARIABLE);
-        if (StringUtils.isBlank(cellName)) {
-            throw new CelleryCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
-        }
-        return cellName;
-    }
-
     /**
      * Start serving requests.
      */
@@ -86,9 +78,9 @@ public class CelleryCellSTSServer {
         log.info("Cellery STS gRPC Server started, listening for outbound traffic on " + outboundListeningPort);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may has been reset by its JVM shutdown hook.
-            System.err.println("Shutting down Cellery Cell STS since JVM is shutting down.");
+            log.error("Shutting down Cellery Cell STS since JVM is shutting down.");
             CelleryCellSTSServer.this.stop();
-            System.err.println("Cellery Cell STS shut down.");
+            log.error("Cellery Cell STS shut down.");
         }));
     }
 
@@ -134,7 +126,7 @@ public class CelleryCellSTSServer {
             jwksServer.startServer();
             watchConfigChanges();
             server.blockUntilShutdown();
-        } catch (Exception e) {
+        } catch (CelleryCellSTSException | IOException | KeyResolverException | InterruptedException e) {
             log.error("Error while starting up the Cell STS.", e);
             // To make the pod go to CrashLoopBackOff state if we encounter any error while starting up
             System.exit(1);

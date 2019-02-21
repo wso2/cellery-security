@@ -28,6 +28,9 @@ import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguratio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Cell sts authorization service.
+ */
 public class AuthorizationService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorizationService.class);

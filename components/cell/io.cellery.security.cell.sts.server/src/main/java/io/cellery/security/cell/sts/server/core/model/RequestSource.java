@@ -23,24 +23,31 @@ import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Object model to represent source of the GPRC request.
+ */
 public class RequestSource {
 
     private String cellName;
     private String workload;
 
     private RequestSource() {
+
     }
 
     public String getCellName() {
+
         return cellName;
     }
 
     public String getWorkload() {
+
         return workload;
     }
 
     @Override
     public String toString() {
+
         Map<String, String> configJson = new HashMap<>();
         configJson.put("Cell Name", cellName);
         configJson.put("Workload", workload);
@@ -48,21 +55,28 @@ public class RequestSource {
         return CellStsUtils.getPrettyPrintJson(configJson);
     }
 
+    /**
+     * Request Builder.
+     */
     public static class RequestSourceBuilder {
+
         private String cellName;
         private String workload;
 
         public RequestSourceBuilder setWorkload(String workload) {
+
             this.workload = workload;
             return this;
         }
 
         public RequestSourceBuilder setCellName(String cellName) {
+
             this.cellName = cellName;
             return this;
         }
 
         public RequestSource build() {
+
             RequestSource requestSource = new RequestSource();
             requestSource.cellName = cellName;
             requestSource.workload = workload;

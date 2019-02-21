@@ -18,10 +18,10 @@
  */
 package io.cellery.security.cell.sts.server.core.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Intercepts inbounds calls to pods within the Cell.
@@ -30,8 +30,8 @@ public class CelleryCellInboundInterceptorService extends CelleryCellInterceptor
 
     private Logger log = LoggerFactory.getLogger(CelleryCellInboundInterceptorService.class);
 
-
     public CelleryCellInboundInterceptorService(CelleryCellStsService cellStsService) throws CelleryCellSTSException {
+
         super(cellStsService);
     }
 
