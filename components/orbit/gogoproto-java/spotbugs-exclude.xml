@@ -17,12 +17,6 @@
   -->
 <FindBugsFilter>
     <Match>
-        <Package name="~io\.cellery\.security\.cell\.sts\.server\.core\.generated.*"/>
-    </Match>
-    <Match>
-        <Class name="io.cellery.security.cell.sts.server.core.service.CelleryCellStsService$1"/>
-    </Match>
-    <Match>
-        <Class name="io.cellery.security.cell.sts.server.core.service.CelleryCellStsService$2"/>
+        <Package name="~com\.google\.protobuf.*"/>
     </Match>
 </FindBugsFilter>
