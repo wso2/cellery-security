@@ -141,9 +141,20 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
         String jwkEndpoint = CellStsConfiguration.getInstance().getGlobalJWKEndpoint();
 
-        if (StringUtils.isNotEmpty(cellStsRequest.getSource().getCellName())) {
+        String sourceCell = cellStsRequest.getSource().getCellName();
+        if (StringUtils.isNotEmpty(sourceCell)) {
             int port = resolvePort(cellStsRequest.getSource().getCellName());
-            jwkEndpoint = "http://" + CellStsUtils.getIssuerName(cellStsRequest.getSource().getCellName()) + ":" + port;
+            try {
+                String hostname;
+                if (StringUtils.equalsIgnoreCase(sourceCell, CellStsUtils.getMyCellName())) {
+                    hostname = "localhost";
+                } else {
+                    hostname = CellStsUtils.getIssuerName(cellStsRequest.getSource().getCellName());
+                }
+                jwkEndpoint = "http://" + hostname + ":" + port;
+            } catch (CelleryCellSTSException e) {
+                throw new TokenValidationFailureException("Error while retrieving cell name", e);
+            }
         }
 
         log.debug("Calling JWKS endpoint: " + jwkEndpoint);
