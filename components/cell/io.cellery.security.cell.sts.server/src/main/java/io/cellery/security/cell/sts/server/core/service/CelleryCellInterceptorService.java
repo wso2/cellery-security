@@ -251,7 +251,8 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     private String extractCellNameFromWorkloadName(String workloadName) {
 
         // When requests reaches cells through istio ingress (after mTLS), source cell is not avialable.
-        if (StringUtils.isNotEmpty(workloadName) && workloadName.startsWith(ISTIO_INGRESS_PREFIX)) {
+        if ((StringUtils.isNotEmpty(workloadName) && workloadName.startsWith(ISTIO_INGRESS_PREFIX)) || !workloadName
+                .contains("--")) {
             return null;
         }
         // Workload name is in the format hr--hr-deployment-596946948d-vvgln.default where the value before --

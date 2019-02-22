@@ -123,9 +123,12 @@ public class CelleryCellStsService {
         }
         Map<String, String> headersToSet = new HashMap<>();
 
-        headersToSet.put(Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
-        log.debug("Set {} to: {}", Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
-
+        if (StringUtils.isNotEmpty(jwtClaims.getSubject())) {
+            headersToSet.put(Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
+            log.debug("Set {} to: {}", Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
+        } else {
+            log.debug("Subject is not available. No user context is passed.");
+        }
         headersToSet.put(CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
         log.debug("Set {} to : {}", CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
 
@@ -259,6 +262,11 @@ public class CelleryCellStsService {
             if (isRequestFromMicroGateway(request)) {
                 log.debug("Request with ID: {} from micro gateway to {} workload of cell {}", requestId, request
                         .getDestination().getWorkload(), request.getDestination().getCellName());
+                if (StringUtils.isNotEmpty(localContextStore.get(requestId))) {
+                    log.debug("Found an already existing local token issued for same request on a different occurance");
+                    return localContextStore.get(requestId);
+
+                }
                 jwt = userContextStore.get(requestId);
                 return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName());
             } else if (isIntraCellCall(request) && localContextStore.get(requestId) != null) {
@@ -306,7 +314,7 @@ public class CelleryCellStsService {
 
     private String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
 
-        return STSTokenGenerator.generateToken(audience, null);
+        return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()));
     }
 
     private String getTokenFromLocalSTS(String jwt, String audience) throws CelleryCellSTSException {
