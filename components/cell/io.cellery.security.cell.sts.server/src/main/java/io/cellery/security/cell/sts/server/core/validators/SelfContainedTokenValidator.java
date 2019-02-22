@@ -81,7 +81,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             throw new TokenValidationFailureException("Token has expired. Expiry time: " + jwtClaimsSet
                     .getExpirationTime());
         }
-        log.debug("Token life time is valid, expiry time: {}" + jwtClaimsSet.getExpirationTime());
+        log.debug("Token life time is valid, expiry time: {}", jwtClaimsSet.getExpirationTime());
     }
 
     private void validateAudience(JWTClaimsSet jwtClaimsSet, CellStsRequest cellStsRequest) throws
@@ -93,7 +93,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
 
         if (jwtClaimsSet.getAudience().isEmpty()) {
-            throw new TokenValidationFailureException("No audiences found in the security");
+            throw new TokenValidationFailureException("No audiences found in the token");
         }
 
         try {

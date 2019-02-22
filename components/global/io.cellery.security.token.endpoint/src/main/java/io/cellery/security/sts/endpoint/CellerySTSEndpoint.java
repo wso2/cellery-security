@@ -40,7 +40,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
- * This is the REST service that is exposed to get the STS security.
+ * This is the REST service that is exposed to get the STS token.
  */
 @Path("/sts")
 public class CellerySTSEndpoint {

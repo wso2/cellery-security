@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * This is the Utils class for security validations.
+ * This is the Utils class for token validations.
  */
 public class Utils {
 
@@ -77,7 +77,7 @@ public class Utils {
     }
 
     public static boolean isSignedJWT(String jwtToTest) {
-        // Signed JWT security contains 3 base64 encoded components separated by periods.
+        // Signed JWT token contains 3 base64 encoded components separated by periods.
         return StringUtils.countMatches(jwtToTest, ".") == 2;
     }
 

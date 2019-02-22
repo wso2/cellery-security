@@ -62,7 +62,7 @@ public class CellerySignedJWTValidator extends OAuth2JWTTokenValidator {
             if (signedJWTValid) {
                 JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
 
-                // These two properties are set to avoid security lookup from the database in the case of signed JWTs
+                // These two properties are set to avoid token lookup from the database in the case of signed JWTs
                 // issued by external IDPs.
                 validationContext.addProperty(OAuth2Util.REMOTE_ACCESS_TOKEN, Boolean.TRUE);
                 validationContext.addProperty(OAuth2Util.JWT_ACCESS_TOKEN, Boolean.TRUE);
