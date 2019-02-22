@@ -37,20 +37,20 @@ public class CellerySecureTokenService {
 
     public CellerySTSResponse issueJWT(CellerySTSRequest tokenRequest) throws CellerySTSException {
 
-        // TODO we need to validate stuff before issuing the security...
+        // TODO we need to validate stuff before issuing the token...
         try {
             String subject = tokenRequest.getSource();
             Map<String, Object> claims = new HashMap<>();
 
             if (StringUtils.isNotBlank(tokenRequest.getUserContextJwt())) {
                 // TODO: add logs here.
-                // If a user context jwt is set this is a security requested to impersonate a user.
+                // If a user context jwt is set this is a token requested to impersonate a user.
                 SignedJWT userContextJwt = SignedJWT.parse(tokenRequest.getUserContextJwt());
                 if (isUserContextJwtValid(userContextJwt)) {
                     subject = userContextJwt.getJWTClaimsSet().getSubject();
                     claims.putAll(Utils.getCustomClaims(userContextJwt));
                 } else {
-                    throw new CellerySTSException("Invalid user context JWT presented to obtain a STS security.");
+                    throw new CellerySTSException("Invalid user context JWT presented to obtain a STS token.");
                 }
             }
 

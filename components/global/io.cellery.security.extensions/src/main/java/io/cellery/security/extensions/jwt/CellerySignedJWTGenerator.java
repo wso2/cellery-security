@@ -99,7 +99,7 @@ public class CellerySignedJWTGenerator extends JWTGenerator {
 
     private Map<String, Object> getClaimsFromSignedJWT(TokenValidationContext validationContext) {
 
-        // Get the signed JWT access security
+        // Get the signed JWT access token
         String accessToken = validationContext.getAccessToken();
         if (Utils.isSignedJWT(accessToken)) {
             try {

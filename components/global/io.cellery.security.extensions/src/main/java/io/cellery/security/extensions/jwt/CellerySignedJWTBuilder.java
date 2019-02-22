@@ -45,7 +45,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * The JWT security builder for Cellery.
+ * The JWT token builder for Cellery.
  */
 public class CellerySignedJWTBuilder {
 

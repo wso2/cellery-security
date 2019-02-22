@@ -41,7 +41,7 @@ public class CelleryExtendedKeyManagerImpl extends AMDefaultKeyManagerImpl {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         if (!Utils.isSignedJWT(accessToken)) {
-            // If the access security is not a signed JWT we let AMDefaultKeyManagerImpl class handle it.
+            // If the access token is not a signed JWT we let AMDefaultKeyManagerImpl class handle it.
             return super.getTokenMetaData(accessToken);
         }
 
@@ -63,7 +63,7 @@ public class CelleryExtendedKeyManagerImpl extends AMDefaultKeyManagerImpl {
             // Convert Expiry Time to milliseconds.
             tokenInfo.setValidityPeriod(getExpiryPeriodInMillis(introspectionResponse));
 
-            // If security has am_application_scope, consider the security as an Application security.
+            // If token has am_application_scope, consider the token as an Application token.
             handleScopes(introspectionResponse, tokenInfo);
         }
         return tokenInfo;

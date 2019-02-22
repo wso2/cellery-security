@@ -32,7 +32,7 @@ public class CellerySTSConstants {
      */
     public static class CellerySTSResponse {
 
-        public static final String STS_TOKEN = "security";
+        public static final String STS_TOKEN = "token";
     }
 
     /**
