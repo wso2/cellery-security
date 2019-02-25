@@ -12,7 +12,7 @@ In Cellery, each Cell is considered as a unique trust domain and each Cell has i
 
 ## Edge Security 
 
-Cellery mesh has an entry point to the data plain which we call as the global gateway. Cell developers publish their global APIs to global gateway which ultimately are be exposed through global gateway. These APIs can be protected or unprotected. In a case if the APIs are protected, the end user retrieves an edge token to invoke the API through global gateway.
+Cellery mesh has an entry point to the data plain which we call as the global gateway. Cell developers publish their global APIs to global gateway which ultimately are exposed through global gateway. These APIs can be protected or unprotected. In a case if the APIs are protected, the end user retrieves an edge token to invoke the API through global gateway.
 
 This token will be an opaque token and end users uses this token to invoke APIs. Upon invoking APIs, global gateway issues a JWT token to the backend service, which is exposed through the Cell gateway after validating the edge token. 
 
@@ -125,7 +125,7 @@ To get started with building Cellery Mesh Security, the following are required.
 
 * Docker
 * Git
-* JDK 1.8 or higher
+* JDK 1.8+
 * Maven
 * GNU Make 4.1+
 		
