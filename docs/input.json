@@ -1,0 +1,59 @@
+{
+  "input": {
+    "requestId": "aac38f7f-0402-9a1b-a3cf-8180fdcd9bb0",
+    "source": {
+      "cellName": "customer-products",
+      "workload": "customer-products--products-deployment-f7884588c-cqr4c.default"
+    },
+    "destination": {
+      "cellName": "customer-products",
+      "workload": "customer-products--categories-service",
+      "isExternalToCellery": false
+    },
+    "requestContext": {
+      "host": "customer-products--categories-service:8000",
+      "path": "/categories.Categories/Get",
+      "protocol": "HTTP/2",
+      "method": "POST"
+    },
+    "requestHeaders": {
+      ":authority": "customer-products--categories-service:8000",
+      ":scheme": "http",
+      "x-istio-attributes": "ClsKF2Rlc3RpbmF0aW9uLnNlcnZpY2UudWlkEkASPmlzdGlvOi8vZGVmYXVsdC9zZXJ2aWNlcy9jdXN0b21lci1wcm9kdWN0cy0tY2F0ZWdvcmllcy1zZXJ2aWNlCl0KGGRlc3RpbmF0aW9uLnNlcnZpY2UuaG9zdBJBEj9jdXN0b21lci1wcm9kdWN0cy0tY2F0ZWdvcmllcy1zZXJ2aWNlLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwKKgodZGVzdGluYXRpb24uc2VydmljZS5uYW1lc3BhY2USCRIHZGVmYXVsdApDChhkZXN0aW5hdGlvbi5zZXJ2aWNlLm5hbWUSJxIlY3VzdG9tZXItcHJvZHVjdHMtLWNhdGVnb3JpZXMtc2VydmljZQpYChNkZXN0aW5hdGlvbi5zZXJ2aWNlEkESP2N1c3RvbWVyLXByb2R1Y3RzLS1jYXRlZ29yaWVzLXNlcnZpY2UuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbApbCgpzb3VyY2UudWlkEk0SS2t1YmVybmV0ZXM6Ly9jdXN0b21lci1wcm9kdWN0cy0tcHJvZHVjdHMtZGVwbG95bWVudC1mNzg4NDU4OGMtY3FyNGMuZGVmYXVsdA\u003d\u003d",
+      "x-b3-sampled": "1",
+      "x-request-id": "aac38f7f-0402-9a1b-a3cf-8180fdcd9bb0",
+      "x-b3-parentspanid": "71884f7f357fa879",
+      "user-agent": "grpc-go/1.18.0",
+      "x-b3-traceid": "d01305a8a56552ed",
+      "authorization": "Bearer eyJ4NXQiOiJaR1U0T0dNeU9UTXhaV013Tm1aa056UTNZakU0TnpobE1qTTFOelV3WTJFMU1URTJNMlJpT1EiLCJraWQiOiJaR1U0T0dNeU9UTXhaV013Tm1aa056UTNZakU0TnpobE1qTTFOelV3WTJFMU1URTJNMlJpT1EiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhbGljZSIsImF1ZCI6ImN1c3RvbWVyLXByb2R1Y3RzIiwic2NvcGUiOlsiYXV0aGVudGljYXRpb24iLCJhY2Nlc3MiLCJyZWFkIiwid3JpdGUiXSwiaXNzIjoiY3VzdG9tZXItcHJvZHVjdHMtLXN0cy1zZXJ2aWNlIiwia2V5dHlwZSI6IlBST0RVQ1RJT04iLCJleHAiOjE1NTEwODY1MjMsImlhdCI6MTU1MTA4NTMyMywianRpIjoiMDNhZmU4NDgtM2Y1Zi00Y2MxLWFmY2EtNTYzZDk2YmU0NWI5In0.krwx5BcbBqmemxRzf8OAe9ec-gCYXM45q8W_kPufmmnFAG-3VZk51vQTjgm-rVDIMkYRlQ1tXHSuzQWOKvJyhiUkEhDY4eAhf5rjA_VWnjIVXNYy1nMxX7bHgFEGsUxUTCa79nPMLEx-mfDSN-F89inaRpa1iOq8eym9AsWKPtb6ztKwv67lXSXV36RgOUyRnsWEF_W5i5jlbH3Ob6w9lPYMHYo5Pjixqgegx1ePBYBejQ6yBIjW6mRkqOn8ik2K50tN_91x8h9Yebj_znYVZ0Z8sJSH9-VHnWTaX6mMF9qpKkbS1g9C5QBQEwHiTXCo1PPfEvvAJOCza2ZiksryMw",
+      "te": "trailers",
+      ":method": "POST",
+      ":path": "/categories.Categories/Get",
+      "x-forwarded-proto": "http",
+      "content-type": "application/grpc",
+      "x-b3-spanid": "3a4549d4bdd4e77f"
+    },
+    "authorizationContext": {
+      "jwtContent": {
+        "claims": {
+          "sub": "alice",
+          "aud": [
+            "customer-products"
+          ],
+          "scope": [
+            "authentication",
+            "access",
+            "read",
+            "write"
+          ],
+          "iss": "customer-products--sts-service",
+          "keytype": "PRODUCTION",
+          "exp": "Feb 25, 2019 9:22:03 AM",
+          "iat": "Feb 25, 2019 9:02:03 AM",
+          "jti": "03afe848-3f5f-4cc1-afca-563d96be45b9"
+        }
+      },
+      "jwt": "eyJ4NXQiOiJaR1U0T0dNeU9UTXhaV013Tm1aa056UTNZakU0TnpobE1qTTFOelV3WTJFMU1URTJNMlJpT1EiLCJraWQiOiJaR1U0T0dNeU9UTXhaV013Tm1aa056UTNZakU0TnpobE1qTTFOelV3WTJFMU1URTJNMlJpT1EiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhbGljZSIsImF1ZCI6ImN1c3RvbWVyLXByb2R1Y3RzIiwic2NvcGUiOlsiYXV0aGVudGljYXRpb24iLCJhY2Nlc3MiLCJyZWFkIiwid3JpdGUiXSwiaXNzIjoiY3VzdG9tZXItcHJvZHVjdHMtLXN0cy1zZXJ2aWNlIiwia2V5dHlwZSI6IlBST0RVQ1RJT04iLCJleHAiOjE1NTEwODY1MjMsImlhdCI6MTU1MTA4NTMyMywianRpIjoiMDNhZmU4NDgtM2Y1Zi00Y2MxLWFmY2EtNTYzZDk2YmU0NWI5In0.krwx5BcbBqmemxRzf8OAe9ec-gCYXM45q8W_kPufmmnFAG-3VZk51vQTjgm-rVDIMkYRlQ1tXHSuzQWOKvJyhiUkEhDY4eAhf5rjA_VWnjIVXNYy1nMxX7bHgFEGsUxUTCa79nPMLEx-mfDSN-F89inaRpa1iOq8eym9AsWKPtb6ztKwv67lXSXV36RgOUyRnsWEF_W5i5jlbH3Ob6w9lPYMHYo5Pjixqgegx1ePBYBejQ6yBIjW6mRkqOn8ik2K50tN_91x8h9Yebj_znYVZ0Z8sJSH9-VHnWTaX6mMF9qpKkbS1g9C5QBQEwHiTXCo1PPfEvvAJOCza2ZiksryMw"
+    }
+  }
+}
