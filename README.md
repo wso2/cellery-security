@@ -2,9 +2,9 @@
 
 
   [![Build Status](https://wso2.org/jenkins/view/cellery/job/cellery/job/mesh-security/badge/icon)](https://wso2.org/jenkins/view/cellery/job/cellery/job/mesh-security/)
-  [![GitHub (pre-)release](https://img.shields.io/github/release/cellery-io/mesh-security/all.svg)](https://github.com/cellery-io/mesh-security/releases)
-  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/cellery-io/mesh-security.svg)](https://github.com/cellery-io/mesh-security/releases)
-  [![GitHub last commit](https://img.shields.io/github/last-commit/cellery-io/mesh-security.svg)](https://github.com/cellery-io/mesh-security/commits/master)
+  [![GitHub (pre-)release](https://img.shields.io/github/release/wso2-cellery/mesh-security/all.svg)](https://github.com/wso2-cellery/mesh-security/releases)
+  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/wso2-cellery/mesh-security.svg)](https://github.com/wso2-cellery/mesh-security/releases)
+  [![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/mesh-security.svg)](https://github.com/wso2-cellery/mesh-security/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
   
 In Cellery, each Cell is considered as a unique trust domain and each Cell has it's own Secure Token Service (STS) which the workloads can use to communicate in a trusted manner with each other. Not only authentication, but also fine grained authorization requirements  can be achieved for the purpose of inter and intra Cell communications. 
@@ -61,7 +61,7 @@ An [Open Policy Agent (OPA)](https://github.com/open-policy-agent/opa) instance 
 
 ### Sample
 
-To start with, deploy the [review sample](https://github.com/cellery-io/sdk/tree/master/samples/product-review). When you invoke the service, you will get the expected results as the response. 
+To start with, deploy the [review sample](https://github.com/wso2-cellery/sdk/tree/master/samples/product-review). When you invoke the service, you will get the expected results as the response. 
 
 In order to apply a policy, edit the policy by editing the ConfigMap customer-products-policy. 
 
@@ -132,7 +132,7 @@ To get started with building Cellery Mesh Security, the following are required.
 #### Steps
 Clone mesh-security using below command.
 ```
-git clone https://github.com/cellery-io/mesh-security.git
+git clone https://github.com/wso2-cellery/mesh-security.git
 ```
 Build the repo using make file.
 ```
@@ -140,7 +140,7 @@ make build-all
 ```
 ### Issue Management
 
-Cellery Mesh Security issue management is mainly handled through GitHub Issues. Please feel free to open an issue about any question, bug report or feature request that you have in mind. (If you are unclear about where your issue should belong to, you can create it in [Cellery SDK](https://github.com/cellery-io/sdk).)
+Cellery Mesh Security issue management is mainly handled through GitHub Issues. Please feel free to open an issue about any question, bug report or feature request that you have in mind. (If you are unclear about where your issue should belong to, you can create it in [Cellery SDK](https://github.com/wso2-cellery/sdk).)
 
 We also welcome any external contributors who are willing to contribute. You can join a conversation in any existing issue and even send PRs to contribute. However, we suggest to start by joining into the conversations and learning about Cellery Mesh Security as the first step.
 
