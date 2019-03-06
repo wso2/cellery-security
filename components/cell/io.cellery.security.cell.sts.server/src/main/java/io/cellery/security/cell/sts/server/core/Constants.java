@@ -25,6 +25,13 @@ package io.cellery.security.cell.sts.server.core;
 public class Constants {
 
     public static final String CELLERY_AUTH_SUBJECT_HEADER = "x-cellery-auth-subject";
+    public static final String CELL_IMAGE_NAME = "cellImageName";
+    public static final String CELL_INSTANCE_NAME = "cellInstanceName";
+    public static final String CELL_VERSION = "cellVersion";
+    public static final String CELL_IMAGE_NAME_ENV_VAR = "CELL_IMAGE_NAME";
+    public static final String CELL_INSTANCE_NAME_ENV_VAR = "CELL_INSTANCE_NAME";
+    public static final String CELL_ORG_NAME_ENV_VAR = "CELL_ORG_NAME";
+    public static final String CELL_VERSION_ENV_VAR = "CELL_IMAGE_VERSION";
 
     /**
      * Configuration constants.

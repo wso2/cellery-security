@@ -57,7 +57,6 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     private static final String CELL_NAME = "cell.name";
     private static final String REQUEST_ID_HEADER = "x-request-id";
     private static final String DESTINATION_HEADER = ":authority";
-    private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
     private static final String ISTIO_ATTRIBUTES_HEADER = "x-istio-attributes";
     private static final String ISTIO_INGRESS_PREFIX = "istio-ingressgateway";
 
@@ -77,7 +76,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
             // Add request ID for log correlation.
             MDC.put(REQUEST_ID, getRequestId(requestFromProxy));
             // Add cell name to log entries
-            MDC.put(CELL_NAME, getMyCellName());
+            MDC.put(CELL_NAME, CellStsUtils.getMyCellName());
 
             String destination = getDestination(requestFromProxy);
             log.debug("Request from Istio-Proxy (destination:{}):\n{}", destination, requestFromProxy);
@@ -174,16 +173,6 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return destination;
     }
 
-    private String getMyCellName() throws CelleryCellSTSException {
-        // For now we pick the cell name from the environment variable. In future we need to figure out a way to derive
-        // values from the authz request.
-        String cellName = System.getenv(CELL_NAME_ENV_VARIABLE);
-        if (StringUtils.isBlank(cellName)) {
-            throw new CelleryCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
-        }
-        return cellName;
-    }
-
     private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
@@ -242,7 +231,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 String sourceWorkloadName = sourceUid.replace("kubernetes://", "");
 
                 requestSourceBuilder.setWorkload(sourceWorkloadName)
-                        .setCellName(extractCellNameFromWorkloadName(sourceWorkloadName));
+                        .setCellInstanceName(extractCellNameFromWorkloadName(sourceWorkloadName));
             }
         }
         return requestSourceBuilder.build();

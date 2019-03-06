@@ -23,6 +23,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 
+import java.util.HashMap;
+
 /**
  * Token Generator used by Cell STS.
  */
@@ -42,10 +44,12 @@ public class STSTokenGenerator {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         JWTClaimsSet jwtClaims = getJWTClaims(incomingJWT);
+        HashMap originalClaims = new HashMap(jwtClaims.getClaims());
+        replaceCellInformation(originalClaims);
         stsjwtBuilder.subject(jwtClaims.getSubject());
         stsjwtBuilder.expiryInSeconds(1200);
         stsjwtBuilder.audience(audience);
-        stsjwtBuilder.claims(jwtClaims.getClaims());
+        stsjwtBuilder.claims(originalClaims);
         stsjwtBuilder.issuer(issuer);
         return stsjwtBuilder.build();
     }
@@ -65,6 +69,7 @@ public class STSTokenGenerator {
         stsjwtBuilder.expiryInSeconds(1200);
         stsjwtBuilder.audience(audience);
         stsjwtBuilder.issuer(issuer);
+        stsjwtBuilder.claims(replaceCellInformation(null));
         return stsjwtBuilder.build();
     }
 
@@ -82,5 +87,19 @@ public class STSTokenGenerator {
         } catch (java.text.ParseException e) {
             throw new CelleryCellSTSException("Error while parsing the Signed JWT in authorization header.", e);
         }
+    }
+
+    private static HashMap replaceCellInformation (HashMap claims) throws CelleryCellSTSException {
+        if (claims == null) {
+            claims = new HashMap();
+        }
+        claims.remove(Constants.CELL_IMAGE_NAME);
+        claims.remove(Constants.CELL_INSTANCE_NAME);
+        claims.remove(Constants.CELL_VERSION);
+
+        claims.put(Constants.CELL_IMAGE_NAME, CellStsUtils.getCellImageName());
+        claims.put(Constants.CELL_INSTANCE_NAME, CellStsUtils.getMyCellName());
+        claims.put(Constants.CELL_VERSION, CellStsUtils.getCellVersion());
+        return claims;
     }
 }

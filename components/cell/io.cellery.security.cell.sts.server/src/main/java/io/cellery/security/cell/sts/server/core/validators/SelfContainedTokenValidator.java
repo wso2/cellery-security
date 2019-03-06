@@ -118,8 +118,8 @@ public class SelfContainedTokenValidator implements TokenValidator {
             return;
         }
         String issuer = globalIssuer;
-        if (StringUtils.isNotEmpty(request.getSource().getCellName())) {
-            issuer = CellStsUtils.getIssuerName(request.getSource().getCellName());
+        if (StringUtils.isNotEmpty(request.getSource().getCellInstanceName())) {
+            issuer = CellStsUtils.getIssuerName(request.getSource().getCellInstanceName());
         }
         String issuerInToken = claimsSet.getIssuer();
         if (StringUtils.isEmpty(issuerInToken)) {
@@ -141,15 +141,15 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
         String jwkEndpoint = CellStsConfiguration.getInstance().getGlobalJWKEndpoint();
 
-        String sourceCell = cellStsRequest.getSource().getCellName();
+        String sourceCell = cellStsRequest.getSource().getCellInstanceName();
         if (StringUtils.isNotEmpty(sourceCell)) {
-            int port = resolvePort(cellStsRequest.getSource().getCellName());
+            int port = resolvePort(cellStsRequest.getSource().getCellInstanceName());
             try {
                 String hostname;
                 if (StringUtils.equalsIgnoreCase(sourceCell, CellStsUtils.getMyCellName())) {
                     hostname = "localhost";
                 } else {
-                    hostname = CellStsUtils.getIssuerName(cellStsRequest.getSource().getCellName());
+                    hostname = CellStsUtils.getIssuerName(cellStsRequest.getSource().getCellInstanceName());
                 }
                 jwkEndpoint = "http://" + hostname + ":" + port;
             } catch (CelleryCellSTSException e) {

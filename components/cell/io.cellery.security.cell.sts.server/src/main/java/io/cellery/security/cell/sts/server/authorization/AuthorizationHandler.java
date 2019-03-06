@@ -19,6 +19,8 @@
 
 package io.cellery.security.cell.sts.server.authorization;
 
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+
 /**
  * Interface for authorization handling. Any authorization provider should override this interface.
  */
@@ -29,5 +31,5 @@ public interface AuthorizationHandler {
      * @param request Authorization request.
      * @throws AuthorizationFailedException AuthorizationFailedException.
      */
-    public void authorize(AuthorizeRequest request) throws AuthorizationFailedException;
+    public void authorize(CellStsRequest request, String jwt) throws AuthorizationFailedException;
 }
