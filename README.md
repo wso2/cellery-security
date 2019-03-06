@@ -7,6 +7,8 @@
   [![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/mesh-security.svg)](https://github.com/wso2-cellery/mesh-security/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
   
+**Note**: If you just wish to get started with trying out Cellery, you can start your journey at [wso2-cellery/sdk](https://github.com/wso2-cellery/sdk) repository.  
+
 In Cellery, each Cell is considered as a unique trust domain and each Cell has it's own Secure Token Service (STS) which the workloads can use to communicate in a trusted manner with each other. Not only authentication, but also fine grained authorization requirements  can be achieved for the purpose of inter and intra Cell communications. 
 
 
