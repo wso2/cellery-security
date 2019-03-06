@@ -24,10 +24,13 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.cellery.security.cell.sts.server.authorization.AuthorizationContext;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationFailedException;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationHandler;
 import io.cellery.security.cell.sts.server.authorization.AuthorizationUtils;
 import io.cellery.security.cell.sts.server.authorization.AuthorizeRequest;
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
@@ -42,17 +45,21 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
     private static final Logger log = LoggerFactory.getLogger(OPAAuthorizationHandler.class);
 
     @Override
-    public void authorize(AuthorizeRequest request) throws AuthorizationFailedException {
+    public void authorize(CellStsRequest cellStsRequest, String jwt) throws AuthorizationFailedException {
 
-        log.debug("OPA authorization handler invoked for request id: {}", request.getRequestId());
-        request.setAuthorizationContext(new OPAAuthorizationContext(request.getAuthorizationContext().getJwt()));
+        AuthorizeRequest authorizeRequest = buildAuthorizeRequest(cellStsRequest, jwt);
+        log.debug("OPA authorization handler invoked for request id: {}", authorizeRequest.getRequestId());
+        authorizeRequest.setAuthorizationContext(new OPAAuthorizationContext(authorizeRequest.getAuthorizationContext()
+                .getJwt()));
         Gson gson = new Gson();
-        String requestString = gson.toJson(request);
+        String requestString = gson.toJson(authorizeRequest);
         requestString = "{ \"input\" :" + requestString + "}";
         HttpResponse<JsonNode> apiResponse = null;
         log.info("Request to OPA server : {}", requestString);
         try {
-            String query = buildEndpoint(AuthorizationUtils.getOPAEndpoint(), request.getDestination().getWorkload());
+            boolean requestToMicroGateway = CellStsUtils.isRequestToMicroGateway(cellStsRequest);
+            String query = buildEndpoint(AuthorizationUtils.getOPAEndpoint(cellStsRequest, requestToMicroGateway),
+                    authorizeRequest.getDestination().getWorkload(), requestToMicroGateway);
             log.info("Querying OPA from {}", query);
             apiResponse = Unirest.post(query).body(requestString).asJson();
             log.info("Response from OPA server: {}", apiResponse.getBody().toString());
@@ -68,14 +75,17 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
                         query);
             }
 
-            log.info("Authorization successfully completed for request: ", request.getRequestId());
+            log.info("Authorization successfully completed for request: ", authorizeRequest.getRequestId());
         } catch (UnirestException | CelleryCellSTSException e) {
             throw new AuthorizationFailedException("Error while sending authorization request to OPA", e);
         }
     }
 
-    private String buildEndpoint(String endpointAddress, String destinationService) {
+    private String buildEndpoint(String endpointAddress, String destinationService, boolean toMicroGateway) {
 
+        if (toMicroGateway) {
+            return endpointAddress + "/allow_access";
+        }
         if (StringUtils.isEmpty(destinationService)) {
             return endpointAddress;
         }
@@ -83,5 +93,14 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
         String sanitizedService = destinationService.replace("-", "_").split(":")
                 [0].concat("_allow");
         return endpointAddress + "/" + sanitizedService;
+    }
+
+    private AuthorizeRequest buildAuthorizeRequest(CellStsRequest request, String jwt) throws
+            AuthorizationFailedException {
+
+        log.info("Building authorize request with jwt: " + jwt);
+        AuthorizationContext authorizationContext = new AuthorizationContext(jwt);
+        AuthorizeRequest authorizeRequest = new AuthorizeRequest(request, authorizationContext);
+        return authorizeRequest;
     }
 }

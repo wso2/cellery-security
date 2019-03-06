@@ -49,16 +49,7 @@ public class AuthorizationService {
             return;
         }
         log.info("Authorization service is invoked for request: {}", request.getRequestId());
-        authorizationHandler.authorize(buildAuthorizeRequest(request, jwt));
+        authorizationHandler.authorize(request, jwt);
 
-    }
-
-    private AuthorizeRequest buildAuthorizeRequest(CellStsRequest request, String jwt) throws
-            AuthorizationFailedException {
-
-        log.info("Building authorize request with jwt: " + jwt);
-        AuthorizationContext authorizationContext = new AuthorizationContext(jwt);
-        AuthorizeRequest authorizeRequest = new AuthorizeRequest(request, authorizationContext);
-        return authorizeRequest;
     }
 }

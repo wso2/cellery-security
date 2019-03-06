@@ -20,6 +20,7 @@ package io.cellery.security.cell.sts.server.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
@@ -38,17 +39,34 @@ import java.util.Map;
  */
 public class CellStsUtils {
 
-    private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
     private static final String STS_CONFIG_PATH_ENV_VARIABLE = "CONF_PATH";
     private static final String CONFIG_FILE_PATH = "/etc/config/sts.json";
 
     public static String getMyCellName() throws CelleryCellSTSException {
         // For now we pick the cell name from the environment variable.
-        String cellName = System.getenv(CELL_NAME_ENV_VARIABLE);
+        String cellName = System.getenv(Constants.CELL_INSTANCE_NAME_ENV_VAR);
         if (StringUtils.isBlank(cellName)) {
-            throw new CelleryCellSTSException("Environment variable '" + CELL_NAME_ENV_VARIABLE + "' is empty.");
+            throw new CelleryCellSTSException("Environment variable '" + Constants.CELL_INSTANCE_NAME_ENV_VAR + "'" +
+                    " is empty.");
         }
         return cellName;
+    }
+
+    public static String getCellImageName() {
+
+        return System.getenv(Constants.CELL_IMAGE_NAME_ENV_VAR);
+    }
+
+    public static String getCellVersion() {
+
+        return System.getenv(Constants.CELL_VERSION_ENV_VAR);
+    }
+
+    public static boolean isRequestToMicroGateway(CellStsRequest cellStsRequest) throws CelleryCellSTSException {
+
+        String workload = cellStsRequest.getDestination().getWorkload();
+        return (StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
+                "--gateway-service"));
     }
 
     public static boolean isWorkloadExternalToCellery(String destinationWorkloadName) {

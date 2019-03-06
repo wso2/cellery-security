@@ -19,6 +19,8 @@
 
 package io.cellery.security.cell.sts.server.authorization;
 
+import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.model.RequestContext;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
@@ -29,11 +31,10 @@ import org.apache.commons.lang.StringUtils;
 public class AuthorizationUtils {
 
     /**
-     *
      * @return Endpoint address
      * @throws CelleryCellSTSException
      */
-    public static String getOPAEndpoint() throws CelleryCellSTSException {
+    public static String getOPAEndpoint(CellStsRequest request, boolean toMicrogateway) throws CelleryCellSTSException {
 
         int opaPort = 8181;
         // Running in the same pod which STS runs.
@@ -47,10 +48,35 @@ public class AuthorizationUtils {
             opaHost = opaHostConfig;
         }
 
-        String opaPrefix = CellStsConfiguration.getInstance().getSTSOPAQueryPrefix();
-        if (StringUtils.isEmpty(opaPrefix)) {
-            opaPrefix = "/data/cellery/io";
+        String opaPrefix = "data";
+        if (!toMicrogateway) {
+            opaPrefix = CellStsConfiguration.getInstance().getSTSOPAQueryPrefix();
+            if (StringUtils.isEmpty(opaPrefix)) {
+                opaPrefix = "/data/cellery/io";
+            }
         }
-        return "http://" + opaHost + ":" + opaPort + "/v1/" + opaPrefix;
+
+        String baseQuery = "http://" + opaHost + ":" + opaPort + "/v1/" + opaPrefix;
+
+        if (toMicrogateway) {
+            return getGatewayContextPolicyQuery(baseQuery, request);
+        } else {
+            return baseQuery;
+        }
+    }
+
+    public static String getGatewayContextPolicyQuery(String baseQueryPath, CellStsRequest request) {
+
+        String context = "";
+        RequestContext requestContext = request.getRequestContext();
+        if (requestContext != null && StringUtils.isNotEmpty(requestContext.getPath())) {
+            String[] split = requestContext.getPath().split("/");
+            if (split.length > 0 && StringUtils.isNotEmpty(split[0])) {
+                context = split[0];
+            } else if (split.length > 1 && StringUtils.isNotEmpty(split[1])) {
+                context = split[1];
+            }
+        }
+        return baseQueryPath + "/" + context;
     }
 }

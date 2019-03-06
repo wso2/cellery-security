@@ -28,16 +28,16 @@ import java.util.Map;
  */
 public class RequestSource {
 
-    private String cellName;
+    private String cellInstanceName;
     private String workload;
 
     private RequestSource() {
 
     }
 
-    public String getCellName() {
+    public String getCellInstanceName() {
 
-        return cellName;
+        return cellInstanceName;
     }
 
     public String getWorkload() {
@@ -49,7 +49,7 @@ public class RequestSource {
     public String toString() {
 
         Map<String, String> configJson = new HashMap<>();
-        configJson.put("Cell Name", cellName);
+        configJson.put("Cell Instance Name", cellInstanceName);
         configJson.put("Workload", workload);
 
         return CellStsUtils.getPrettyPrintJson(configJson);
@@ -60,7 +60,7 @@ public class RequestSource {
      */
     public static class RequestSourceBuilder {
 
-        private String cellName;
+        private String cellInstanceName;
         private String workload;
 
         public RequestSourceBuilder setWorkload(String workload) {
@@ -69,16 +69,16 @@ public class RequestSource {
             return this;
         }
 
-        public RequestSourceBuilder setCellName(String cellName) {
+        public RequestSourceBuilder setCellInstanceName(String cellInstanceName) {
 
-            this.cellName = cellName;
+            this.cellInstanceName = cellInstanceName;
             return this;
         }
 
         public RequestSource build() {
 
             RequestSource requestSource = new RequestSource();
-            requestSource.cellName = cellName;
+            requestSource.cellInstanceName = cellInstanceName;
             requestSource.workload = workload;
             return requestSource;
         }

@@ -103,13 +103,13 @@ public class CelleryCellStsService {
             throw new CelleryCellSTSException("Error while evaluating authentication requirement", e);
         }
 
-        String callerCell = cellStsRequest.getSource().getCellName();
+        String callerCell = cellStsRequest.getSource().getCellInstanceName();
         log.debug("Caller cell : {}", callerCell);
 
         jwt = getUserContextJwt(cellStsRequest);
         log.debug("Incoming JWT : " + jwt);
 
-        if (isRequestToMicroGateway(cellStsRequest)) {
+        if (CellStsUtils.isRequestToMicroGateway(cellStsRequest)) {
             log.debug("Request to micro-gateway intercepted");
             jwtClaims = handleRequestToMicroGW(cellStsRequest, requestId, jwt);
         } else {
@@ -141,7 +141,7 @@ public class CelleryCellStsService {
 
         JWTClaimsSet jwtClaims;
         log.debug("Call from a workload to workload within cell {} ; Source workload {} ; Destination workload",
-                cellStsRequest.getSource().getCellName(), cellStsRequest.getSource().getWorkload(),
+                cellStsRequest.getSource().getCellInstanceName(), cellStsRequest.getSource().getWorkload(),
                 cellStsRequest.getDestination().getWorkload());
 
         try {
@@ -206,7 +206,7 @@ public class CelleryCellStsService {
 
             String stsToken = getStsToken(cellStsRequest);
             if (StringUtils.isEmpty(stsToken)) {
-                throw new CelleryCellSTSException("No JWT security received from the STS endpoint: "
+                throw new CelleryCellSTSException("No JWT token received from the STS endpoint: "
                         + CellStsConfiguration.getInstance().getStsEndpoint());
             }
             log.debug("Attaching jwt to outbound request : {}", stsToken);
@@ -268,6 +268,9 @@ public class CelleryCellStsService {
 
                 }
                 jwt = userContextStore.get(requestId);
+                if (StringUtils.isEmpty(jwt)) {
+                    return getTokenFromLocalSTS(CellStsUtils.getMyCellName());
+                }
                 return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName());
             } else if (isIntraCellCall(request) && localContextStore.get(requestId) != null) {
                 log.debug("Intra cell request with ID: {} from source workload {} to destination workload {} within " +
@@ -275,12 +278,13 @@ public class CelleryCellStsService {
                         request.getDestination().getWorkload());
                 return localContextStore.get(requestId);
             } else if (!isIntraCellCall(request) && localContextStore.get(requestId) != null) {
+                log.debug("Outbound call from home cell. Building token");
                 jwt = localContextStore.get(requestId);
                 return getTokenFromLocalSTS(jwt, request.getDestination().getCellName());
             } else {
-                log.debug("Request initiated within cell {} to {}", request.getSource().getCellName(), request
+                log.debug("Request initiated within cell {} to {}", request.getSource().getCellInstanceName(), request
                         .getDestination().toString());
-                return getTokenFromLocalSTS(CellStsUtils.getMyCellName());
+                return getTokenFromLocalSTS(request.getDestination().getCellName());
             }
         } finally {
             // do nothing
@@ -305,13 +309,6 @@ public class CelleryCellStsService {
         return false;
     }
 
-    private boolean isRequestToMicroGateway(CellStsRequest cellStsRequest) throws CelleryCellSTSException {
-
-        String workload = cellStsRequest.getDestination().getWorkload();
-        return (StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
-                "--gateway-service"));
-    }
-
     private String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
 
         return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()));
@@ -321,6 +318,7 @@ public class CelleryCellStsService {
 
         String token = STSTokenGenerator.generateToken(jwt, audience,
                 CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()));
+        log.info("Issued a token from local STS : " + CellStsUtils.getCellImageName());
         return token;
     }
 
