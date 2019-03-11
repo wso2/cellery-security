@@ -26,3 +26,7 @@ build-sts-server-docker:
 
 .PHONY: build-all
 build-all: build-java-components build-sts-server-docker
+
+.PHONY: build-envoy-oidc-filter
+build-envoy-oidc-filter:
+	go build -o envoy-oidc-filter -x ./components/envoy-oidc-filter
