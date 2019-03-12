@@ -51,6 +51,7 @@ public class CelleryCellSTSServer {
     private CelleryCellSTSServer(int inboundListeningPort, int outboundListeningPort) throws CelleryCellSTSException {
 
         CellStsUtils.buildCellStsConfiguration();
+        CellStsUtils.readUnsecuredContexts();
         UserContextStore contextStore = new UserContextStoreImpl();
         UserContextStore localContextStore = new UserContextStoreImpl();
 

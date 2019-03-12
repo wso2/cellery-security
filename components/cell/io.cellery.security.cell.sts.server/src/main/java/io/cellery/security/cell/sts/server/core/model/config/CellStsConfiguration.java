@@ -20,7 +20,9 @@ package io.cellery.security.cell.sts.server.core.model.config;
 
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,7 +50,22 @@ public class CellStsConfiguration {
 
     private String stsOPAQueryPrefix;
 
+    private List<String> unsecuredAPIS;
+
     private static CellStsConfiguration instance = new CellStsConfiguration();
+
+    public List<String> getUnsecuredAPIS() {
+
+        if (this.unsecuredAPIS == null) {
+            return Collections.emptyList();
+        }
+        return unsecuredAPIS;
+    }
+
+    public void setUnsecuredAPIS(List<String> unsecuredAPIS) {
+
+        this.unsecuredAPIS = unsecuredAPIS;
+    }
 
     private CellStsConfiguration() {
 
