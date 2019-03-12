@@ -49,7 +49,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
@@ -68,7 +67,7 @@ public class CelleryCellStsService {
     private static final String AUTHORIZATION_HEADER_NAME = "authorization";
     private static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
     private static TokenValidator tokenValidator = new SelfContainedTokenValidator();
-    private static CellSTSRequestValidator requestValidator = new DefaultCellSTSReqValidator(Collections.EMPTY_LIST);
+    private static CellSTSRequestValidator requestValidator = new DefaultCellSTSReqValidator();
     private static AuthorizationService authorizationService = new AuthorizationService();
 
     private static final Logger log = LoggerFactory.getLogger(CelleryCellStsService.class);

@@ -23,12 +23,14 @@ import io.cellery.security.cell.sts.server.core.CelleryCellSTSServer;
 import io.cellery.security.cell.sts.server.core.Constants;
 import io.cellery.security.cell.sts.server.core.exception.CellSTSRequestValidationFailedException;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
+import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Default implementation of cell STS request validator.
@@ -36,11 +38,9 @@ import java.util.Optional;
 public class DefaultCellSTSReqValidator implements CellSTSRequestValidator {
 
     private static final Logger log = LoggerFactory.getLogger(CelleryCellSTSServer.class);
-    private List<String> unAuthenticatedAPIs;
 
-    public DefaultCellSTSReqValidator(List<String> unAuthenticatedAPIs) {
+    public DefaultCellSTSReqValidator() {
 
-        this.unAuthenticatedAPIs = unAuthenticatedAPIs;
     }
 
     @Override
@@ -58,12 +58,19 @@ public class DefaultCellSTSReqValidator implements CellSTSRequestValidator {
             CellSTSRequestValidationFailedException {
 
         String path = cellStsRequest.getRequestContext().getPath();
-        Optional<String> unProtectedResult = unAuthenticatedAPIs.stream().
-                filter(unProtectedPath -> StringUtils.equals(path, unProtectedPath)).findAny();
+        Optional<String> unProtectedResult = CellStsConfiguration.getInstance().getUnsecuredAPIS().stream().
+                filter(unProtectedPath -> match(path, unProtectedPath)).findAny();
         if (unProtectedResult.isPresent()) {
             return false;
         }
         return true;
+    }
+
+    private static boolean match(String url, String regex) {
+
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(url);
+        return m.find();
     }
 
 }

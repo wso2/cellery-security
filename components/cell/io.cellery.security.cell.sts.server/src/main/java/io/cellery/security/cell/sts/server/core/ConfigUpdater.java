@@ -43,11 +43,11 @@ public class ConfigUpdater implements Runnable {
 
         log.info("Running configuration updater..");
         String configFilePath = CellStsUtils.getConfigFilePath();
-        Path myDir = Paths.get(configFilePath.substring(0, configFilePath.lastIndexOf("/")));
+        Path directoryPath = Paths.get(configFilePath.substring(0, configFilePath.lastIndexOf("/")));
         try {
             while (true) {
-                WatchService watcher = myDir.getFileSystem().newWatchService();
-                myDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
+                WatchService watcher = directoryPath.getFileSystem().newWatchService();
+                directoryPath.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
                         StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 
                 log.debug("Waiting for config file change");
@@ -59,10 +59,12 @@ public class ConfigUpdater implements Runnable {
                     if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                         log.info("Updating file on {} event", StandardWatchEventKinds.ENTRY_CREATE);
                         CellStsUtils.buildCellStsConfiguration();
+                        CellStsUtils.readUnsecuredContexts();
                     }
                     if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
                         log.info("Updating file on {} event", StandardWatchEventKinds.ENTRY_MODIFY);
                         CellStsUtils.buildCellStsConfiguration();
+                        CellStsUtils.readUnsecuredContexts();
                     }
                 }
 

@@ -24,6 +24,7 @@ import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +42,8 @@ import java.util.Map;
 public class CellStsUtils {
 
     private static final String STS_CONFIG_PATH_ENV_VARIABLE = "CONF_PATH";
+    private static final String UNSECURED_PATHS_ENV_VARIABLE = "UNSECURED_CONTEXTS_CONF_PATH";
+    private static final String UNSECURED_PATHS_CONFIG_PATH = "/etc/config/unsecured-paths.json";
     private static final String CONFIG_FILE_PATH = "/etc/config/sts.json";
 
     public static String getMyCellName() throws CelleryCellSTSException {
@@ -104,6 +108,12 @@ public class CellStsUtils {
         return StringUtils.isNotBlank(configPath) ? configPath : CONFIG_FILE_PATH;
     }
 
+    public static String getUnsecuredPathsConfigPath() {
+
+        String configPath = System.getenv(UNSECURED_PATHS_ENV_VARIABLE);
+        return StringUtils.isNotBlank(configPath) ? configPath : UNSECURED_PATHS_CONFIG_PATH;
+    }
+
     public static void buildCellStsConfiguration() throws CelleryCellSTSException {
 
         try {
@@ -128,6 +138,20 @@ public class CellStsUtils {
                             (Constants.Configs.CONFIG_AUTHORIZATION_ENABLED))));
         } catch (ParseException | IOException e) {
             throw new CelleryCellSTSException("Error while setting up STS configurations", e);
+        }
+    }
+
+    public static void readUnsecuredContexts() throws CelleryCellSTSException {
+
+        String configFilePath = CellStsUtils.getUnsecuredPathsConfigPath();
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(configFilePath)), StandardCharsets.UTF_8);
+            JSONArray config = (JSONArray) new JSONParser().parse(content);
+            List unsecuredContexts = config.subList(0, config.size());
+            CellStsConfiguration.getInstance().setUnsecuredAPIS(unsecuredContexts);
+        } catch (IOException | ParseException e) {
+            throw new CelleryCellSTSException("Error while reading unsecured contexts from config file", e);
         }
     }
 
