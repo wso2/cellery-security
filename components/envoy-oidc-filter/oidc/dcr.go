@@ -20,7 +20,6 @@ package oidc
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"io/ioutil"
@@ -43,9 +42,6 @@ func isDcrRequired(c *Config) bool {
 }
 
 func dcr(c *Config) (string, string, error) {
-
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	values := map[string]interface{}{"client_name": c.ClientID, "grant_types": []string{"password",
 		"authorization_code", "implicit"}, "ext_param_client_id": c.ClientID, "redirect_uris": []string{c.RedirectURL}}
 
