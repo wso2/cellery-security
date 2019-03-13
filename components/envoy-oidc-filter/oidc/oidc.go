@@ -20,6 +20,17 @@ const (
 	RedirectCookie = "redirect"
 )
 
+type dcrErrorResponse struct {
+	Error string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+type dcrSuccessResponse struct {
+	ClientName string `json:"client_name"`
+	ClientId string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+}
+
 type Authenticator struct {
 	provider       *oidc.Provider
 	oauth2Config   *oauth2.Config
@@ -29,11 +40,21 @@ type Authenticator struct {
 	unsecuredPaths map[string]bool
 }
 
-func NewAuthenticator(c *Config) (*Authenticator, error) {
+func NewAuthenticator(c Config) (*Authenticator, error) {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, c.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get provider: %v", err)
+	}
+
+	if isDcrRequired(&c) {
+		log.Println("DCR required")
+		clientId, clientSecret, err := dcr(&c)
+		if err != nil {
+			return nil, fmt.Errorf("Error in performing DCR: %v", err)
+		}
+		c.ClientID = clientId
+		c.ClientSecret = clientSecret
 	}
 
 	config := &oauth2.Config{
@@ -52,11 +73,12 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 		oauth2Config: config,
 		oidcConfig:   oidcConfig,
 		ctx:          ctx,
-		config:       c,
-		unsecuredPaths: map[string]bool{
-			"/pet/app/*": true,
-			"/pet/":      true,
-		},
+		config:       &c,
+		// TODO:
+		// unsecuredPaths: map[string]bool{
+		//	"/pet/app/*": true,
+		//	"/pet/":      true,
+		//},
 	}, nil
 }
 
