@@ -43,6 +43,10 @@ func main() {
 		DcrEP:        os.Getenv(dcrEpEnv),
 		DcrUser:      os.Getenv(dcrUser),
 		DcrPassword:  os.Getenv(dcrPassword),
+		PrivateKeyFile:  "/home/miraj/WSO2/go/src/github.com/cellery-io/mesh-security/key1.pem",
+		CertificateFile: "/home/miraj/WSO2/go/src/github.com/cellery-io/mesh-security/cert.pem",
+		JwtIssuer:       "my-issuer",
+		JwtAudience:     "my-audience",
 	}
 	err := cfg.Validate()
 	if err != nil {

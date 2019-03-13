@@ -44,16 +44,14 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:fa5e9e1af8a8645086811ec5ab003806026babc57c8bb3a6f7e1ab34b80e2ff1"
+  digest = "1:5d1b5a25486fc7d4e133646d834f6fca7ba1cef9903d40e7aa786c41b89e9e91"
   name = "github.com/golang/protobuf"
   packages = [
-    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/struct",
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
@@ -215,12 +213,13 @@
   version = "v1.17.0"
 
 [[projects]]
-  digest = "1:c0c30f47f9c16f227ba82f0bdfd14fa968453c30b7677a07903b3b4f34b98d49"
+  digest = "1:005cbf8b937fcb1694b9dbb845b0aef618627be7faf7bb330eb2490e3f506ef8"
   name = "gopkg.in/square/go-jose.v2"
   packages = [
     ".",
     "cipher",
     "json",
+    "jwt",
   ]
   pruneopts = "UT"
   revision = "628223f44a71f715d2881ea69afc795a1e9c01be"
@@ -236,10 +235,11 @@
     "github.com/envoyproxy/go-control-plane/envoy/type",
     "github.com/gogo/googleapis/google/rpc",
     "github.com/gogo/protobuf/types",
-    "github.com/golang/protobuf/jsonpb",
     "golang.org/x/oauth2",
     "google.golang.org/grpc",
     "google.golang.org/grpc/reflection",
+    "gopkg.in/square/go-jose.v2",
+    "gopkg.in/square/go-jose.v2/jwt",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
