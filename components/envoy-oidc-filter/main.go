@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/cellery-io/mesh-security/components/envoy-oidc-filter/oidc"
 	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
@@ -13,19 +14,42 @@ import (
 	"os/signal"
 )
 
+const (
+	idpDiscoveryUrlEnv         = "IDP_DISCOVERY_URL"
+	skipDiscoveryCertVerifyEnv = "SKIP_DISCOVERY_URL_CERT_VERIFY"
+	clientIdEnv                = "CLIENT_ID"
+	clientSecretEnv            = "CLIENT_SECRET"
+	redirectUrlEnv             = "REDIRECT_URL"
+	appUrlEnv                  = "APP_BASE_URL"
+	dcrEpEnv                   = "DCR_EP"
+	dcrUser                    = "DCR_USER"
+	dcrPassword                = "DCR_PASSWORD"
+)
+
 func main() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt)
 
+	_, skipCertVerify := os.LookupEnv(skipDiscoveryCertVerifyEnv)
+	if skipCertVerify {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 	cfg := &oidc.Config{
-		Provider:     "https://accounts.google.com",
-		ClientID:     ":)",
-		ClientSecret: ":)",
-		RedirectURL:  "http://my-domain.com/_auth/callback",
-		BaseURL:      "http://my-domain.com/pet/",
+		Provider:     os.Getenv(idpDiscoveryUrlEnv),
+		ClientID:     os.Getenv(clientIdEnv),
+		ClientSecret: os.Getenv(clientSecretEnv),
+		RedirectURL:  os.Getenv(redirectUrlEnv),
+		BaseURL:      os.Getenv(appUrlEnv),
+		DcrEP:        os.Getenv(dcrEpEnv),
+		DcrUser:      os.Getenv(dcrUser),
+		DcrPassword:  os.Getenv(dcrPassword),
+	}
+	err := cfg.Validate()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	auth, err := oidc.NewAuthenticator(cfg)
+	auth, err := oidc.NewAuthenticator(*cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
