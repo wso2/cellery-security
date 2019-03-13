@@ -21,7 +21,7 @@ const (
 	clientSecretEnv            = "CLIENT_SECRET"
 	redirectUrlEnv             = "REDIRECT_URL"
 	appUrlEnv                  = "APP_BASE_URL"
-	dcrEpEnv                   = "DCR_EP"
+	dcrEpEnv                   = "DCR_ENDPOINT"
 	dcrUser                    = "DCR_USER"
 	dcrPassword                = "DCR_PASSWORD"
 )
@@ -49,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	auth, err := oidc.NewAuthenticator(*cfg)
+	auth, err := oidc.NewAuthenticator(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
