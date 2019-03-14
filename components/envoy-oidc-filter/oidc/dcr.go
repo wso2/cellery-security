@@ -21,11 +21,12 @@ package oidc
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -34,7 +35,7 @@ const (
 )
 
 func isDcrRequired(c *Config) bool {
-	if !IsEmpty(c.ClientID) && !IsEmpty(c.ClientSecret) {
+	if !isEmpty(c.ClientID) && !isEmpty(c.ClientSecret) {
 		// client id and client secret provided, DCR not required
 		return false
 	}
@@ -70,7 +71,7 @@ func dcr(c *Config) (string, string, error) {
 	}
 
 	var clientSecret string
-	if (resp.StatusCode != 201) {
+	if resp.StatusCode != 201 {
 		if resp.StatusCode == 400 {
 			var errResp dcrErrorResponse
 			err = json.Unmarshal(body, &errResp)
