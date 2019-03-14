@@ -34,7 +34,7 @@ const (
 )
 
 func isDcrRequired(c *Config) bool {
-	if !IsEmpty(c.ClientID) && !IsEmpty(c.ClientSecret) {
+	if !isEmpty(c.ClientID) && !isEmpty(c.ClientSecret) {
 		// client id and client secret provided, DCR not required
 		return false
 	}

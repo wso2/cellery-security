@@ -24,6 +24,10 @@ const (
 	dcrEpEnv                   = "DCR_ENDPOINT"
 	dcrUser                    = "DCR_USER"
 	dcrPassword                = "DCR_PASSWORD"
+	PrivateKeyFile             = "PRIVATE_KEY_FILE"
+	CertificateFile            = "CERTIFICATE_FILE"
+	JwtIssuer                  = "JWT_ISSUER"
+	JwtAudience                = "JWT_AUDIENCE"
 )
 
 func main() {
@@ -35,18 +39,18 @@ func main() {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	cfg := &oidc.Config{
-		Provider:     os.Getenv(idpDiscoveryUrlEnv),
-		ClientID:     os.Getenv(clientIdEnv),
-		ClientSecret: os.Getenv(clientSecretEnv),
-		RedirectURL:  os.Getenv(redirectUrlEnv),
-		BaseURL:      os.Getenv(appUrlEnv),
-		DcrEP:        os.Getenv(dcrEpEnv),
-		DcrUser:      os.Getenv(dcrUser),
-		DcrPassword:  os.Getenv(dcrPassword),
-		PrivateKeyFile:  "/home/miraj/WSO2/go/src/github.com/cellery-io/mesh-security/key1.pem",
-		CertificateFile: "/home/miraj/WSO2/go/src/github.com/cellery-io/mesh-security/cert.pem",
-		JwtIssuer:       "my-issuer",
-		JwtAudience:     "my-audience",
+		Provider:        os.Getenv(idpDiscoveryUrlEnv),
+		ClientID:        os.Getenv(clientIdEnv),
+		ClientSecret:    os.Getenv(clientSecretEnv),
+		RedirectURL:     os.Getenv(redirectUrlEnv),
+		BaseURL:         os.Getenv(appUrlEnv),
+		DcrEP:           os.Getenv(dcrEpEnv),
+		DcrUser:         os.Getenv(dcrUser),
+		DcrPassword:     os.Getenv(dcrPassword),
+		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
+		CertificateFile: os.Getenv(CertificateFile),
+		JwtIssuer:       os.Getenv(JwtIssuer),
+		JwtAudience:     os.Getenv(JwtAudience),
 	}
 	err := cfg.Validate()
 	if err != nil {
