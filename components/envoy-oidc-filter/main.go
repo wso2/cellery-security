@@ -29,6 +29,9 @@ const (
 	CertificateFile            = "CERTIFICATE_FILE"
 	JwtIssuer                  = "JWT_ISSUER"
 	JwtAudience                = "JWT_AUDIENCE"
+
+	FilterListenerPort       = "FILTER_LISTENER_PORT"
+	HttpCallbackListenerPort = "HTTP_CALLBACK_LISTENER_PORT"
 )
 
 func main() {
@@ -67,8 +70,9 @@ func main() {
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/_auth/callback", auth.Callback)
-		fmt.Printf("Starting HTTP auth callback reciver on %q\n", "8990")
-		log.Fatal(http.ListenAndServe(":8990", mux))
+		port := LookupEnv(HttpCallbackListenerPort, "15810")
+		fmt.Printf("Starting HTTP auth callback reciver on %q\n", port)
+		log.Fatal(http.ListenAndServe(":"+port, mux))
 	}()
 
 	// Start auth check envoy gRPC filter
@@ -77,12 +81,20 @@ func main() {
 		ext_authz.RegisterAuthorizationServer(s, auth)
 		reflection.Register(s)
 
-		fmt.Printf("Starting gRPC filter reciver on %q\n", "8081")
-		lis, err := net.Listen("tcp", ":8081")
+		port := LookupEnv(FilterListenerPort, "15800")
+		fmt.Printf("Starting gRPC filter reciver on %q\n", port)
+		lis, err := net.Listen("tcp", ":"+port)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 		log.Fatal(s.Serve(lis))
 	}()
 	<-c
+}
+
+func LookupEnv(key string, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
