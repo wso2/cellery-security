@@ -3,15 +3,16 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/cellery-io/mesh-security/components/envoy-oidc-filter/oidc"
-	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/cellery-io/mesh-security/components/envoy-oidc-filter/oidc"
+	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
