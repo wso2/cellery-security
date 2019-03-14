@@ -16,15 +16,15 @@ import (
 )
 
 const (
-	idpDiscoveryUrlEnv         = "IDP_DISCOVERY_URL"
-	skipDiscoveryCertVerifyEnv = "SKIP_DISCOVERY_URL_CERT_VERIFY"
-	clientIdEnv                = "CLIENT_ID"
-	clientSecretEnv            = "CLIENT_SECRET"
-	redirectUrlEnv             = "REDIRECT_URL"
-	appUrlEnv                  = "APP_BASE_URL"
-	dcrEpEnv                   = "DCR_ENDPOINT"
-	dcrUser                    = "DCR_USER"
-	dcrPassword                = "DCR_PASSWORD"
+	IdpDiscoveryUrlEnv         = "IDP_DISCOVERY_URL"
+	SkipDiscoveryCertVerifyEnv = "SKIP_DISCOVERY_URL_CERT_VERIFY"
+	ClientIdEnv                = "CLIENT_ID"
+	ClientSecretEnv            = "CLIENT_SECRET"
+	RedirectUrlEnv             = "REDIRECT_URL"
+	AppUrlEnv                  = "APP_BASE_URL"
+	DcrEpEnv                   = "DCR_ENDPOINT"
+	DcrUser                    = "DCR_USER"
+	DcrPassword                = "DCR_PASSWORD"
 	PrivateKeyFile             = "PRIVATE_KEY_FILE"
 	CertificateFile            = "CERTIFICATE_FILE"
 	JwtIssuer                  = "JWT_ISSUER"
@@ -35,19 +35,19 @@ func main() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt)
 
-	_, skipCertVerify := os.LookupEnv(skipDiscoveryCertVerifyEnv)
+	_, skipCertVerify := os.LookupEnv(SkipDiscoveryCertVerifyEnv)
 	if skipCertVerify {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	cfg := &oidc.Config{
-		Provider:        os.Getenv(idpDiscoveryUrlEnv),
-		ClientID:        os.Getenv(clientIdEnv),
-		ClientSecret:    os.Getenv(clientSecretEnv),
-		RedirectURL:     os.Getenv(redirectUrlEnv),
-		BaseURL:         os.Getenv(appUrlEnv),
-		DcrEP:           os.Getenv(dcrEpEnv),
-		DcrUser:         os.Getenv(dcrUser),
-		DcrPassword:     os.Getenv(dcrPassword),
+		Provider:        os.Getenv(IdpDiscoveryUrlEnv),
+		ClientID:        os.Getenv(ClientIdEnv),
+		ClientSecret:    os.Getenv(ClientSecretEnv),
+		RedirectURL:     os.Getenv(RedirectUrlEnv),
+		BaseURL:         os.Getenv(AppUrlEnv),
+		DcrEP:           os.Getenv(DcrEpEnv),
+		DcrUser:         os.Getenv(DcrUser),
+		DcrPassword:     os.Getenv(DcrPassword),
 		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
 		CertificateFile: os.Getenv(CertificateFile),
 		JwtIssuer:       os.Getenv(JwtIssuer),
