@@ -283,10 +283,27 @@ public class CelleryCellStsService {
             } else {
                 log.debug("Request initiated within cell {} to {}", request.getSource().getCellInstanceName(), request
                         .getDestination().toString());
+                String token = getUserContextJwt(request);
+                if (StringUtils.isNotEmpty(token)) {
+                    log.debug("Found a token attached by the workload : {}", token);
+                    return getTokenWithWorkloadPassedBearerToken(request, token);
+                }
                 return getTokenFromLocalSTS(request.getDestination().getCellName());
             }
         } finally {
             // do nothing
+        }
+    }
+
+    private String getTokenWithWorkloadPassedBearerToken(CellStsRequest request, String token) throws
+            CelleryCellSTSException {
+
+        try {
+            log.debug("Validating workload attached token.");
+            tokenValidator.validateToken(token, request);
+            return getTokenFromLocalSTS(token, request.getDestination().getCellName());
+        } catch (TokenValidationFailureException e) {
+            throw new CelleryCellSTSException("Error while validating workload passed token", e);
         }
     }
 
@@ -301,11 +318,8 @@ public class CelleryCellStsService {
     private boolean isRequestFromMicroGateway(CellStsRequest cellStsRequest) throws CelleryCellSTSException {
 
         String workload = cellStsRequest.getSource().getWorkload();
-        if (StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
-                "--gateway-deployment-")) {
-            return true;
-        }
-        return false;
+        return StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
+                "--gateway-deployment-");
     }
 
     private String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
