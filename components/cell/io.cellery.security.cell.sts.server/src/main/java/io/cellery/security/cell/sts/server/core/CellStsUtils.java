@@ -102,6 +102,11 @@ public class CellStsUtils {
         return cellName + "--sts-service";
     }
 
+    public static String getGatewayIssuer(String cellName) {
+
+        return cellName + "--gateway";
+    }
+
     public static String getConfigFilePath() {
 
         String configPath = System.getenv(STS_CONFIG_PATH_ENV_VARIABLE);
@@ -153,6 +158,16 @@ public class CellStsUtils {
         } catch (IOException | ParseException e) {
             throw new CelleryCellSTSException("Error while reading unsecured contexts from config file", e);
         }
+    }
+
+    /**
+     * Checks whether the STS is running in debug mode.
+     *
+     * @return true if STS runs in debug mode, unless returns false.
+     */
+    public static boolean isRunningInDebugMode() {
+
+        return StringUtils.isNotEmpty(System.getenv("debug"));
     }
 
 }
