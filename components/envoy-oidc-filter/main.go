@@ -29,6 +29,7 @@ const (
 	CertificateFile            = "CERTIFICATE_FILE"
 	JwtIssuer                  = "JWT_ISSUER"
 	JwtAudience                = "JWT_AUDIENCE"
+	SubjectClaim               = "SUBJECT_CLAIM"
 
 	FilterListenerPort       = "FILTER_LISTENER_PORT"
 	HttpCallbackListenerPort = "HTTP_CALLBACK_LISTENER_PORT"
@@ -55,6 +56,7 @@ func main() {
 		CertificateFile: os.Getenv(CertificateFile),
 		JwtIssuer:       os.Getenv(JwtIssuer),
 		JwtAudience:     os.Getenv(JwtAudience),
+		SubjectClaim:    os.Getenv(SubjectClaim),
 	}
 	err := cfg.Validate()
 	if err != nil {

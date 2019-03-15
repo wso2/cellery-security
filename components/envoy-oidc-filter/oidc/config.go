@@ -15,6 +15,7 @@ type Config struct {
 	PrivateKeyFile  string
 	JwtIssuer       string
 	JwtAudience     string
+	SubjectClaim    string
 }
 
 func (c *Config) Validate() error {
