@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.is</groupId>
         <artifactId>identity-server-parent</artifactId>
-        <version>5.8.0-m24</version>
+        <version>5.8.0-m26</version>
     </parent>
 
 
@@ -48,8 +48,5 @@
         <url>http://www.wso2.org</url>
     </organization>
 
-    <properties>
-        <identity.inbound.auth.oauth.version>6.0.104</identity.inbound.auth.oauth.version>
-    </properties>
 
 </project>
