@@ -124,12 +124,12 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 			log.Println(err)
 			return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
 		} else {
-			token, err := a.buildForwardJwt(cookie.Value)
+			token, sub, err := a.buildForwardHeaders(cookie.Value)
 			if err != nil {
 				fmt.Println(err)
 				return buildServerErrorCheckResponse(), nil
 			}
-			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token)), nil
+			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub), nil
 		}
 	} else {
 		return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
@@ -198,16 +198,16 @@ func (a *Authenticator) authCodeURL() string {
 	return a.oauth2Config.AuthCodeURL("state")
 }
 
-func (a *Authenticator) buildForwardJwt(idToken string) (string, error) {
+func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, error) {
 
 	tok, err := jwt.ParseSigned(idToken)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	c := jwt.Claims{}
 	m := make(map[string]interface{})
 	if err := tok.UnsafeClaimsWithoutVerification(&c, &m); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	c.Issuer = a.config.JwtIssuer
@@ -219,6 +219,8 @@ func (a *Authenticator) buildForwardJwt(idToken string) (string, error) {
 		}
 	}
 
+	subHeaderValue := c.Subject
+
 	kid := base64.RawStdEncoding.EncodeToString([]byte(fmt.Sprintf("%x", sha1.Sum(a.cert.Raw))))
 	rsaSigner, err := jose.NewSigner(
 		jose.SigningKey{Algorithm: jose.RS256, Key: a.key},
@@ -227,10 +229,10 @@ func (a *Authenticator) buildForwardJwt(idToken string) (string, error) {
 
 	newJwt, err := jwt.Signed(rsaSigner).Claims(m).Claims(c).CompactSerialize()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	fmt.Println(newJwt)
-	return newJwt, nil
+	return newJwt, subHeaderValue, nil
 }
 
 func toHttpRequest(checkReq *extauthz.CheckRequest) (*http.Request, error) {
@@ -300,7 +302,7 @@ func buildServerErrorCheckResponse() *extauthz.CheckResponse {
 	}
 }
 
-func buildOkCheckResponse(authzHeader string) *extauthz.CheckResponse {
+func buildOkCheckResponse(authzHeader string, xSubjectHeader string) *extauthz.CheckResponse {
 	return &extauthz.CheckResponse{
 		Status: &googlerpc.Status{Code: int32(googlerpc.OK)},
 		HttpResponse: &extauthz.CheckResponse_OkResponse{
@@ -310,6 +312,15 @@ func buildOkCheckResponse(authzHeader string) *extauthz.CheckResponse {
 						Header: &core.HeaderValue{
 							Key:   "Authorization",
 							Value: authzHeader,
+						},
+						Append: &types.BoolValue{
+							Value: false,
+						},
+					},
+					{
+						Header: &core.HeaderValue{
+							Key:   "x-cellery-auth-subject",
+							Value: xSubjectHeader,
 						},
 						Append: &types.BoolValue{
 							Value: false,
