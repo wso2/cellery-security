@@ -213,6 +213,12 @@ func (a *Authenticator) buildForwardJwt(idToken string) (string, error) {
 	c.Issuer = a.config.JwtIssuer
 	c.Audience = []string{a.config.JwtAudience}
 
+	if len(a.config.SubjectClaim) > 0 {
+		if sub, ok := m[a.config.SubjectClaim].(string); ok {
+			c.Subject = sub
+		}
+	}
+
 	kid := base64.RawStdEncoding.EncodeToString([]byte(fmt.Sprintf("%x", sha1.Sum(a.cert.Raw))))
 	rsaSigner, err := jose.NewSigner(
 		jose.SigningKey{Algorithm: jose.RS256, Key: a.key},
