@@ -21,12 +21,11 @@ package oidc
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -123,7 +122,7 @@ func getClientSecret(c *Config) (string, error) {
 	var clientSecret string
 	if resp.StatusCode != 200 {
 		// error
-		return "", errors.Errorf("Error occurred while retrieving oauth application %v, error: %+v",
+		return "", fmt.Errorf("Error occurred while retrieving oauth application %v, error: %+v",
 			c.ClientID, body)
 	} else {
 		var successResp dcrSuccessResponse

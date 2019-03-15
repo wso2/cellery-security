@@ -1,6 +1,6 @@
 package oidc
 
-import "github.com/pkg/errors"
+import "errors"
 
 type Config struct {
 	Provider        string
