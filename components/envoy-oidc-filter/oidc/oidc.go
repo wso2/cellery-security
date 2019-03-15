@@ -2,17 +2,24 @@ package oidc
 
 import (
 	"context"
+	"crypto/rsa"
+	"crypto/sha1"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
-	"github.com/envoyproxy/go-control-plane/envoy/type"
+	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
 	"golang.org/x/oauth2"
-	"log"
-	"net/http"
+	"gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
 )
 
 const (
@@ -38,6 +45,8 @@ type Authenticator struct {
 	config         *Config
 	ctx            context.Context
 	unsecuredPaths map[string]bool
+	cert           *x509.Certificate
+	key            *rsa.PrivateKey
 }
 
 func NewAuthenticator(c *Config) (*Authenticator, error) {
@@ -45,6 +54,15 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 	provider, err := oidc.NewProvider(ctx, c.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get provider: %v", err)
+	}
+
+	key, err := loadPrivateKey(c.PrivateKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read private key file: %v", err)
+	}
+	cert, err := loadX509Certificate(c.CertificateFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read certificate file: %v", err)
 	}
 
 	if isDcrRequired(c) {
@@ -74,11 +92,8 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 		oidcConfig:   oidcConfig,
 		ctx:          ctx,
 		config:       c,
-		// TODO:
-		// unsecuredPaths: map[string]bool{
-		//	"/pet/app/*": true,
-		//	"/pet/":      true,
-		//},
+		key:          key,
+		cert:         cert,
 	}, nil
 }
 
@@ -104,7 +119,12 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 			log.Println(err)
 			return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
 		} else {
-			return buildOkCheckResponse(), nil
+			token, sub, err := a.buildForwardHeaders(cookie.Value)
+			if err != nil {
+				fmt.Println(err)
+				return buildServerErrorCheckResponse(), nil
+			}
+			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub), nil
 		}
 	} else {
 		return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
@@ -173,6 +193,43 @@ func (a *Authenticator) authCodeURL() string {
 	return a.oauth2Config.AuthCodeURL("state")
 }
 
+func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, error) {
+
+	tok, err := jwt.ParseSigned(idToken)
+	if err != nil {
+		return "", "", err
+	}
+	c := jwt.Claims{}
+	m := make(map[string]interface{})
+	if err := tok.UnsafeClaimsWithoutVerification(&c, &m); err != nil {
+		return "", "", err
+	}
+
+	c.Issuer = a.config.JwtIssuer
+	c.Audience = []string{a.config.JwtAudience}
+
+	if len(a.config.SubjectClaim) > 0 {
+		if sub, ok := m[a.config.SubjectClaim].(string); ok {
+			c.Subject = sub
+		}
+	}
+
+	subHeaderValue := c.Subject
+
+	kid := base64.RawStdEncoding.EncodeToString([]byte(fmt.Sprintf("%x", sha1.Sum(a.cert.Raw))))
+	rsaSigner, err := jose.NewSigner(
+		jose.SigningKey{Algorithm: jose.RS256, Key: a.key},
+		(&jose.SignerOptions{}).WithType("JWT").WithHeader("kid", kid),
+	)
+
+	newJwt, err := jwt.Signed(rsaSigner).Claims(m).Claims(c).CompactSerialize()
+	if err != nil {
+		return "", "", err
+	}
+	fmt.Println(newJwt)
+	return newJwt, subHeaderValue, nil
+}
+
 func toHttpRequest(checkReq *extauthz.CheckRequest) (*http.Request, error) {
 	httpAttr := checkReq.Attributes.Request.Http
 	method := httpAttr.Method
@@ -226,8 +283,46 @@ func buildRedirectCheckResponse(currentUrl string, redirectUrl string) *extauthz
 	}
 }
 
-func buildOkCheckResponse() *extauthz.CheckResponse {
+func buildServerErrorCheckResponse() *extauthz.CheckResponse {
+	return &extauthz.CheckResponse{
+		Status: &googlerpc.Status{Code: int32(googlerpc.INTERNAL)},
+		HttpResponse: &extauthz.CheckResponse_DeniedResponse{
+			DeniedResponse: &extauthz.DeniedHttpResponse{
+				Status: &envoy_type.HttpStatus{
+					Code: envoy_type.StatusCode_InternalServerError,
+				},
+				Body: "500 Internal Server Error",
+			},
+		},
+	}
+}
+
+func buildOkCheckResponse(authzHeader string, xSubjectHeader string) *extauthz.CheckResponse {
 	return &extauthz.CheckResponse{
 		Status: &googlerpc.Status{Code: int32(googlerpc.OK)},
+		HttpResponse: &extauthz.CheckResponse_OkResponse{
+			OkResponse: &extauthz.OkHttpResponse{
+				Headers: []*core.HeaderValueOption{
+					{
+						Header: &core.HeaderValue{
+							Key:   "Authorization",
+							Value: authzHeader,
+						},
+						Append: &types.BoolValue{
+							Value: false,
+						},
+					},
+					{
+						Header: &core.HeaderValue{
+							Key:   "x-cellery-auth-subject",
+							Value: xSubjectHeader,
+						},
+						Append: &types.BoolValue{
+							Value: false,
+						},
+					},
+				},
+			},
+		},
 	}
 }

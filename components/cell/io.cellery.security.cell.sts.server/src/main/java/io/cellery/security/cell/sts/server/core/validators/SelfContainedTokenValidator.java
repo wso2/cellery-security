@@ -54,10 +54,10 @@ public class SelfContainedTokenValidator implements TokenValidator {
     public void validateToken(String token, CellStsRequest cellStsRequest) throws TokenValidationFailureException {
 
         if (StringUtils.isEmpty(token)) {
-            throw new TokenValidationFailureException("No security token found in the request.");
+            throw new TokenValidationFailureException("No token found in the request.");
         }
         try {
-            log.debug("Validating security: {}", token);
+            log.debug("Validating token: {}", token);
             SignedJWT parsedJWT = SignedJWT.parse(token);
             JWTClaimsSet jwtClaimsSet = parsedJWT.getJWTClaimsSet();
             validateIssuer(jwtClaimsSet, cellStsRequest);
@@ -125,6 +125,14 @@ public class SelfContainedTokenValidator implements TokenValidator {
         if (StringUtils.isEmpty(issuerInToken)) {
             throw new TokenValidationFailureException("No issuer found in the JWT");
         }
+
+        String gatewayIssuer = CellStsUtils.getGatewayIssuer(request.getSource().getCellInstanceName());
+
+        // In web cells the issuer will be the gateway of it's own cell.
+        if (StringUtils.equalsIgnoreCase(issuerInToken, gatewayIssuer)) {
+            return;
+        }
+
         if (!StringUtils.equalsIgnoreCase(issuerInToken, issuer)) {
             throw new TokenValidationFailureException("Issuer validation failed. Expected issuer : " + issuer + ". " +
                     "Received issuer: " + issuerInToken);

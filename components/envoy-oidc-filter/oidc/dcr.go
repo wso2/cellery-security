@@ -21,7 +21,7 @@ package oidc
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pkg/errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -34,7 +34,7 @@ const (
 )
 
 func isDcrRequired(c *Config) bool {
-	if !IsEmpty(c.ClientID) && !IsEmpty(c.ClientSecret) {
+	if !isEmpty(c.ClientID) && !isEmpty(c.ClientSecret) {
 		// client id and client secret provided, DCR not required
 		return false
 	}
@@ -70,7 +70,7 @@ func dcr(c *Config) (string, string, error) {
 	}
 
 	var clientSecret string
-	if (resp.StatusCode != 201) {
+	if resp.StatusCode != 201 {
 		if resp.StatusCode == 400 {
 			var errResp dcrErrorResponse
 			err = json.Unmarshal(body, &errResp)
@@ -122,7 +122,7 @@ func getClientSecret(c *Config) (string, error) {
 	var clientSecret string
 	if resp.StatusCode != 200 {
 		// error
-		return "", errors.Errorf("Error occurred while retrieving oauth application %v, error: %+v",
+		return "", fmt.Errorf("Error occurred while retrieving oauth application %v, error: %+v",
 			c.ClientID, body)
 	} else {
 		var successResp dcrSuccessResponse

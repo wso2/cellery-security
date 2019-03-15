@@ -19,11 +19,8 @@
 
 package io.cellery.security.cell.sts.server.utils;
 
-import io.cellery.security.cell.sts.server.core.CellStsUtils;
-import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import io.cellery.security.cell.sts.server.jwks.FileBasedKeyResolver;
 import io.cellery.security.cell.sts.server.jwks.KeyResolver;
-import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
-import io.cellery.security.cell.sts.server.jwks.SelfSignedKeyResolver;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +37,7 @@ import java.security.cert.CertificateEncodingException;
 public class CertificateUtils {
 
     private static final Logger log = LoggerFactory.getLogger(CertificateUtils.class);
-    private static KeyResolver keyResolver;
-
-    static {
-        try {
-            keyResolver = new SelfSignedKeyResolver(CellStsUtils.getMyCellName());
-        } catch (KeyResolverException | CelleryCellSTSException e) {
-            log.error("Error while initiating key resolver", e);
-        }
-    }
+    private static KeyResolver keyResolver = new FileBasedKeyResolver();
 
     public static String getThumbPrint(Certificate certificate) throws NoSuchAlgorithmException,
             CertificateEncodingException {

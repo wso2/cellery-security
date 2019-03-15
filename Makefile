@@ -14,6 +14,21 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+PROJECT_ROOT := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+PROJECT_ENVOY_FILTER_ROOT := $(PROJECT_ROOT)/components/envoy-oidc-filter
+PROJECT_PKG := github.com/cellery-io/mesh-controller
+BUILD_DIRECTORY := build
+BUILD_ROOT := $(PROJECT_ENVOY_FILTER_ROOT)/$(BUILD_DIRECTORY)
+GO_FILES		= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GIT_REVISION := $(shell git rev-parse --verify HEAD)
+
+OIDC_FILTER_NAME := envoy-oidc-filter
+
+VERSION ?= $(GIT_REVISION)
+
+DOCKER_REPO ?= celleryio
+DOCKER_IMAGE_TAG ?= $(VERSION)
+
 .PHONY: build-java-components
 build-java-components:
 	cd ./components; \
@@ -27,6 +42,34 @@ build-sts-server-docker:
 .PHONY: build-all
 build-all: build-java-components build-sts-server-docker
 
-.PHONY: build-envoy-oidc-filter
-build-envoy-oidc-filter:
-	go build -o envoy-oidc-filter -x ./components/envoy-oidc-filter
+.PHONY: build.envoy-oidc-filter
+build.envoy-oidc-filter:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BUILD_ROOT)/$(OIDC_FILTER_NAME) -x $(PROJECT_ENVOY_FILTER_ROOT)
+
+
+.PHONY: docker.envoy-oidc-filter
+docker.envoy-oidc-filter: build.envoy-oidc-filter
+	docker build -f $(PROJECT_ROOT)/docker/$(OIDC_FILTER_NAME)/Dockerfile $(BUILD_ROOT) -t $(DOCKER_REPO)/$(OIDC_FILTER_NAME):$(DOCKER_IMAGE_TAG)
+
+
+.PHONY: docker-push.envoy-oidc-filter
+docker-push.envoy-oidc-filter: docker.envoy-oidc-filter
+	docker push $(DOCKER_REPO)/$(OIDC_FILTER_NAME):$(DOCKER_IMAGE_TAG)
+
+.PHONY: code.format
+code.format: tools.goimports
+	@goimports -local $(PROJECT_PKG) -w -l $(GO_FILES)
+
+.PHONY: code.format-check
+code.format-check: tools.goimports
+	@goimports -local $(PROJECT_PKG) -l $(GO_FILES)
+
+.PHONY: tools tools.goimports
+
+tools: tools.goimports
+
+tools.goimports:
+	@command -v goimports >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "goimports not found. Running 'go get golang.org/x/tools/cmd/goimports'"; \
+		go get golang.org/x/tools/cmd/goimports; \
+	fi
