@@ -113,10 +113,9 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 
 	// if this is an unsecured path, skip re-auth
 	if a.config.NonSecurePaths != nil && isUnsecurePath(req.URL.Path, a.config.NonSecurePaths) {
-		fmt.Println("***** non secured path: " + req.URL.Path)
+		//fmt.Println("***** non secured path: " + req.URL.Path)
 		return buildOkCheckResponseWithoutAuthAndSub(), nil
 	}
-	fmt.Println("******* No unsecure paths found !!")
 
 	if cookie, err := req.Cookie(IdTokenCookie); err == nil {
 		_, err := a.provider.Verifier(a.oidcConfig).Verify(a.ctx, cookie.Value)
@@ -199,8 +198,8 @@ func isUnsecurePath(requestPath string, nonSecuredPaths []string) bool {
 		// check if an absolute path. ex: /pet or /pet/
 		if !strings.HasSuffix(nonSecPath, "*") {
 			if path.Clean(requestPath) == path.Clean(nonSecPath) {
-				fmt.Println("***** pattern: " + nonSecPath)
-				fmt.Println("***** matched request path: " + path.Clean(requestPath))
+				//fmt.Println("***** pattern: " + nonSecPath)
+				//fmt.Println("***** matched request path: " + path.Clean(requestPath))
 				return true
 			}
 		} else {
@@ -212,8 +211,8 @@ func isUnsecurePath(requestPath string, nonSecuredPaths []string) bool {
 			// If not, can't compare.
 			if nonSecPathLength <= len(requestPath) {
 				if path.Clean(requestPath[:nonSecPathLength]) == path.Clean(pathWithouthoutTrailingStar) {
-					fmt.Println("***** pattern: " + nonSecPath)
-					fmt.Println("***** matched request path segment: " + path.Clean(requestPath[:nonSecPathLength]))
+					//fmt.Println("***** pattern: " + nonSecPath)
+					//fmt.Println("***** matched request path segment: " + path.Clean(requestPath[:nonSecPathLength]))
 					return true
 				}
 			}
