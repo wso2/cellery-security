@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/cellery-io/mesh-security/components/envoy-oidc-filter/oidc"
 	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
@@ -25,16 +26,15 @@ const (
 	DcrEpEnv                   = "DCR_ENDPOINT"
 	DcrUser                    = "DCR_USER"
 	DcrPassword                = "DCR_PASSWORD"
+	NonSecurePaths             = "NON_SECURE_PATHS"
 	PrivateKeyFile             = "PRIVATE_KEY_FILE"
 	CertificateFile            = "CERTIFICATE_FILE"
 	JwtIssuer                  = "JWT_ISSUER"
 	JwtAudience                = "JWT_AUDIENCE"
 	SubjectClaim               = "SUBJECT_CLAIM"
-
-	FilterListenerPort       = "FILTER_LISTENER_PORT"
-	HttpCallbackListenerPort = "HTTP_CALLBACK_LISTENER_PORT"
+	FilterListenerPort         = "FILTER_LISTENER_PORT"
+	HttpCallbackListenerPort   = "HTTP_CALLBACK_LISTENER_PORT"
 )
-
 
 func main() {
 	c := make(chan os.Signal)
@@ -53,6 +53,7 @@ func main() {
 		DcrEP:           os.Getenv(DcrEpEnv),
 		DcrUser:         os.Getenv(DcrUser),
 		DcrPassword:     os.Getenv(DcrPassword),
+		NonSecurePaths:  getNonSecuredPaths(),
 		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
 		CertificateFile: os.Getenv(CertificateFile),
 		JwtIssuer:       os.Getenv(JwtIssuer),
@@ -100,4 +101,16 @@ func LookupEnv(key string, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getNonSecuredPaths() []string {
+	_, exist := os.LookupEnv(NonSecurePaths); if !exist {
+		return nil
+	}
+	elems := strings.Split(os.Getenv(NonSecurePaths), ",")
+	paths := make([]string, len(elems))
+	for i, elem := range elems {
+		paths[i] = strings.TrimSpace(elem)
+	}
+	return paths
 }
