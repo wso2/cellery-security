@@ -7,6 +7,7 @@ type Config struct {
 	DcrEP           string
 	DcrUser         string
 	DcrPassword     string
+	NonSecurePaths  []string
 	ClientID        string
 	ClientSecret    string
 	RedirectURL     string
