@@ -31,12 +31,12 @@ import java.util.HashMap;
 public class STSTokenGenerator {
 
     /**
-     * Generates a JWT security.
+     * Generates a JWT token.
      *
      * @param incomingJWT Incoming JWT.
      * @param audience    Audience which needs to be added to JWT.
      * @param issuer      Issuer of the JWT.
-     * @return JWT security as a String.
+     * @return JWT token as a String.
      * @throws CelleryCellSTSException
      */
     public static String generateToken(String incomingJWT, String audience, String issuer) throws
@@ -55,11 +55,11 @@ public class STSTokenGenerator {
     }
 
     /**
-     * Generates a JWT security.
+     * Generates a JWT token.
      *
      * @param audience Audience of the JWT to be issued.
      * @param issuer   Issuer of the JWT to be issued.
-     * @return JWT security as a String.
+     * @return JWT token as a String.
      * @throws CelleryCellSTSException
      */
     public static String generateToken(String audience, String issuer) throws CelleryCellSTSException {
@@ -76,7 +76,7 @@ public class STSTokenGenerator {
     /**
      * Retrieve CalimSet of the parsed JWT.
      *
-     * @param jwt JWT security.
+     * @param jwt JWT token.
      * @return JWTClaim Set of the input security.
      * @throws CelleryCellSTSException
      */

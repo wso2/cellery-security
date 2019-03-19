@@ -60,7 +60,10 @@ public class DefaultCellSTSReqValidator implements CellSTSRequestValidator {
         String path = cellStsRequest.getRequestContext().getPath();
         Optional<String> unProtectedResult = CellStsConfiguration.getInstance().getUnsecuredAPIS().stream().
                 filter(unProtectedPath -> match(path, unProtectedPath)).findAny();
+        log.info("Validating isAuthenticaitonRequered for context: {}", path);
+        log.info(CellStsConfiguration.getInstance().getUnsecuredAPIS().toString());
         if (unProtectedResult.isPresent()) {
+            log.info("Unprotected resource match found. Hence returning false");
             return false;
         }
         return true;

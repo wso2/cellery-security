@@ -76,6 +76,7 @@ public class JWKSBasedJWTValidator implements JWTSignatureValidator {
             log.debug("validating JWT signature using jwks_uri: " + jwksUri + " , for signing algorithm: " +
                     algorithm);
         }
+
         try {
             // set the Key Selector for the jwks_uri.
             setJWKeySelector(jwksUri, algorithm);
