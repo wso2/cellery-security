@@ -14,12 +14,14 @@ import (
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
-	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
+	"github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
 	"golang.org/x/oauth2"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
+	"path"
+	"strings"
 )
 
 const (
@@ -44,7 +46,6 @@ type Authenticator struct {
 	oidcConfig     *oidc.Config
 	config         *Config
 	ctx            context.Context
-	unsecuredPaths map[string]bool
 	cert           *x509.Certificate
 	key            *rsa.PrivateKey
 }
@@ -110,13 +111,12 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 		log.Println(err)
 	}
 
-	//fmt.Println(path.Clean(req.URL.Path))
-	//for k, _ := range a.unsecuredPaths {
-	//	if matched, _ := path.Match(path.Clean(k), path.Clean(req.URL.Path)); matched {
-	//		fmt.Printf("======= %s matched with url %s\n", k, req.URL.Path)
-	//		return buildOkCheckResponse(), nil
-	//	}
-	//}
+	// if this is an unsecured path, skip re-auth
+	if a.config.NonSecurePaths != nil && isUnsecurePath(req.URL.Path, a.config.NonSecurePaths) {
+		fmt.Println("***** non secured path: " + req.URL.Path)
+		return buildOkCheckResponseWithoutAuthAndSub(), nil
+	}
+	fmt.Println("******* No unsecure paths found !!")
 
 	if cookie, err := req.Cookie(IdTokenCookie); err == nil {
 		_, err := a.provider.Verifier(a.oidcConfig).Verify(a.ctx, cookie.Value)
@@ -192,6 +192,34 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r, a.config.BaseURL, http.StatusFound)
 	}
+}
+
+func isUnsecurePath(requestPath string, nonSecuredPaths []string) bool {
+	for _, nonSecPath := range nonSecuredPaths {
+		// check if an absolute path. ex: /pet or /pet/
+		if !strings.HasSuffix(nonSecPath, "*") {
+			if path.Clean(requestPath) == path.Clean(nonSecPath) {
+				fmt.Println("***** pattern: " + nonSecPath)
+				fmt.Println("***** matched request path: " + path.Clean(requestPath))
+				return true
+			}
+		} else {
+			// request path is a pattern suffixed with '*'. ex.: /pet/*
+			// remove suffix '*' and try to match
+			pathWithouthoutTrailingStar := strings.TrimSuffix(nonSecPath, "*")
+			nonSecPathLength := len(pathWithouthoutTrailingStar)
+			// check if the length of the non secured path is lesser than or equal to the request path.
+			// If not, can't compare.
+			if nonSecPathLength <= len(requestPath) {
+				if path.Clean(requestPath[:nonSecPathLength]) == path.Clean(pathWithouthoutTrailingStar) {
+					fmt.Println("***** pattern: " + nonSecPath)
+					fmt.Println("***** matched request path segment: " + path.Clean(requestPath[:nonSecPathLength]))
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (a *Authenticator) authCodeURL() string {
@@ -297,6 +325,16 @@ func buildServerErrorCheckResponse() *extauthz.CheckResponse {
 					Code: envoy_type.StatusCode_InternalServerError,
 				},
 				Body: "500 Internal Server Error",
+			},
+		},
+	}
+}
+
+func buildOkCheckResponseWithoutAuthAndSub() *extauthz.CheckResponse {
+	return &extauthz.CheckResponse{
+		Status: &googlerpc.Status{Code: int32(googlerpc.OK)},
+		HttpResponse: &extauthz.CheckResponse_OkResponse{
+			OkResponse: &extauthz.OkHttpResponse{
 			},
 		},
 	}
