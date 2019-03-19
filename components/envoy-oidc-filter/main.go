@@ -53,7 +53,7 @@ func main() {
 		DcrEP:           os.Getenv(DcrEpEnv),
 		DcrUser:         os.Getenv(DcrUser),
 		DcrPassword:     os.Getenv(DcrPassword),
-		NonSecurePaths:  getNonSecuredPaths(),
+		NonSecurePaths:  getNonSecurePaths(),
 		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
 		CertificateFile: os.Getenv(CertificateFile),
 		JwtIssuer:       os.Getenv(JwtIssuer),
@@ -103,7 +103,7 @@ func LookupEnv(key string, fallback string) string {
 	return fallback
 }
 
-func getNonSecuredPaths() []string {
+func getNonSecurePaths() []string {
 	_, exist := os.LookupEnv(NonSecurePaths); if !exist {
 		return nil
 	}
@@ -111,6 +111,7 @@ func getNonSecuredPaths() []string {
 	paths := make([]string, len(elems))
 	for i, elem := range elems {
 		paths[i] = strings.TrimSpace(elem)
+		fmt.Printf("Non secure path: %v\n", paths[i])
 	}
 	return paths
 }
