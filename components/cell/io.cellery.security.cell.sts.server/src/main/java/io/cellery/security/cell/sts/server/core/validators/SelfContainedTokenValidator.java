@@ -170,7 +170,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             log.debug("Validating signature of the security");
             jwtValidator.validateSignature(jwt, jwkEndpoint, jwt.getHeader().getAlgorithm().getName(), null);
         } catch (TokenValidationFailureException e) {
-            throw new TokenValidationFailureException("Error while validating signature of the security", e);
+            throw new TokenValidationFailureException("Error while validating signature of the token", e);
         }
         log.debug("Token signature validated successfully");
     }

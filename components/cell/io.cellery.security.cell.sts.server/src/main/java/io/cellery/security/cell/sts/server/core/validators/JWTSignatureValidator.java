@@ -42,7 +42,7 @@ public interface JWTSignatureValidator {
             TokenValidationFailureException;
 
     /**
-     * Validates a JWT security using jwks_uri.
+     * Validates a JWT token using jwks_uri.
      *
      * @param jwt       JWT.
      * @param jwksUri   Identity provider's jwks_uri.

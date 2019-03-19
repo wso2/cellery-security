@@ -155,7 +155,7 @@ public class CelleryCellStsService {
             }
             jwtClaims = extractUserClaimsFromJwt(jwt);
         } catch (TokenValidationFailureException e) {
-            throw new CelleryCellSTSException("Error while validating locally issued security.", e);
+            throw new CelleryCellSTSException("Error while validating locally issued token.", e);
         }
         return jwtClaims;
     }
@@ -173,7 +173,7 @@ public class CelleryCellStsService {
             jwtClaims = extractUserClaimsFromJwt(jwt);
 
         } catch (TokenValidationFailureException e) {
-            throw new CelleryCellSTSException("Error while validating JWT security", e);
+            throw new CelleryCellSTSException("Error while validating JWT token", e);
         }
         return jwtClaims;
     }
