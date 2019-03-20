@@ -95,11 +95,6 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 		config:       c,
 		key:          key,
 		cert:         cert,
-		// TODO:
-		// unsecuredPaths: map[string]bool{
-		//	"/pet/app/*": true,
-		//	"/pet/":      true,
-		//},
 	}, nil
 }
 
@@ -112,7 +107,7 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 	}
 
 	// if this is an unsecured path, skip re-auth
-	if a.config.NonSecurePaths != nil && isUnsecurePath(req.URL.Path, a.config.NonSecurePaths) {
+	if a.config.NonSecurePaths != nil && isNonSecurePath(req.URL.Path, a.config.NonSecurePaths) {
 		//fmt.Println("***** non secured path: " + req.URL.Path)
 		return buildOkCheckResponseWithoutAuthAndSub(), nil
 	}
@@ -193,7 +188,7 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isUnsecurePath(requestPath string, nonSecuredPaths []string) bool {
+func isNonSecurePath(requestPath string, nonSecuredPaths []string) bool {
 	for _, nonSecPath := range nonSecuredPaths {
 		// check if an absolute path. ex: /pet or /pet/
 		if !strings.HasSuffix(nonSecPath, "*") {
