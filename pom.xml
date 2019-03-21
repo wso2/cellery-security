@@ -359,7 +359,7 @@
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <maven.docker.version>1.4.10</maven.docker.version>
-        <docker.repo.name>celleryio</docker.repo.name>
+        <docker.repo.name>wso2cellery</docker.repo.name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

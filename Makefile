@@ -26,7 +26,7 @@ OIDC_FILTER_NAME := envoy-oidc-filter
 
 VERSION ?= $(GIT_REVISION)
 
-DOCKER_REPO ?= celleryio
+DOCKER_REPO ?= wso2cellery
 DOCKER_IMAGE_TAG ?= $(VERSION)
 
 .PHONY: build-java-components
