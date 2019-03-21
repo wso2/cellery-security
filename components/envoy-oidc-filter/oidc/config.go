@@ -27,9 +27,9 @@ func (c *Config) Validate() error {
 		return createErr("Client id not found in OIDC config")
 	}
 	if isEmpty(c.ClientSecret) {
-		// check if DCR configs are provided
-		if isEmpty(c.DcrEP) || isEmpty(c.DcrUser) || isEmpty(c.DcrPassword) {
-			return createErr("Either Client Id & Client Secret or DCR endpoint & credentials should be provided in OIDC config")
+		// check if DCR user and password configs are provided. The DCR endpoint can be retrieved from the well known address.
+		if isEmpty(c.DcrUser) || isEmpty(c.DcrPassword) {
+			return createErr("Either Client Id & Client Secret or DCR endpoint credentials should be provided in OIDC config")
 		}
 	}
 	if isEmpty(c.RedirectURL) {
