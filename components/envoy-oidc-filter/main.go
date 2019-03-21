@@ -111,7 +111,7 @@ func getNonSecurePaths() []string {
 	paths := make([]string, len(elems))
 	for i, elem := range elems {
 		paths[i] = strings.TrimSpace(elem)
-		fmt.Printf("Non secure path: %v\n", paths[i])
 	}
+	fmt.Printf("Non secure paths: [ %v ] \n", paths)
 	return paths
 }
