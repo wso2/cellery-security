@@ -42,6 +42,18 @@ func isDcrRequired(c *Config) bool {
 }
 
 func dcr(c *Config) (string, string, error) {
+	// if DCR endpoint is not explicitly given, can retrieve via the well known address
+	if isEmpty(c.DcrEP) {
+		dcrEp, err := getDcrUrl(c.Provider); if err != nil {
+			return "", "", err
+		}
+		if isEmpty(dcrEp) {
+			return "", "", fmt.Errorf("Empty DCR url retrived from the IDP: %v, unable to perform DCR", c.Provider)
+		}
+		c.DcrEP = dcrEp
+		log.Printf("Retrieved DCR url from provider: %v", c.DcrEP)
+	}
+
 	values := map[string]interface{}{"client_name": c.ClientID, "grant_types": []string{"password",
 		"authorization_code", "implicit"}, "ext_param_client_id": c.ClientID, "redirect_uris": []string{c.RedirectURL}}
 
@@ -98,6 +110,35 @@ func dcr(c *Config) (string, string, error) {
 		clientSecret = successResp.ClientSecret
 	}
 	return c.ClientID, clientSecret, nil
+}
+
+type dcrEpResp struct {
+	RegistrationEndpoint string `json:"registration_endpoint"`
+}
+
+func getDcrUrl (provider string) (string, error) {
+	wkUrl:= strings.TrimSuffix(provider, "/") + "/.well-known/openid-configuration"
+	req, err := http.NewRequest("GET", wkUrl, nil)
+	if err != nil {
+		return "", err
+	}
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("unable to read response body: %v", err)
+	}
+	var dcrResp dcrEpResp
+	err = json.Unmarshal(body, &dcrResp)
+	if err != nil {
+		return "", err
+	}
+	return dcrResp.RegistrationEndpoint, nil
 }
 
 func getClientSecret(c *Config) (string, error) {
