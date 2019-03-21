@@ -253,7 +253,7 @@ func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, err
 	if err != nil {
 		return "", "", err
 	}
-	fmt.Println(newJwt)
+	//fmt.Println(newJwt)
 	return newJwt, subHeaderValue, nil
 }
 
