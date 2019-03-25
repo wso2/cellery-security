@@ -12,6 +12,7 @@ type Config struct {
 	ClientSecret    string
 	RedirectURL     string
 	BaseURL         string
+	LogoutURL       string
 	CertificateFile string
 	PrivateKeyFile  string
 	JwtIssuer       string
