@@ -104,12 +104,27 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 		log.Println(err)
 	}
 
-	// if this is an unsecured path, skip re-auth
-	if a.config.NonSecurePaths != nil && isNonSecurePath(req.URL.Path, a.config.NonSecurePaths) {
-		//fmt.Println("***** non secured path: " + req.URL.Path)
-		return buildOkCheckResponseWithoutAuthAndSub(), nil
+	if isDefined(a.config.NonSecurePaths) {
+		// non secured URLs are provided, skip authentication
+		if isPathMatchFound(req.URL.Path, a.config.NonSecurePaths) {
+			return buildOkCheckResponseWithoutAuthAndSub(), nil
+		} else {
+			return checkAndPromptAuth(req, a)
+		}
+	} else if isDefined(a.config.SecurePaths) {
+		// secure URLs are provided, only secure those
+		if isPathMatchFound(req.URL.Path, a.config.SecurePaths) {
+			return checkAndPromptAuth(req, a)
+		} else {
+			return buildOkCheckResponseWithoutAuthAndSub(), nil
+		}
+	} else {
+		// by default, consider everything as secured
+		return checkAndPromptAuth(req, a)
 	}
+}
 
+func checkAndPromptAuth (req *http.Request, a *Authenticator) (*extauthz.CheckResponse, error) {
 	if cookie, err := req.Cookie(IdTokenCookie); err == nil {
 		_, err := a.provider.Verifier(a.oidcConfig).Verify(a.ctx, cookie.Value)
 		if err != nil {
@@ -219,26 +234,25 @@ func (a *Authenticator) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isNonSecurePath(requestPath string, nonSecuredPaths []string) bool {
-	for _, nonSecPath := range nonSecuredPaths {
-		// check if an absolute path. ex: /pet or /pet/
-		if !strings.HasSuffix(nonSecPath, "*") {
-			if path.Clean(requestPath) == path.Clean(nonSecPath) {
-				//fmt.Println("***** pattern: " + nonSecPath)
+func isPathMatchFound(requestPath string, pathsToBeMatched []string) bool {
+	for _, pathToMatch := range pathsToBeMatched { // check if an absolute path. ex: /pet or /pet/
+		if !strings.HasSuffix(pathToMatch, "*") {
+			if path.Clean(requestPath) == path.Clean(pathToMatch) {
+				//fmt.Println("***** pattern: " + pathToMatch)
 				//fmt.Println("***** matched request path: " + path.Clean(requestPath))
 				return true
 			}
 		} else {
 			// request path is a pattern suffixed with '*'. ex.: /pet/*
 			// remove suffix '*' and try to match
-			pathWithouthoutTrailingStar := strings.TrimSuffix(nonSecPath, "*")
-			nonSecPathLength := len(pathWithouthoutTrailingStar)
-			// check if the length of the non secured path is lesser than or equal to the request path.
+			pathWithouthoutTrailingStar := strings.TrimSuffix(pathToMatch, "*")
+			pathToMatchLength := len(pathWithouthoutTrailingStar)
+			// check if the length of the path to match is lesser than or equal to the request path.
 			// If not, can't compare.
-			if nonSecPathLength <= len(requestPath) {
-				if path.Clean(requestPath[:nonSecPathLength]) == path.Clean(pathWithouthoutTrailingStar) {
-					//fmt.Println("***** pattern: " + nonSecPath)
-					//fmt.Println("***** matched request path segment: " + path.Clean(requestPath[:nonSecPathLength]))
+			if pathToMatchLength <= len(requestPath) {
+				if path.Clean(requestPath[:pathToMatchLength]) == path.Clean(pathWithouthoutTrailingStar) {
+					//fmt.Println("***** pattern: " + pathToMatch)
+					//fmt.Println("***** matched request path segment: " + path.Clean(requestPath[:pathToMatchLength]))
 					return true
 				}
 			}
