@@ -33,6 +33,17 @@ const (
 	contentTypeJson   = "application/json"
 )
 
+type dcrErrorResponse struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+type dcrSuccessResponse struct {
+	ClientName   string `json:"client_name"`
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+}
+
 func isDcrRequired(c *Config) bool {
 	if !isEmpty(c.ClientID) && !isEmpty(c.ClientSecret) {
 		// client id and client secret provided, DCR not required
@@ -44,7 +55,8 @@ func isDcrRequired(c *Config) bool {
 func dcr(c *Config) (string, string, error) {
 	// if DCR endpoint is not explicitly given, can retrieve via the well known address
 	if isEmpty(c.DcrEP) {
-		dcrEp, err := getDcrUrl(c.Provider); if err != nil {
+		dcrEp, err := getDcrUrl(c.Provider)
+		if err != nil {
 			return "", "", err
 		}
 		if isEmpty(dcrEp) {
@@ -116,8 +128,8 @@ type dcrEpResp struct {
 	RegistrationEndpoint string `json:"registration_endpoint"`
 }
 
-func getDcrUrl (provider string) (string, error) {
-	wkUrl:= strings.TrimSuffix(provider, "/") + "/.well-known/openid-configuration"
+func getDcrUrl(provider string) (string, error) {
+	wkUrl := strings.TrimSuffix(provider, "/") + "/.well-known/openid-configuration"
 	req, err := http.NewRequest("GET", wkUrl, nil)
 	if err != nil {
 		return "", err

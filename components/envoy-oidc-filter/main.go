@@ -22,6 +22,7 @@ const (
 	ClientIdEnv                = "CLIENT_ID"
 	ClientSecretEnv            = "CLIENT_SECRET"
 	RedirectUrlEnv             = "REDIRECT_URL"
+	LogoutUrlEnv               = "LOGOUT_URL"
 	AppUrlEnv                  = "APP_BASE_URL"
 	DcrEpEnv                   = "DCR_ENDPOINT"
 	DcrUser                    = "DCR_USER"
@@ -49,6 +50,7 @@ func main() {
 		ClientID:        os.Getenv(ClientIdEnv),
 		ClientSecret:    os.Getenv(ClientSecretEnv),
 		RedirectURL:     os.Getenv(RedirectUrlEnv),
+		LogoutURL:       os.Getenv(LogoutUrlEnv),
 		BaseURL:         os.Getenv(AppUrlEnv),
 		DcrEP:           os.Getenv(DcrEpEnv),
 		DcrUser:         os.Getenv(DcrUser),
@@ -74,6 +76,7 @@ func main() {
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/_auth/callback", auth.Callback)
+		mux.HandleFunc("/_auth/logout", auth.Logout)
 		port := LookupEnv(HttpCallbackListenerPort, "15810")
 		fmt.Printf("Starting HTTP auth callback reciver on %q\n", port)
 		log.Fatal(http.ListenAndServe(":"+port, mux))
@@ -104,7 +107,8 @@ func LookupEnv(key string, fallback string) string {
 }
 
 func getNonSecurePaths() []string {
-	_, exist := os.LookupEnv(NonSecurePaths); if !exist {
+	_, exist := os.LookupEnv(NonSecurePaths)
+	if !exist {
 		return nil
 	}
 	elems := strings.Split(os.Getenv(NonSecurePaths), ",")

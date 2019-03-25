@@ -10,18 +10,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+
+	"path"
+	"strings"
 
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
-	"github.com/envoyproxy/go-control-plane/envoy/type"
+	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
 	"golang.org/x/oauth2"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
-	"path"
-	"strings"
 )
 
 const (
@@ -29,25 +31,15 @@ const (
 	RedirectCookie = "redirect"
 )
 
-type dcrErrorResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
-type dcrSuccessResponse struct {
-	ClientName   string `json:"client_name"`
-	ClientId     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-}
-
 type Authenticator struct {
-	provider       *oidc.Provider
-	oauth2Config   *oauth2.Config
-	oidcConfig     *oidc.Config
-	config         *Config
-	ctx            context.Context
-	cert           *x509.Certificate
-	key            *rsa.PrivateKey
+	provider     *oidc.Provider
+	providerInfo *providerInfo
+	oauth2Config *oauth2.Config
+	oidcConfig   *oidc.Config
+	config       *Config
+	ctx          context.Context
+	cert         *x509.Certificate
+	key          *rsa.PrivateKey
 }
 
 func NewAuthenticator(c *Config) (*Authenticator, error) {
@@ -55,6 +47,11 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 	provider, err := oidc.NewProvider(ctx, c.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get provider: %v", err)
+	}
+
+	providerInfo, err := loadProviderInfo(ctx, c.Provider)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load provider info: %v", err)
 	}
 
 	key, err := loadPrivateKey(c.PrivateKeyFile)
@@ -89,6 +86,7 @@ func NewAuthenticator(c *Config) (*Authenticator, error) {
 
 	return &Authenticator{
 		provider:     provider,
+		providerInfo: providerInfo,
 		oauth2Config: config,
 		oidcConfig:   oidcConfig,
 		ctx:          ctx,
@@ -188,6 +186,39 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *Authenticator) Logout(w http.ResponseWriter, r *http.Request) {
+	for _, cookie := range r.Cookies() {
+		fmt.Println("Found a cookie named:", cookie.Name)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   IdTokenCookie,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	if len(a.config.LogoutURL) > 0 {
+		http.Redirect(w, r, a.config.LogoutURL, http.StatusFound)
+	} else {
+		if len(a.providerInfo.EndSessionUrl) == 0 {
+			http.Redirect(w, r, a.config.BaseURL, http.StatusFound)
+		} else {
+			idToken := ""
+			if cookie, err := r.Cookie(IdTokenCookie); err == nil {
+				idToken = cookie.Value
+			}
+			v := url.Values{
+				"id_token_hint":            {idToken},
+				"post_logout_redirect_uri": {a.config.BaseURL},
+				"state":                    {"state"},
+			}
+			redirectUrl := fmt.Sprintf("%s?%s", a.providerInfo.EndSessionUrl, v.Encode())
+			http.Redirect(w, r, redirectUrl, http.StatusFound)
+		}
+	}
+}
+
 func isNonSecurePath(requestPath string, nonSecuredPaths []string) bool {
 	for _, nonSecPath := range nonSecuredPaths {
 		// check if an absolute path. ex: /pet or /pet/
@@ -260,8 +291,8 @@ func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, err
 func toHttpRequest(checkReq *extauthz.CheckRequest) (*http.Request, error) {
 	httpAttr := checkReq.Attributes.Request.Http
 	method := httpAttr.Method
-	url := fmt.Sprintf("http://%s%s", httpAttr.Host, httpAttr.Path)
-	req, err := http.NewRequest(method, url, nil)
+	uri := fmt.Sprintf("http://%s%s", httpAttr.Host, httpAttr.Path)
+	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -328,8 +359,7 @@ func buildOkCheckResponseWithoutAuthAndSub() *extauthz.CheckResponse {
 	return &extauthz.CheckResponse{
 		Status: &googlerpc.Status{Code: int32(googlerpc.OK)},
 		HttpResponse: &extauthz.CheckResponse_OkResponse{
-			OkResponse: &extauthz.OkHttpResponse{
-			},
+			OkResponse: &extauthz.OkHttpResponse{},
 		},
 	}
 }
