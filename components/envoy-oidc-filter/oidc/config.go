@@ -1,6 +1,9 @@
 package oidc
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Config struct {
 	Provider        string
@@ -8,6 +11,7 @@ type Config struct {
 	DcrUser         string
 	DcrPassword     string
 	NonSecurePaths  []string
+	SecurePaths     []string
 	ClientID        string
 	ClientSecret    string
 	RedirectURL     string
@@ -56,7 +60,17 @@ func (c *Config) Validate() error {
 		return createErr("jwt audience cannot be empty")
 	}
 
+	// check if both secured and non-secured URLs are provided.
+	// If so, only non-secured URLs will be unprotected, while all other URLs will be unprotected.
+	if isDefined(c.NonSecurePaths) && isDefined(c.SecurePaths) {
+		fmt.Println("Only non-secure URLs will be unprotected, all other URLs will treated as secured")
+	}
+
 	return nil
+}
+
+func isDefined(arr []string) bool {
+	return arr != nil
 }
 
 func isEmpty(str string) bool {

@@ -28,6 +28,7 @@ const (
 	DcrUser                    = "DCR_USER"
 	DcrPassword                = "DCR_PASSWORD"
 	NonSecurePaths             = "NON_SECURE_PATHS"
+	SecurePaths                = "SECURE_PATHS"
 	PrivateKeyFile             = "PRIVATE_KEY_FILE"
 	CertificateFile            = "CERTIFICATE_FILE"
 	JwtIssuer                  = "JWT_ISSUER"
@@ -56,6 +57,7 @@ func main() {
 		DcrUser:         os.Getenv(DcrUser),
 		DcrPassword:     os.Getenv(DcrPassword),
 		NonSecurePaths:  getNonSecurePaths(),
+		SecurePaths:     getSecurePaths(),
 		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
 		CertificateFile: os.Getenv(CertificateFile),
 		JwtIssuer:       os.Getenv(JwtIssuer),
@@ -106,9 +108,21 @@ func LookupEnv(key string, fallback string) string {
 	return fallback
 }
 
+func getSecurePaths() []string {
+	_, exist := os.LookupEnv(SecurePaths); if !exist || len(os.Getenv(SecurePaths)) == 0 {
+		return nil
+	}
+	elems := strings.Split(os.Getenv(SecurePaths), ",")
+	paths := make([]string, len(elems))
+	for i, elem := range elems {
+		paths[i] = strings.TrimSpace(elem)
+	}
+	fmt.Printf("secure paths: [ %v ] \n", paths)
+	return paths
+}
+
 func getNonSecurePaths() []string {
-	_, exist := os.LookupEnv(NonSecurePaths)
-	if !exist {
+	_, exist := os.LookupEnv(NonSecurePaths); if !exist || len(os.Getenv(NonSecurePaths)) == 0 {
 		return nil
 	}
 	elems := strings.Split(os.Getenv(NonSecurePaths), ",")
