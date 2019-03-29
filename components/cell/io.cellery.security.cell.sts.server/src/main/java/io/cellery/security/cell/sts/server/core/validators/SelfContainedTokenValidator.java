@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
- * Validate self contained acess tokens.
+ * Validate self contained access tokens.
  */
 public class SelfContainedTokenValidator implements TokenValidator {
 

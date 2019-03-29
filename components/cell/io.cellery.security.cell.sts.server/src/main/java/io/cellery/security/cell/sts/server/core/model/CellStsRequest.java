@@ -31,6 +31,7 @@ public class CellStsRequest {
     private RequestSource source;
     private RequestDestination destination;
     private RequestContext requestContext;
+    private boolean isGatewayIncomingRequest;
     private Map<String, String> requestHeaders = new HashMap<>();
 
     public RequestSource getSource() {
@@ -58,6 +59,11 @@ public class CellStsRequest {
         return requestId;
     }
 
+    public boolean isGatewayIncomingRequest() {
+
+        return isGatewayIncomingRequest;
+    }
+
     private CellStsRequest() {
 
     }
@@ -71,6 +77,7 @@ public class CellStsRequest {
         private RequestSource source;
         private RequestDestination destination;
         private RequestContext requestContext;
+        private boolean isGatewayIncomingRequest;
         private Map<String, String> requestHeaders = new HashMap<>();
 
         public CellStsRequestBuilder setSource(RequestSource source) {
@@ -103,6 +110,12 @@ public class CellStsRequest {
             return this;
         }
 
+        public CellStsRequestBuilder setIsGatewayIncomingRequest(boolean isGatewayIncomingRequest) {
+
+            this.isGatewayIncomingRequest = isGatewayIncomingRequest;
+            return this;
+        }
+
         public CellStsRequest build() {
 
             CellStsRequest request = new CellStsRequest();
@@ -111,6 +124,7 @@ public class CellStsRequest {
             request.destination = destination;
             request.requestContext = requestContext;
             request.requestHeaders = requestHeaders;
+            request.isGatewayIncomingRequest = isGatewayIncomingRequest;
 
             return request;
         }

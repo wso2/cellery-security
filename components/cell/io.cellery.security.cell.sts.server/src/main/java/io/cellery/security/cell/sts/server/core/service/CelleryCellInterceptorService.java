@@ -173,7 +173,13 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return destination;
     }
 
-    private CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
+    protected CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
+            throws CelleryCellSTSException {
+
+        return getCellStsRequestBuilder(requestFromProxy).build();
+    }
+
+    protected CellStsRequest.CellStsRequestBuilder getCellStsRequestBuilder(ExternalAuth.CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
         return new CellStsRequest.CellStsRequestBuilder()
@@ -181,8 +187,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 .setRequestHeaders(requestFromProxy.getAttributes().getRequest().getHttp().getHeaders())
                 .setSource(buildRequestSource(requestFromProxy))
                 .setDestination(buildRequestDestination(requestFromProxy))
-                .setRequestContext(buildRequestContext(requestFromProxy))
-                .build();
+                .setRequestContext(buildRequestContext(requestFromProxy));
     }
 
     private AttributesOuterClass.Attributes getAttributesFromRequest(ExternalAuth.CheckRequest requestFromProxy) {

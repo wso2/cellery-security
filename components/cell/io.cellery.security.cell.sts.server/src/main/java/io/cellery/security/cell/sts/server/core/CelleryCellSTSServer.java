@@ -25,6 +25,8 @@ import io.cellery.security.cell.sts.server.core.service.CelleryCellInboundInterc
 import io.cellery.security.cell.sts.server.core.service.CelleryCellOutboundInterceptorService;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
+import io.cellery.security.cell.sts.server.core.service.CelleryGWInboundInterceptorService;
+import io.cellery.security.cell.sts.server.core.service.CelleryGWSTSService;
 import io.cellery.security.cell.sts.server.jwks.JWKSServer;
 import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
 import io.grpc.Server;
@@ -42,13 +44,17 @@ public class CelleryCellSTSServer {
 
     private static final String CELL_NAME_ENV_VARIABLE = "CELL_NAME";
     private static final Logger log = LoggerFactory.getLogger(CelleryCellSTSServer.class);
+
     private final int inboundListeningPort;
     private final Server inboundListener;
 
     private final int outboundListeningPort;
     private final Server outboundListener;
 
-    private CelleryCellSTSServer(int inboundListeningPort, int outboundListeningPort) throws CelleryCellSTSException {
+    private final Server gatewayListner;
+    private final int gatewayListeningPort;
+    private CelleryCellSTSServer(int inboundListeningPort, int outboundListeningPort, int gatewayListeningPort) throws
+            CelleryCellSTSException {
 
         CellStsUtils.buildCellStsConfiguration();
         CellStsUtils.readUnsecuredContexts();
@@ -56,6 +62,7 @@ public class CelleryCellSTSServer {
         UserContextStore localContextStore = new UserContextStoreImpl();
 
         CelleryCellStsService cellStsService = new CelleryCellStsService(contextStore, localContextStore);
+        CelleryGWSTSService celleryGWSTSService = new CelleryGWSTSService(contextStore, localContextStore);
 
         this.inboundListeningPort = inboundListeningPort;
         inboundListener = ServerBuilder.forPort(inboundListeningPort)
@@ -66,7 +73,13 @@ public class CelleryCellSTSServer {
         outboundListener = ServerBuilder.forPort(outboundListeningPort)
                 .addService(new CelleryCellOutboundInterceptorService(cellStsService))
                 .build();
+
+        this.gatewayListeningPort = gatewayListeningPort;
+        gatewayListner = ServerBuilder.forPort(gatewayListeningPort)
+                .addService(new CelleryGWInboundInterceptorService(celleryGWSTSService))
+                .build();
     }
+
 
     /**
      * Start serving requests.
@@ -75,8 +88,10 @@ public class CelleryCellSTSServer {
 
         inboundListener.start();
         outboundListener.start();
+        gatewayListner.start();
         log.info("Cellery STS gRPC Server started, listening for inbound traffic on " + inboundListeningPort);
         log.info("Cellery STS gRPC Server started, listening for outbound traffic on " + outboundListeningPort);
+        log.info("Cellery STS gRPC Server started, listening for gateway inbound traffic on " + gatewayListeningPort);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may has been reset by its JVM shutdown hook.
             log.error("Shutting down Cellery Cell STS since JVM is shutting down.");
@@ -97,6 +112,10 @@ public class CelleryCellSTSServer {
         if (outboundListener != null) {
             outboundListener.shutdown();
         }
+
+        if (gatewayListner != null) {
+            gatewayListner.shutdown();
+        }
     }
 
     /**
@@ -111,6 +130,10 @@ public class CelleryCellSTSServer {
         if (outboundListener != null) {
             outboundListener.awaitTermination();
         }
+
+        if (gatewayListner != null) {
+            gatewayListner.awaitTermination();
+        }
     }
 
     public static void main(String[] args) {
@@ -118,10 +141,11 @@ public class CelleryCellSTSServer {
         CelleryCellSTSServer server;
         int inboundListeningPort = getPortFromEnvVariable("inboundPort", 8080);
         int outboundListeningPort = getPortFromEnvVariable("outboundPort", 8081);
+        int gatewayInboundPort = getPortFromEnvVariable("gatewayInboundPort", 8082);
         int jwksEndpointPort = getPortFromEnvVariable("jwksPort", 8090);
 
         try {
-            server = new CelleryCellSTSServer(inboundListeningPort, outboundListeningPort);
+            server = new CelleryCellSTSServer(inboundListeningPort, outboundListeningPort, gatewayInboundPort);
             server.start();
             JWKSServer jwksServer = new JWKSServer(jwksEndpointPort);
             jwksServer.startServer();
