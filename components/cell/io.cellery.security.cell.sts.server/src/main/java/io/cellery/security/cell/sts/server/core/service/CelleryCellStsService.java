@@ -63,17 +63,17 @@ import javax.net.ssl.X509TrustManager;
  */
 public class CelleryCellStsService {
 
-    private static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
-    private static final String AUTHORIZATION_HEADER_NAME = "authorization";
-    private static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
-    private static TokenValidator tokenValidator = new SelfContainedTokenValidator();
-    private static CellSTSRequestValidator requestValidator = new DefaultCellSTSReqValidator();
-    private static AuthorizationService authorizationService = new AuthorizationService();
-
     private static final Logger log = LoggerFactory.getLogger(CelleryCellStsService.class);
 
-    private UserContextStore userContextStore;
-    private UserContextStore localContextStore;
+    protected static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
+    protected static final String AUTHORIZATION_HEADER_NAME = "authorization";
+    protected static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
+    protected static final TokenValidator TOKEN_VALIDATOR = new SelfContainedTokenValidator();
+    protected static final CellSTSRequestValidator REQUEST_VALIDATOR = new DefaultCellSTSReqValidator();
+    protected static final AuthorizationService AUTHORIZATION_SERVICE = new AuthorizationService();
+
+    protected UserContextStore userContextStore;
+    protected UserContextStore localContextStore;
 
     public CelleryCellStsService(UserContextStore contextStore, UserContextStore localContextStore)
             throws CelleryCellSTSException {
@@ -93,7 +93,7 @@ public class CelleryCellStsService {
         String jwt;
 
         try {
-            boolean authenticationRequired = requestValidator.isAuthenticationRequired(cellStsRequest);
+            boolean authenticationRequired = REQUEST_VALIDATOR.isAuthenticationRequired(cellStsRequest);
             if (!authenticationRequired) {
                 return;
             }
@@ -116,7 +116,7 @@ public class CelleryCellStsService {
         }
         // TODO : Integrate OPA and enable authorization.
         try {
-            authorizationService.authorize(cellStsRequest, jwt);
+            AUTHORIZATION_SERVICE.authorize(cellStsRequest, jwt);
         } catch (AuthorizationFailedException e) {
             throw new CelleryCellSTSException("Authorization failure", e);
         }
@@ -160,7 +160,7 @@ public class CelleryCellStsService {
         return jwtClaims;
     }
 
-    private JWTClaimsSet handleRequestToMicroGW(CellStsRequest cellStsRequest, String requestId, String jwt) throws
+    protected JWTClaimsSet handleRequestToMicroGW(CellStsRequest cellStsRequest, String requestId, String jwt) throws
             CelleryCellSTSException {
 
         JWTClaimsSet jwtClaims;
@@ -181,10 +181,10 @@ public class CelleryCellStsService {
     private void validateInboundToken(CellStsRequest cellStsRequest, String token) throws
             TokenValidationFailureException {
 
-        tokenValidator.validateToken(token, cellStsRequest);
+        TOKEN_VALIDATOR.validateToken(token, cellStsRequest);
     }
 
-    private String getUserContextJwt(CellStsRequest cellStsRequest) {
+    protected String getUserContextJwt(CellStsRequest cellStsRequest) {
 
         String authzHeaderValue = getAuthorizationHeaderValue(cellStsRequest);
         return extractJwtFromAuthzHeader(authzHeaderValue);
@@ -202,19 +202,25 @@ public class CelleryCellStsService {
         } else {
             log.info("Intercepted an outbound call to a workload:{} within Cellery. Injecting a STS security for " +
                     "authentication and user-context sharing from Cell STS.", destination);
-
-            String stsToken = getStsToken(cellStsRequest);
-            if (StringUtils.isEmpty(stsToken)) {
-                throw new CelleryCellSTSException("No JWT token received from the STS endpoint: "
-                        + CellStsConfiguration.getInstance().getStsEndpoint());
-            }
-            log.debug("Attaching jwt to outbound request : {}", stsToken);
-            // Set the authorization header
-            if (cellStsRequest.getRequestHeaders().get(Constants.CELLERY_AUTH_SUBJECT_HEADER) != null) {
-                log.info("Found user in outgoing request");
-            }
-            cellStsResponse.addResponseHeader(AUTHORIZATION_HEADER_NAME, BEARER_HEADER_VALUE_PREFIX + stsToken);
+            attachToken(cellStsRequest, cellStsResponse);
         }
+    }
+
+    protected void attachToken(CellStsRequest cellStsRequest, CellStsResponse cellStsResponse)
+            throws CelleryCellSTSException {
+
+
+        String stsToken = getStsToken(cellStsRequest);
+        if (StringUtils.isEmpty(stsToken)) {
+            throw new CelleryCellSTSException("No JWT token received from the STS endpoint: "
+                    + CellStsConfiguration.getInstance().getStsEndpoint());
+        }
+        log.debug("Attaching jwt to outbound request : {}", stsToken);
+        // Set the authorization header
+        if (cellStsRequest.getRequestHeaders().get(Constants.CELLERY_AUTH_SUBJECT_HEADER) != null) {
+            log.info("Found user in outgoing request");
+        }
+        cellStsResponse.addResponseHeader(AUTHORIZATION_HEADER_NAME, BEARER_HEADER_VALUE_PREFIX + stsToken);
     }
 
     private String getAuthorizationHeaderValue(CellStsRequest request) {
@@ -300,7 +306,7 @@ public class CelleryCellStsService {
 
         try {
             log.debug("Validating workload attached token.");
-            tokenValidator.validateToken(token, request);
+            TOKEN_VALIDATOR.validateToken(token, request);
             return getTokenFromLocalSTS(token, request.getDestination().getCellName());
         } catch (TokenValidationFailureException e) {
             throw new CelleryCellSTSException("Error while validating workload passed token", e);
@@ -322,12 +328,12 @@ public class CelleryCellStsService {
                 "--gateway-deployment-");
     }
 
-    private String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
+    protected String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
 
         return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()));
     }
 
-    private String getTokenFromLocalSTS(String jwt, String audience) throws CelleryCellSTSException {
+    protected String getTokenFromLocalSTS(String jwt, String audience) throws CelleryCellSTSException {
 
         String token = STSTokenGenerator.generateToken(jwt, audience,
                 CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()));

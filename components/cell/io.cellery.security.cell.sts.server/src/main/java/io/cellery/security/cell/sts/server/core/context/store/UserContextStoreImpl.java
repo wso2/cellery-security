@@ -39,7 +39,7 @@ public class UserContextStoreImpl implements UserContextStore {
 
     public UserContextStoreImpl() {
 
-        log.info("User Context expiry set to {} seconds." , getUserContextExpiry());
+        log.info("User Context expiry set to {} seconds.", getUserContextExpiry());
         Cache<String, String> cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(getUserContextExpiry(), TimeUnit.SECONDS)
                 .removalListener(removalNotification -> {
@@ -67,18 +67,26 @@ public class UserContextStoreImpl implements UserContextStore {
 
     @Override
     public String get(String contextId) {
+
         return userContextMap.get(contextId);
     }
 
     @Override
     public void put(String contextId, String context) {
+
         userContextMap.put(contextId, context);
     }
 
     @Override
     public boolean containsKey(String contextId) {
+
         return userContextMap.containsKey(contextId);
     }
 
+    @Override
+    public void remove(String contextId) {
+
+        userContextMap.remove(contextId);
+    }
 
 }

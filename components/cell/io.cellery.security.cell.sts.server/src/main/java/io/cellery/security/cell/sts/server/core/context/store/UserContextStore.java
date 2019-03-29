@@ -27,4 +27,6 @@ public interface UserContextStore {
     void put(String contextId, String context);
 
     boolean containsKey(String contextId);
+
+    void remove(String contextId);
 }

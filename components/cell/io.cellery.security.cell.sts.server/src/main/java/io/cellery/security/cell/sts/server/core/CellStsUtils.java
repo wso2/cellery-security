@@ -69,8 +69,10 @@ public class CellStsUtils {
     public static boolean isRequestToMicroGateway(CellStsRequest cellStsRequest) throws CelleryCellSTSException {
 
         String workload = cellStsRequest.getDestination().getWorkload();
-        return (StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
-                "--gateway-service"));
+        boolean inferFromDestinationAddress = (StringUtils.isNotEmpty(workload) &&
+                workload.startsWith(CellStsUtils.getMyCellName() + "--gateway-service"));
+
+        return (inferFromDestinationAddress || cellStsRequest.isGatewayIncomingRequest());
     }
 
     public static boolean isWorkloadExternalToCellery(String destinationWorkloadName) {
