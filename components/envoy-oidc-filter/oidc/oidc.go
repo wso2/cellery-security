@@ -212,6 +212,7 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 		Name:  IdTokenCookie,
 		Value: rawIDToken,
 		Path:  "/",
+		HttpOnly: true,
 	})
 
 	if c, err := r.Cookie(RedirectCookie); err == nil {
