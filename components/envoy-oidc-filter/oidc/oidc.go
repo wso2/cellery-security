@@ -107,7 +107,7 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 	if isDefined(a.config.NonSecurePaths) {
 		// non secured URLs are provided, skip authentication
 		if isPathMatchFound(req.URL.Path, a.config.NonSecurePaths) {
-			return buildOkCheckResponseWithoutAuthAndSub(), nil
+			return validateCookieForNonSecuredPaths(req, a);
 		} else {
 			return checkAndPromptAuth(req, a)
 		}
@@ -116,12 +116,32 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 		if isPathMatchFound(req.URL.Path, a.config.SecurePaths) {
 			return checkAndPromptAuth(req, a)
 		} else {
-			return buildOkCheckResponseWithoutAuthAndSub(), nil
+			return validateCookieForNonSecuredPaths(req, a);
 		}
 	} else {
 		// by default, consider everything as secured
 		return checkAndPromptAuth(req, a)
 	}
+}
+
+func validateCookieForNonSecuredPaths(req *http.Request, a *Authenticator) (*extauthz.CheckResponse, error) {
+
+	if cookie, err := req.Cookie(IdTokenCookie); err == nil {
+		fmt.Println("Validating cookie for non secured path since cookie is present")
+		_, err := a.provider.Verifier(a.oidcConfig).Verify(a.ctx, cookie.Value)
+		if err != nil {
+			log.Printf("Error while validating token for non secured path. Hence ignoring error: %v", err)
+			return buildOkCheckResponseWithoutAuthAndSub(), nil
+		} else {
+			token, sub, err := a.buildForwardHeaders(cookie.Value)
+			if err != nil {
+				fmt.Println(err)
+				return buildServerErrorCheckResponse(), nil
+			}
+			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub), nil
+		}
+	}
+	return buildOkCheckResponseWithoutAuthAndSub(), nil
 }
 
 func checkAndPromptAuth (req *http.Request, a *Authenticator) (*extauthz.CheckResponse, error) {
