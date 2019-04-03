@@ -107,7 +107,7 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 	if isDefined(a.config.NonSecurePaths) {
 		// non secured URLs are provided, skip authentication
 		if isPathMatchFound(req.URL.Path, a.config.NonSecurePaths) {
-			return validateCookieForNonSecuredPaths(req, a);
+			return validateCookieForNonSecuredPaths(req, a)
 		} else {
 			return checkAndPromptAuth(req, a)
 		}
@@ -116,7 +116,7 @@ func (a *Authenticator) Check(ctx context.Context, checkReq *extauthz.CheckReque
 		if isPathMatchFound(req.URL.Path, a.config.SecurePaths) {
 			return checkAndPromptAuth(req, a)
 		} else {
-			return validateCookieForNonSecuredPaths(req, a);
+			return validateCookieForNonSecuredPaths(req, a)
 		}
 	} else {
 		// by default, consider everything as secured
@@ -144,7 +144,7 @@ func validateCookieForNonSecuredPaths(req *http.Request, a *Authenticator) (*ext
 	return buildOkCheckResponseWithoutAuthAndSub(), nil
 }
 
-func checkAndPromptAuth (req *http.Request, a *Authenticator) (*extauthz.CheckResponse, error) {
+func checkAndPromptAuth(req *http.Request, a *Authenticator) (*extauthz.CheckResponse, error) {
 	if cookie, err := req.Cookie(IdTokenCookie); err == nil {
 		_, err := a.provider.Verifier(a.oidcConfig).Verify(a.ctx, cookie.Value)
 		if err != nil {
@@ -209,9 +209,9 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 	log.Println(string(data))
 
 	http.SetCookie(w, &http.Cookie{
-		Name:  IdTokenCookie,
-		Value: rawIDToken,
-		Path:  "/",
+		Name:     IdTokenCookie,
+		Value:    rawIDToken,
+		Path:     "/",
 		HttpOnly: true,
 	})
 

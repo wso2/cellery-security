@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	IdpDiscoveryUrlEnv         = "IDP_DISCOVERY_URL"
+	ProviderUrlEnv             = "PROVIDER_URL"
 	SkipDiscoveryCertVerifyEnv = "SKIP_DISCOVERY_URL_CERT_VERIFY"
 	ClientIdEnv                = "CLIENT_ID"
 	ClientSecretEnv            = "CLIENT_SECRET"
@@ -47,7 +47,7 @@ func main() {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	cfg := &oidc.Config{
-		Provider:        os.Getenv(IdpDiscoveryUrlEnv),
+		Provider:        os.Getenv(ProviderUrlEnv),
 		ClientID:        os.Getenv(ClientIdEnv),
 		ClientSecret:    os.Getenv(ClientSecretEnv),
 		RedirectURL:     os.Getenv(RedirectUrlEnv),
@@ -109,7 +109,8 @@ func LookupEnv(key string, fallback string) string {
 }
 
 func getSecurePaths() []string {
-	_, exist := os.LookupEnv(SecurePaths); if !exist || len(os.Getenv(SecurePaths)) == 0 {
+	_, exist := os.LookupEnv(SecurePaths)
+	if !exist || len(os.Getenv(SecurePaths)) == 0 {
 		return nil
 	}
 	elems := strings.Split(os.Getenv(SecurePaths), ",")
@@ -122,7 +123,8 @@ func getSecurePaths() []string {
 }
 
 func getNonSecurePaths() []string {
-	_, exist := os.LookupEnv(NonSecurePaths); if !exist || len(os.Getenv(NonSecurePaths)) == 0 {
+	_, exist := os.LookupEnv(NonSecurePaths)
+	if !exist || len(os.Getenv(NonSecurePaths)) == 0 {
 		return nil
 	}
 	elems := strings.Split(os.Getenv(NonSecurePaths), ",")
