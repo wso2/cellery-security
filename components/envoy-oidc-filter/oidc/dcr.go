@@ -67,7 +67,7 @@ func dcr(c *Config) (string, string, error) {
 	}
 
 	values := map[string]interface{}{"client_name": c.ClientID, "grant_types": []string{"password",
-		"authorization_code", "implicit"}, "ext_param_client_id": c.ClientID, "redirect_uris": []string{c.RedirectURL}}
+		"authorization_code", "implicit"}, "ext_param_client_id": c.ClientID, "redirect_uris": []string{c.RedirectURL, c.BaseURL}}
 
 	payload, err := json.Marshal(values)
 	if err != nil {
