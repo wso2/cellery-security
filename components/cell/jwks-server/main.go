@@ -1,8 +1,8 @@
 package main
 
-import "github.com/mesh-security/components/cell/jwks-server/main/expose"
+import "github.com/cellery-io/mesh-security/components/cell/jwks-server/jwks"
 
 func main (){
-	go expose.SSLSecuredService()
-	expose.UnSecuredService()
+	go jwks.SSLSecuredService()
+	jwks.UnSecuredService()
 }
