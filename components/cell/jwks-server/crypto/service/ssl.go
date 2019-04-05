@@ -109,12 +109,8 @@ func getEnvPort() string {
 }
 
 func getGeneratedJwks(w http.ResponseWriter, r *http.Request) {
-	err := resolver.KeyGenerator()
-	if err != nil {
-		log.Printf("Error occured while generating the keys. %s", err)
-	}
 	log.Println("Generated the jwks.")
-	err = json.NewEncoder(w).Encode(resolver.Jwks)
+	err := json.NewEncoder(w).Encode(resolver.Jwks)
 	if err != nil {
 		log.Printf("Unable to encode the json. %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
