@@ -29,7 +29,7 @@ JWKS_SERVER_NAME := jwks-server
 
 VERSION ?= $(GIT_REVISION)
 
-DOCKER_REPO ?= make
+DOCKER_REPO ?= wso2cellery
 DOCKER_IMAGE_TAG ?= $(VERSION)
 
 .PHONY: build-java-components

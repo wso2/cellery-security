@@ -1,8 +1,15 @@
 package main
 
-import "github.com/cellery-io/mesh-security/components/cell/jwks-server/jwks"
+import (
+	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/service"
+	"log"
+)
 
 func main (){
-	go jwks.SSLSecuredService()
-	jwks.UnSecuredService()
+	go service.UnSecuredService()
+	err := service.SSLSecuredService()
+	if err != nil{
+		log.Printf("Error occure while establishing the SLL service. %s", err)
+	}
 }
+
