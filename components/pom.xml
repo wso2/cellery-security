@@ -36,6 +36,7 @@
         <module>global/io.cellery.security.extensions</module>
         <module>global/io.cellery.security.sts.endpoint.core</module>
         <module>global/io.cellery.security.token.endpoint</module>
+        <module>global/io.cellery.security.post.idp.init</module>
     </modules>
 
 </project>
