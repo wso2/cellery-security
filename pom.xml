@@ -248,6 +248,11 @@
                 <version>${org.codehaus.jackson.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.core</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>${org.codehaus.jackson.version}</version>
@@ -271,6 +276,11 @@
                 <groupId>io.cellery.security</groupId>
                 <artifactId>io.cellery.security.extensions</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+                <version>${apache.felix.scr.ds.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.cellery.security</groupId>
@@ -326,6 +336,8 @@
 
         <swagger.jaxrs.version>1.5.20</swagger.jaxrs.version>
 
+        <carbon.identity.framework.version>5.12.153</carbon.identity.framework.version>
+        <apache.felix.scr.ds.annotations.version>1.2.8</apache.felix.scr.ds.annotations.version>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <org.apache.felix.annotations.version>1.2.4</org.apache.felix.annotations.version>
         <eclipse.osgi.version>3.5.100.v20160504-1419</eclipse.osgi.version>
