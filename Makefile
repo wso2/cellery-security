@@ -34,23 +34,29 @@ build-java-components:
 	cd ./components; \
 	mvn clean install;
 
-.PHONY: build-sts-server-docker
-build-sts-server-docker:
-	cd ./docker/sts; \
-	bash build.sh;
-
 .PHONY: build-all
-build-all: build-java-components build-sts-server-docker
+build-all: build-java-components docker-push
+
+.PHONY: docker-push
+docker-push: docker-push.sts-server-docker docker-push.envoy-oidc-filter
+
+.PHONY: docker.sts-server-docker
+docker.sts-server-docker:
+	[ -d "docker/sts/target" ] || mvn initialize -f docker/sts/pom.xml
+	cd docker/sts; \
+	docker build -t ${DOCKER_REPO}/cell-sts:${DOCKER_IMAGE_TAG} .
+
+.PHONY: docker-push.sts-server-docker
+docker-push.sts-server-docker: docker.sts-server-docker
+	docker push ${DOCKER_REPO}/cell-sts:${DOCKER_IMAGE_TAG}
 
 .PHONY: build.envoy-oidc-filter
 build.envoy-oidc-filter:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BUILD_ROOT)/$(OIDC_FILTER_NAME) -x $(PROJECT_ENVOY_FILTER_ROOT)
 
-
 .PHONY: docker.envoy-oidc-filter
 docker.envoy-oidc-filter: build.envoy-oidc-filter
 	docker build -f $(PROJECT_ROOT)/docker/$(OIDC_FILTER_NAME)/Dockerfile $(BUILD_ROOT) -t $(DOCKER_REPO)/$(OIDC_FILTER_NAME):$(DOCKER_IMAGE_TAG)
-
 
 .PHONY: docker-push.envoy-oidc-filter
 docker-push.envoy-oidc-filter: docker.envoy-oidc-filter
