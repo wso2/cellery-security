@@ -16,13 +16,16 @@
 
 PROJECT_ROOT := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PROJECT_ENVOY_FILTER_ROOT := $(PROJECT_ROOT)/components/envoy-oidc-filter
+PROJECT_JWKS_SERVER_ROOT := $(PROJECT_ROOT)/components/cell/jwks-server
 PROJECT_PKG := github.com/cellery-io/mesh-controller
 BUILD_DIRECTORY := build
 BUILD_ROOT := $(PROJECT_ENVOY_FILTER_ROOT)/$(BUILD_DIRECTORY)
+BUILD_ROOT_JWKS := $(PROJECT_JWKS_SERVER_ROOT)/$(BUILD_DIRECTORY)
 GO_FILES		= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GIT_REVISION := $(shell git rev-parse --verify HEAD)
 
 OIDC_FILTER_NAME := envoy-oidc-filter
+JWKS_SERVER_NAME := jwks-server
 
 VERSION ?= $(GIT_REVISION)
 
@@ -61,6 +64,18 @@ docker.envoy-oidc-filter: build.envoy-oidc-filter
 .PHONY: docker-push.envoy-oidc-filter
 docker-push.envoy-oidc-filter: docker.envoy-oidc-filter
 	docker push $(DOCKER_REPO)/$(OIDC_FILTER_NAME):$(DOCKER_IMAGE_TAG)
+
+.PHONY: build.jwks-server
+build.jwks-server:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BUILD_ROOT_JWKS)/$(JWKS_SERVER_NAME) -x $(PROJECT_JWKS_SERVER_ROOT)
+
+.PHONY: docker.jwks-server
+docker.jwks-server: build.jwks-server
+	docker build -f $(PROJECT_ROOT)/docker/$(JWKS_SERVER_NAME)/Dockerfile $(BUILD_ROOT_JWKS) -t $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
+
+.PHONY: docker-push.jwks-server
+docker-push.jwks-server: docker.jwks-server
+	docker push $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
 
 .PHONY: code.format
 code.format: tools.goimports
