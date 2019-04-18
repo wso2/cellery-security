@@ -325,7 +325,7 @@ public class CelleryCellStsService {
 
         String workload = cellStsRequest.getSource().getWorkload();
         return StringUtils.isNotEmpty(workload) && workload.startsWith(CellStsUtils.getMyCellName() +
-                "--gateway-deployment-");
+                "--gateway-deployment");
     }
 
     protected String getTokenFromLocalSTS(String audience) throws CelleryCellSTSException {
