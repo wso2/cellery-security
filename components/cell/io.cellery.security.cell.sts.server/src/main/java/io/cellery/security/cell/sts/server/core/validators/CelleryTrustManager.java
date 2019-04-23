@@ -46,7 +46,7 @@ import javax.net.ssl.X509TrustManager;
  */
 public class CelleryTrustManager implements X509TrustManager {
 
-    public static final String TRUST_CERTS_LOCATION = "/Users/hasinthaindrajee/Desktop/trusted-certs";
+    public static final String TRUST_CERTS_LOCATION = "/etc/certs/trusted-certs";
 
     private static Log log = LogFactory.getLog(CelleryTrustManager.class);
     private X509TrustManager defaultTrustManager;
