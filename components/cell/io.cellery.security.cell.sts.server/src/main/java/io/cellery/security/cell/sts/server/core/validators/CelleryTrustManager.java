@@ -20,7 +20,6 @@
 package io.cellery.security.cell.sts.server.core.validators;
 
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
-import io.cellery.security.cell.sts.server.utils.LambdaExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,11 +29,13 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -52,7 +53,7 @@ public class CelleryTrustManager implements X509TrustManager {
     private X509TrustManager defaultTrustManager;
     private X509TrustManager trustManager;
     private static final String VALIDATE_SERVER_CERT = "VALIDATE_SERVER_CERT";
-    private boolean validateServerCertificate = false;
+    private boolean validateServerCertificate;
     KeyStore keyStore;
 
     public CelleryTrustManager() throws CelleryCellSTSException {
@@ -161,15 +162,34 @@ public class CelleryTrustManager implements X509TrustManager {
         File[] files = folder.listFiles();
         List<X509Certificate> trustedCerts = new ArrayList<>();
 
-        Arrays.stream(files).forEach(LambdaExceptionUtils.rethrowConsumer(file -> {
+        if (files != null) {
+            Arrays.stream(files).forEach(file -> {
 
-            CertificateFactory fact = CertificateFactory.getInstance("X.509");
-            try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                X509Certificate certificate = (X509Certificate) fact.generateCertificate(fileInputStream);
-                keyStore.setCertificateEntry(certificate.getIssuerDN().getName(), certificate);
-                log.debug("Added to trust store: " + certificate.getIssuerDN().getName());
-            }
-        }));
+                try {
+                    CertificateFactory fact = CertificateFactory.getInstance("X.509");
+                    try (FileInputStream fileInputStream = new FileInputStream(file)) {
+
+                        Collection<? extends Certificate> certificates = fact.generateCertificates(fileInputStream);
+                        if (certificates != null) {
+                            certificates.stream().forEach(certificate -> {
+                                X509Certificate x509Certificate = (X509Certificate) certificate;
+                                try {
+                                    keyStore.setCertificateEntry(x509Certificate.getIssuerDN().getName(),
+                                            x509Certificate);
+                                } catch (KeyStoreException e) {
+                                    log.error("Error while adding certificate s {} " + certificate.toString(), e);
+                                }
+                                trustedCerts.add(x509Certificate);
+                                log.debug("Added to trust store: " + x509Certificate.getIssuerDN().getName());
+                            });
+                        }
+
+                    }
+                } catch (CertificateException | IOException e) {
+                    log.error("Error while adding trusted certificte from file : " + file, e);
+                }
+            });
+        }
         return trustedCerts;
     }
 }
