@@ -18,7 +18,6 @@
  */
 package io.cellery.security.cell.sts.server.core.service;
 
-import com.mashape.unirest.http.Unirest;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
@@ -35,28 +34,22 @@ import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
 import io.cellery.security.cell.sts.server.core.model.RequestDestination;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
 import io.cellery.security.cell.sts.server.core.validators.CellSTSRequestValidator;
+import io.cellery.security.cell.sts.server.core.validators.CelleryHostnameVerifier;
+import io.cellery.security.cell.sts.server.core.validators.CelleryTrustManager;
 import io.cellery.security.cell.sts.server.core.validators.DefaultCellSTSReqValidator;
 import io.cellery.security.cell.sts.server.core.validators.SelfContainedTokenValidator;
 import io.cellery.security.cell.sts.server.core.validators.TokenValidator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  * Cellery Token Service.
@@ -209,7 +202,6 @@ public class CelleryCellStsService {
     protected void attachToken(CellStsRequest cellStsRequest, CellStsResponse cellStsResponse)
             throws CelleryCellSTSException {
 
-
         String stsToken = getStsToken(cellStsRequest);
         if (StringUtils.isEmpty(stsToken)) {
             throw new CelleryCellSTSException("No JWT token received from the STS endpoint: "
@@ -343,53 +335,16 @@ public class CelleryCellStsService {
 
     private void setHttpClientProperties() throws CelleryCellSTSException {
 
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-
-                return null;
-            }
-
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
-            }
-
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
-            }
-        }
-        };
-
+        CelleryTrustManager celleryTrustManager = new CelleryTrustManager();
         try {
             SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            sc.init(null, new TrustManager[]{celleryTrustManager}, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(
+                    new CelleryHostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier()));
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
             throw new CelleryCellSTSException("Error while initializing SSL context");
         }
 
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-
-                return true;
-            }
-        };
-
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-
-        try {
-
-            // TODO add the correct certs for hostname verification..
-            Unirest.setHttpClient(HttpClients.custom()
-                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, (x509Certificates, s)
-                            -> true).build())
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                    .disableRedirectHandling()
-                    .build());
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            throw new CelleryCellSTSException("Error initializing the http client.", e);
-        }
     }
 }

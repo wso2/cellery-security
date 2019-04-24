@@ -53,6 +53,7 @@ public class CelleryCellSTSServer {
 
     private final Server gatewayListner;
     private final int gatewayListeningPort;
+
     private CelleryCellSTSServer(int inboundListeningPort, int outboundListeningPort, int gatewayListeningPort) throws
             CelleryCellSTSException {
 
@@ -79,7 +80,6 @@ public class CelleryCellSTSServer {
                 .addService(new CelleryGWInboundInterceptorService(celleryGWSTSService))
                 .build();
     }
-
 
     /**
      * Start serving requests.

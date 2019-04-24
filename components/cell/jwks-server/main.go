@@ -23,10 +23,9 @@ import (
 	"log"
 )
 
-func main (){
+func main() {
 	err := service.SSLSecuredService()
-	if err != nil{
+	if err != nil {
 		log.Printf("Error occured while establishing the SLL service. %s", err)
 	}
 }
-
