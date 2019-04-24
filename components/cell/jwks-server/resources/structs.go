@@ -16,26 +16,9 @@
  * under the License.
  */
 
-package resolver
+package resources
 
-import (
-	"crypto/sha1"
-	b64 "encoding/base64"
-	"fmt"
-	"log"
-)
-
-func EncodeCert(certBytes []byte) string {
-	h := sha1.New()
-	h.Write(certBytes)
-	hashSum := h.Sum(nil)
-	log.Println("Hash SHA1 sum generated.")
-	sEnc := b64.RawStdEncoding.EncodeToString([]byte(fmt.Sprintf("%x", hashSum)))
-	log.Println("Encoded to base 64.")
-	return sEnc
-}
-
-type Json struct {
+type JwksJson struct {
 	Keys [] Key `json:"keys"`
 }
 
@@ -44,7 +27,6 @@ type Key struct {
 	Use string `json:"use"`
 	Kid string `json:"kid"`
 	Kty string `json:"kty"`
-	E string `json:"e"`
-	N string `json:"n"`
+	E   string `json:"e"`
+	N   string `json:"n"`
 }
-

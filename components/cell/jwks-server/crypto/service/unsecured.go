@@ -20,8 +20,6 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/resolver"
-	"github/gorilla/mux"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,17 +28,15 @@ import (
 const httpPort int = 8186
 
 func UnSecuredService() {
-	router := mux.NewRouter()
 	httpPortString := ":" + strconv.Itoa(httpPort)
-	log.Println("Http Server initialized on Port " + httpPortString + ".")
-	router.HandleFunc("/jwks", getJson).Methods("GET")
-	log.Fatal(http.ListenAndServe(httpPortString, router))
+	log.Printf("Http Server initialized on Port %s.", httpPortString)
+	http.HandleFunc("/jwks", getGeneratedJwks)
+	log.Println(http.ListenAndServe(httpPortString, nil))
 }
 
-
-func getJson(w http.ResponseWriter, r *http.Request) {
+func getJwksJson(w http.ResponseWriter, r *http.Request) {
 	log.Println("Generated the jwks.")
-	err := json.NewEncoder(w).Encode(resolver.Jwks)
+	err := json.NewEncoder(w).Encode(jwksJson)
 	if err != nil {
 		log.Printf("Unable to encode the json. %s", err)
 		w.WriteHeader(http.StatusInternalServerError)

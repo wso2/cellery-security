@@ -22,41 +22,50 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/resolver"
+	"github.com/cellery-io/mesh-security/components/cell/jwks-server/resources"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
-const httpsDefaultPort int = 8185
-const jwksPortEnvVar = "jwksPort"
+const (
+	httpsDefaultPort int = 8185
+	jwksPortEnvVar       = "jwksPort"
+	certEnvVar           = "certFile"
+	keyEnvVar            = "keyFile"
 
-var HttpsPortString string
+	keyFileDefaultPath  string = "/etc/certs/key.pem"
+	certFileDefaultPath string = "/etc/certs/cert.pem"
+)
 
-func SSLSecuredService() error{
-	HttpsPortString = getEnvPort()
-	keyData, keyError := ioutil.ReadFile(resolver.KeyFilePath)
-	certData, certError := ioutil.ReadFile(resolver.CertFilePath)
+var (
+	httpsPortString string
+	jwksJson        resources.JwksJson
+	keyFilePath     string
+	certFilePath    string
+)
 
-	if keyError == nil && certError == nil{
+func SSLSecuredService() error {
+	httpsPortString = getEnvPort()
+	resolveEnvFilePaths()
+	keyData, certData, err := checkFiles()
+	if err == nil {
 		log.Println("Key file read from /etc/certs.")
-		log.Println("Https Server initialized on Port " + string(HttpsPortString) + ".")
+		log.Printf("Https Server initialized on Port %s.", httpsPortString)
 		log.Println("Key file read from /etc/certs.")
-
-		err := resolver.FileBasedKeyResolver(keyData, certData)
+		keyJson, err := resolver.KeyResolver(keyData, certData)
+		jwksJson = keyJson
 		if err != nil {
 			log.Printf("Error occured while reloving keys with the file based key resolver. %s", err)
 			return err
 		}
-		http.HandleFunc("/jwks", getJwks)
-		err = http.ListenAndServeTLS(HttpsPortString, resolver.CertFilePath, resolver.KeyFilePath, nil)
-		if err != nil {
-			log.Printf("Listen And Serve: %s", err)
-			return err
-		}
+		return initSSLFileBased()
 	} else {
-		log.Println("Unable to read from /etc/certs for https. Generating self signed keys.")
-		err := processSSLCertAndKey()
+		log.Printf("Unable to read from %s and %s for https. Generating self signed keys.",
+			certFilePath, keyFilePath)
+		err := initSSLServiceSelfGen()
 		if err != nil {
 			log.Printf("Error occured while generating the key and the cert. %s", err)
 			return err
@@ -65,31 +74,59 @@ func SSLSecuredService() error{
 	return nil
 }
 
-func processSSLCertAndKey() error{
-	err := resolver.KeyGenerator()
+func initSSLFileBased() error {
+	http.HandleFunc("/jwks", getGeneratedJwks)
+	err := http.ListenAndServeTLS(httpsPortString, certFilePath, keyFilePath, nil)
 	if err != nil {
-		log.Printf("Error occured while generating the keys. %s" , err)
+		log.Printf("Listen And Serve: %s", err)
+		return err
 	}
+	return nil
+}
 
-	keyB := resolver.PrivateKey
-	certB := resolver.Cert
-	cert, err := tls.X509KeyPair(certB, keyB)
+func checkFiles() ([]byte, []byte, error) {
+	keyData, err := ioutil.ReadFile(keyFilePath)
 	if err != nil {
-		log.Printf("Mis match with the private key and public key. %s", err)
+		return nil, nil, err
 	}
-	//Construct a tls.config
+	certData, err := ioutil.ReadFile(certFilePath)
+	if err != nil {
+		return nil, nil, err
+	}
+	return keyData, certData, nil
+}
+
+func generateCert() (tls.Certificate, error) {
+	keyJson, err := resolver.KeyGenerator()
+	keyBytes, certBytes := resolver.GetKeyAndCertBytes()
+	jwksJson = keyJson
+	if err != nil {
+		log.Printf("Error occured while generating the keys. %s", err)
+		return tls.Certificate{}, err
+	}
+	cert, err := tls.X509KeyPair(certBytes, keyBytes)
+	if err != nil {
+		log.Printf("Mismatch with the private key and public key. %s", err)
+		return tls.Certificate{}, err
+	}
+	return cert, err
+}
+
+func initSSLServiceSelfGen() error {
+	cert, err := generateCert()
+	// Construct a tls.config
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 	}
-	log.Println("Generated key map :", resolver.Jwks)
-	log.Println("Https Server initialized on Port " + string(HttpsPortString) + ".")
+	log.Println("Generated key map :", jwksJson)
+	log.Println("Https Server initialized on Port " + string(httpsPortString) + ".")
 	http.HandleFunc("/jwks", getGeneratedJwks)
 
 	server := http.Server{
 		TLSConfig: tlsConfig,
-		Addr:      HttpsPortString,
+		Addr:      httpsPortString,
 	}
-	log.Println("Reading cert and key for https...")
+	log.Println("Reading cert and key for https.")
 	err = server.ListenAndServeTLS("", "")
 	if err != nil {
 		log.Printf("Listen And Serve: %s", err)
@@ -101,25 +138,27 @@ func processSSLCertAndKey() error{
 func getEnvPort() string {
 	port := os.Getenv(jwksPortEnvVar)
 	if len(port) == 0 {
-		log.Println("Environment variable " + jwksPortEnvVar + " is not set.")
-		return ":" + string(httpsDefaultPort)
+		log.Printf("Environment variable %s could not be found.", jwksPortEnvVar)
+		return ":" + strconv.Itoa(httpsDefaultPort)
 	} else {
-		return ":" + os.Getenv(jwksPortEnvVar)
+		log.Printf("Reading from the environment varibale :%s.", jwksPortEnvVar)
+		return ":" + port
+	}
+}
+
+func resolveEnvFilePaths() {
+	certFilePath = os.Getenv(certEnvVar)
+	keyFilePath = os.Getenv(keyEnvVar)
+	if len(certFilePath) == 0 || len(keyFilePath) == 0 {
+		log.Printf("Reading from the environment variables %s and %s was found.", certEnvVar, keyEnvVar)
+		certFilePath = certFileDefaultPath
+		keyFilePath = keyFileDefaultPath
 	}
 }
 
 func getGeneratedJwks(w http.ResponseWriter, r *http.Request) {
-	log.Println("Generated the jwks.")
-	err := json.NewEncoder(w).Encode(resolver.Jwks)
-	if err != nil {
-		log.Printf("Unable to encode the json. %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-func getJwks(w http.ResponseWriter, r *http.Request) {
-	log.Println("Generated the jwks.")
-	err := json.NewEncoder(w).Encode(resolver.Jwks)
+	log.Println("Generated the JWKS.")
+	err := json.NewEncoder(w).Encode(jwksJson)
 	if err != nil {
 		log.Printf("Unable to encode the json. %s", err)
 		w.WriteHeader(http.StatusInternalServerError)

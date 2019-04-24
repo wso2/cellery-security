@@ -41,7 +41,7 @@ build-java-components:
 build-all: build-java-components docker-push
 
 .PHONY: docker-push
-docker-push: docker-push.sts-server-docker docker-push.envoy-oidc-filter
+docker-push: docker-push.sts-server-docker docker-push.envoy-oidc-filter docker-push.jwks-server
 
 .PHONY: docker.sts-server-docker
 docker.sts-server-docker:
@@ -71,11 +71,11 @@ build.jwks-server:
 
 .PHONY: docker.jwks-server
 docker.jwks-server: build.jwks-server
-	docker build -f $(PROJECT_ROOT)/docker/$(JWKS_SERVER_NAME)/Dockerfile $(BUILD_ROOT_JWKS) -t $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
+	docker build -f $(PROJECT_ROOT)/docker/$(JWKS_SERVER_NAME)/Dockerfile $(BUILD_ROOT_JWKS) -t $(DOCKER_REPO)/$(JWKS_SERVER_NAME):latest
 
 .PHONY: docker-push.jwks-server
 docker-push.jwks-server: docker.jwks-server
-	docker push $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
+	docker push $(DOCKER_REPO)/$(JWKS_SERVER_NAME):latest
 
 .PHONY: code.format
 code.format: tools.goimports
