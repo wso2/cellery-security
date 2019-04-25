@@ -40,6 +40,7 @@ import io.cellery.security.cell.sts.server.core.validators.DefaultCellSTSReqVali
 import io.cellery.security.cell.sts.server.core.validators.SelfContainedTokenValidator;
 import io.cellery.security.cell.sts.server.core.validators.TokenValidator;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -341,7 +342,7 @@ public class CelleryCellStsService {
             sc.init(null, new TrustManager[]{celleryTrustManager}, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier(
-                    new CelleryHostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier()));
+                    new CelleryHostnameVerifier(new DefaultHostnameVerifier()));
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
             throw new CelleryCellSTSException("Error while initializing SSL context");
         }
