@@ -39,19 +39,19 @@ var (
 )
 
 func KeyGenerator() (resources.JwksJson, error) {
-	keyB, certB, err := getKeyPair()
+	keyBytes, certBytes, err := getKeyPair()
 	if err != nil {
 		return resources.JwksJson{}, err
 	}
-	jwksJson, err := KeyResolver(keyB, certB)
+	jwksJson, err := KeyResolver(keyBytes, certBytes)
 	if err != nil {
 		return jwksJson, err
 	}
 	return jwksJson, nil
 }
 
-func KeyResolver(privateKeyStr []byte, certificateStr []byte) (resources.JwksJson, error) {
-	blockPriv, _ := pem.Decode([]byte(privateKeyStr))
+func KeyResolver(privateKeyBytes []byte, certificateBytes []byte) (resources.JwksJson, error) {
+	blockPriv, _ := pem.Decode([]byte(privateKeyBytes))
 	// To get RSA Private key
 	key, err := x509.ParsePKCS1PrivateKey(blockPriv.Bytes)
 	if err != nil {
@@ -59,7 +59,7 @@ func KeyResolver(privateKeyStr []byte, certificateStr []byte) (resources.JwksJso
 		return resources.JwksJson{}, err
 	}
 
-	blockCert, _ := pem.Decode([]byte(certificateStr))
+	blockCert, _ := pem.Decode([]byte(certificateBytes))
 	// To obtain a single certificate from the given ASN.1 DER data.
 	cert, err := x509.ParseCertificate(blockCert.Bytes)
 	if err != nil {

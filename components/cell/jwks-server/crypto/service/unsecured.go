@@ -19,7 +19,6 @@
 package service
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -35,10 +34,10 @@ func UnSecuredService() {
 }
 
 func getJwksJson(w http.ResponseWriter, r *http.Request) {
-	log.Println("Generated the jwks.")
-	err := json.NewEncoder(w).Encode(jwksJson)
+	w.Header().Set("Content-Type", "application/json")
+	status, err := w.Write(jsonBytesResponse)
 	if err != nil {
 		log.Printf("Unable to encode the json. %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 	}
 }

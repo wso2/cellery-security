@@ -41,10 +41,11 @@ const (
 )
 
 var (
-	httpsPortString string
-	jwksJson        resources.JwksJson
-	keyFilePath     string
-	certFilePath    string
+	httpsPortString   string
+	jwksJson          resources.JwksJson
+	jsonBytesResponse []byte
+	keyFilePath       string
+	certFilePath      string
 )
 
 func SSLSecuredService() error {
@@ -53,10 +54,8 @@ func SSLSecuredService() error {
 	keyData, certData, err := checkFiles()
 	if err == nil {
 		log.Println("Key file read from /etc/certs.")
-		log.Printf("Https Server initialized on Port %s.", httpsPortString)
-		log.Println("Key file read from /etc/certs.")
-		keyJson, err := resolver.KeyResolver(keyData, certData)
-		jwksJson = keyJson
+		jwksJson, err = resolver.KeyResolver(keyData, certData)
+		jsonBytesResponse, err = json.Marshal(jwksJson)
 		if err != nil {
 			log.Printf("Error occured while reloving keys with the file based key resolver. %s", err)
 			return err
@@ -76,6 +75,8 @@ func SSLSecuredService() error {
 
 func initSSLFileBased() error {
 	http.HandleFunc("/jwks", getGeneratedJwks)
+	log.Println("Generated key map :", jwksJson)
+	log.Printf("Https Server initialized on Port %s.", httpsPortString)
 	err := http.ListenAndServeTLS(httpsPortString, certFilePath, keyFilePath, nil)
 	if err != nil {
 		log.Printf("Listen And Serve: %s", err)
@@ -100,6 +101,7 @@ func generateCert() (tls.Certificate, error) {
 	keyJson, err := resolver.KeyGenerator()
 	keyBytes, certBytes := resolver.GetKeyAndCertBytes()
 	jwksJson = keyJson
+	jsonBytesResponse, err = json.Marshal(jwksJson)
 	if err != nil {
 		log.Printf("Error occured while generating the keys. %s", err)
 		return tls.Certificate{}, err
@@ -119,14 +121,12 @@ func initSSLServiceSelfGen() error {
 		Certificates: []tls.Certificate{cert},
 	}
 	log.Println("Generated key map :", jwksJson)
-	log.Println("Https Server initialized on Port " + string(httpsPortString) + ".")
+	log.Printf("Https Serverv initialized on Port %s.", httpsPortString)
 	http.HandleFunc("/jwks", getGeneratedJwks)
-
 	server := http.Server{
 		TLSConfig: tlsConfig,
 		Addr:      httpsPortString,
 	}
-	log.Println("Reading cert and key for https.")
 	err = server.ListenAndServeTLS("", "")
 	if err != nil {
 		log.Printf("Listen And Serve: %s", err)
@@ -157,10 +157,10 @@ func resolveEnvFilePaths() {
 }
 
 func getGeneratedJwks(w http.ResponseWriter, r *http.Request) {
-	log.Println("Generated the JWKS.")
-	err := json.NewEncoder(w).Encode(jwksJson)
+	w.Header().Set("Content-Type", "application/json")
+	status, err := w.Write(jsonBytesResponse)
 	if err != nil {
 		log.Printf("Unable to encode the json. %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 	}
 }
