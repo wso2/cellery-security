@@ -74,7 +74,7 @@ func SSLSecuredService() error {
 }
 
 func initSSLFileBased() error {
-	http.HandleFunc("", getGeneratedJwks)
+	http.HandleFunc("/", getGeneratedJwks)
 	log.Println("Generated key map :", jwksJson)
 	log.Printf("Https Server initialized on Port %s.", httpsPortString)
 	err := http.ListenAndServeTLS(httpsPortString, certFilePath, keyFilePath, nil)
@@ -122,7 +122,7 @@ func initSSLServiceSelfGen() error {
 	}
 	log.Println("Generated key map :", jwksJson)
 	log.Printf("Https Serverv initialized on Port %s.", httpsPortString)
-	http.HandleFunc("", getGeneratedJwks)
+	http.HandleFunc("/", getGeneratedJwks)
 	server := http.Server{
 		TLSConfig: tlsConfig,
 		Addr:      httpsPortString,
