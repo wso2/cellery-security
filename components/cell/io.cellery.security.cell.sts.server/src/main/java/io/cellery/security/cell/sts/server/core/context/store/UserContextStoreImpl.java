@@ -19,6 +19,7 @@ package io.cellery.security.cell.sts.server.core.context.store;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,8 @@ public class UserContextStoreImpl implements UserContextStore {
     private long getUserContextExpiry() {
 
         long expiryTimeInSecs = DEFAULT_EXPIRY_IN_SECONDS;
-        String expiryConfigValue = System.getenv(USER_CONTEXT_EXPIRY_IN_SECONDS);
+        String expiryConfigValue = CellStsUtils.resolveSystemVariable(USER_CONTEXT_EXPIRY_IN_SECONDS);
+
         if (StringUtils.isNotBlank(expiryConfigValue)) {
             try {
                 expiryTimeInSecs = Long.parseLong(expiryConfigValue);
