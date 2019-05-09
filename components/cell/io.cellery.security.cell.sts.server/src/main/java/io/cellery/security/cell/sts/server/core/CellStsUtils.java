@@ -172,4 +172,13 @@ public class CellStsUtils {
         return StringUtils.isNotEmpty(System.getenv("debug"));
     }
 
+    public static String resolveSystemVariable(String variableName) {
+
+        String systemVariable = System.getProperty(variableName);
+        if (StringUtils.isEmpty(systemVariable)) {
+            systemVariable = System.getenv(variableName);
+        }
+        return systemVariable;
+    }
+
 }
