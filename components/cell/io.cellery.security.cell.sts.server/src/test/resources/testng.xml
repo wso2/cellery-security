@@ -27,6 +27,7 @@
             <class name="io.cellery.security.cell.sts.server.core.context.store.UserContextStoreImplTest"/>
             <class name="io.cellery.security.cell.sts.server.core.validators.CelleryHostnameVerifierTest"/>
             <class name="io.cellery.security.cell.sts.server.core.validators.CelleryTrustManagerTest"/>
+            <class name="io.cellery.security.cell.sts.server.core.CellStsUtilsTest"/>
         </classes>
     </test>
 </suite>
