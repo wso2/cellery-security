@@ -28,6 +28,11 @@
             <class name="io.cellery.security.cell.sts.server.core.validators.CelleryHostnameVerifierTest"/>
             <class name="io.cellery.security.cell.sts.server.core.validators.CelleryTrustManagerTest"/>
             <class name="io.cellery.security.cell.sts.server.core.CellStsUtilsTest"/>
+            <class name="io.cellery.security.cell.sts.server.core.validators.DefaultCellSTSReqValidatorTest"/>
+            <class name="io.cellery.security.cell.sts.server.utils.CertificateUtilsTest"/>
+            <class name="io.cellery.security.cell.sts.server.core.STSTokenGeneratorTest"/>
+            <class name="io.cellery.security.cell.sts.server.core.validators.JWKSourceDataProviderTest"/>
+
         </classes>
     </test>
 </suite>
