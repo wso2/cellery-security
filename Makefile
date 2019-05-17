@@ -71,11 +71,11 @@ build.jwks-server:
 
 .PHONY: docker.jwks-server
 docker.jwks-server: build.jwks-server
-	docker build -f $(PROJECT_ROOT)/docker/$(JWKS_SERVER_NAME)/Dockerfile $(BUILD_ROOT_JWKS) -t $(DOCKER_REPO)/$(JWKS_SERVER_NAME):latest
+	docker build -f $(PROJECT_ROOT)/docker/$(JWKS_SERVER_NAME)/Dockerfile $(BUILD_ROOT_JWKS) -t $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
 
 .PHONY: docker-push.jwks-server
 docker-push.jwks-server: docker.jwks-server
-	docker push $(DOCKER_REPO)/$(JWKS_SERVER_NAME):latest
+	docker push $(DOCKER_REPO)/$(JWKS_SERVER_NAME):$(DOCKER_IMAGE_TAG)
 
 .PHONY: code.format
 code.format: tools.goimports
