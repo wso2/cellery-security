@@ -21,7 +21,7 @@
         <groupId>io.cellery.security</groupId>
         <artifactId>cellery-seucirity</artifactId>
         <relativePath>../../pom.xml</relativePath>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.1</version>
     </parent>
 
     <artifactId>io.cellery.security.sts.endpoint.core</artifactId>
