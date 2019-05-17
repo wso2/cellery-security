@@ -19,7 +19,9 @@
 
 package io.cellery.security.cell.sts.server.core.validators;
 
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,7 +49,9 @@ import javax.net.ssl.X509TrustManager;
  */
 public class CelleryTrustManager implements X509TrustManager {
 
-    public static final String TRUST_CERTS_LOCATION = "/etc/certs/trusted-certs";
+    public static final String TRUST_CERTS_DEFAULT_LOCATION = "/etc/certs/trusted-certs";
+    public static final String TRUST_CERTS_LOCATION_ENV = "TRUSTED_CERTS_LOCATION";
+    public String trustCertsLocation = TRUST_CERTS_DEFAULT_LOCATION;
 
     private static Log log = LogFactory.getLog(CelleryTrustManager.class);
     private X509TrustManager defaultTrustManager;
@@ -58,7 +62,11 @@ public class CelleryTrustManager implements X509TrustManager {
 
     public CelleryTrustManager() throws CelleryCellSTSException {
 
-        validateServerCertificate = Boolean.parseBoolean(System.getenv(VALIDATE_SERVER_CERT));
+        validateServerCertificate = Boolean.parseBoolean(CellStsUtils.resolveSystemVariable(VALIDATE_SERVER_CERT));
+        String customTrustCertsLocation = CellStsUtils.resolveSystemVariable(TRUST_CERTS_LOCATION_ENV);
+        if (StringUtils.isNotEmpty(customTrustCertsLocation)) {
+            trustCertsLocation = customTrustCertsLocation;
+        }
         log.info("validate server certificate is set to : " + validateServerCertificate);
         setupTrustManager();
     }
@@ -158,7 +166,7 @@ public class CelleryTrustManager implements X509TrustManager {
 
     private List<X509Certificate> readCertificates() throws CelleryCellSTSException {
 
-        File folder = new File(TRUST_CERTS_LOCATION);
+        File folder = new File(trustCertsLocation);
         File[] files = folder.listFiles();
         List<X509Certificate> trustedCerts = new ArrayList<>();
 
@@ -166,24 +174,27 @@ public class CelleryTrustManager implements X509TrustManager {
             Arrays.stream(files).forEach(file -> {
 
                 try {
-                    CertificateFactory fact = CertificateFactory.getInstance("X.509");
-                    try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    if (StringUtils.isNotEmpty(file.getName()) && file.getName().endsWith(".pem")) {
+                        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+                        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                            Collection<? extends Certificate> certificates = fact.generateCertificates(fileInputStream);
+                            if (certificates != null) {
+                                certificates.stream().forEach(certificate -> {
+                                    X509Certificate x509Certificate = (X509Certificate) certificate;
+                                    try {
+                                        keyStore.setCertificateEntry(x509Certificate.getIssuerDN().getName(),
+                                                x509Certificate);
+                                    } catch (KeyStoreException e) {
+                                        log.error("Error while adding certificate s {} " + certificate.toString(), e);
+                                    }
+                                    trustedCerts.add(x509Certificate);
+                                    log.debug("Added to trust store: " + x509Certificate.getIssuerDN().getName());
+                                });
+                            }
 
-                        Collection<? extends Certificate> certificates = fact.generateCertificates(fileInputStream);
-                        if (certificates != null) {
-                            certificates.stream().forEach(certificate -> {
-                                X509Certificate x509Certificate = (X509Certificate) certificate;
-                                try {
-                                    keyStore.setCertificateEntry(x509Certificate.getIssuerDN().getName(),
-                                            x509Certificate);
-                                } catch (KeyStoreException e) {
-                                    log.error("Error while adding certificate s {} " + certificate.toString(), e);
-                                }
-                                trustedCerts.add(x509Certificate);
-                                log.debug("Added to trust store: " + x509Certificate.getIssuerDN().getName());
-                            });
                         }
-
+                    } else {
+                        log.debug("Found a non certificate file : " + file.getName());
                     }
                 } catch (CertificateException | IOException e) {
                     log.error("Error while adding trusted certificte from file : " + file, e);

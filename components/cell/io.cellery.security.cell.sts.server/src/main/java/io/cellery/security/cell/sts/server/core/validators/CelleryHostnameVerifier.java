@@ -19,6 +19,8 @@
 
 package io.cellery.security.cell.sts.server.core.validators;
 
+import io.cellery.security.cell.sts.server.core.CellStsUtils;
+
 import java.util.Arrays;
 import java.util.Locale;
 import javax.net.ssl.HostnameVerifier;
@@ -36,7 +38,7 @@ public class CelleryHostnameVerifier implements HostnameVerifier {
     public CelleryHostnameVerifier(HostnameVerifier hostnameVerifier) {
 
         this.hostnameVerifier = hostnameVerifier;
-        verifyHostname = Boolean.parseBoolean(System.getenv(HOSTNAME_VERIFICATION_ENABLED));
+        verifyHostname = Boolean.parseBoolean(CellStsUtils.resolveSystemVariable(HOSTNAME_VERIFICATION_ENABLED));
     }
 
     private static final String[] LOCALHOSTS =

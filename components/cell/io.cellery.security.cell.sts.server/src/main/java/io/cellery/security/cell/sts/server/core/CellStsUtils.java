@@ -48,7 +48,7 @@ public class CellStsUtils {
 
     public static String getMyCellName() throws CelleryCellSTSException {
         // For now we pick the cell name from the environment variable.
-        String cellName = System.getenv(Constants.CELL_INSTANCE_NAME_ENV_VAR);
+        String cellName = resolveSystemVariable(Constants.CELL_INSTANCE_NAME_ENV_VAR);
         if (StringUtils.isBlank(cellName)) {
             throw new CelleryCellSTSException("Environment variable '" + Constants.CELL_INSTANCE_NAME_ENV_VAR + "'" +
                     " is empty.");
@@ -58,12 +58,12 @@ public class CellStsUtils {
 
     public static String getCellImageName() {
 
-        return System.getenv(Constants.CELL_IMAGE_NAME_ENV_VAR);
+        return resolveSystemVariable(Constants.CELL_IMAGE_NAME_ENV_VAR);
     }
 
     public static String getCellVersion() {
 
-        return System.getenv(Constants.CELL_VERSION_ENV_VAR);
+        return resolveSystemVariable(Constants.CELL_VERSION_ENV_VAR);
     }
 
     public static boolean isRequestToMicroGateway(CellStsRequest cellStsRequest) throws CelleryCellSTSException {
@@ -111,13 +111,13 @@ public class CellStsUtils {
 
     public static String getConfigFilePath() {
 
-        String configPath = System.getenv(STS_CONFIG_PATH_ENV_VARIABLE);
+        String configPath = resolveSystemVariable(STS_CONFIG_PATH_ENV_VARIABLE);
         return StringUtils.isNotBlank(configPath) ? configPath : CONFIG_FILE_PATH;
     }
 
     public static String getUnsecuredPathsConfigPath() {
 
-        String configPath = System.getenv(UNSECURED_PATHS_ENV_VARIABLE);
+        String configPath = resolveSystemVariable(UNSECURED_PATHS_ENV_VARIABLE);
         return StringUtils.isNotBlank(configPath) ? configPath : UNSECURED_PATHS_CONFIG_PATH;
     }
 
@@ -169,7 +169,16 @@ public class CellStsUtils {
      */
     public static boolean isRunningInDebugMode() {
 
-        return StringUtils.isNotEmpty(System.getenv("debug"));
+        return StringUtils.isNotEmpty(resolveSystemVariable("debug"));
+    }
+
+    public static String resolveSystemVariable(String variableName) {
+
+        String systemVariable = System.getProperty(variableName);
+        if (StringUtils.isEmpty(systemVariable)) {
+            systemVariable = System.getenv(variableName);
+        }
+        return systemVariable;
     }
 
 }
