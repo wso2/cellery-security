@@ -31,7 +31,6 @@
     <description>Cellery security implementations.</description>
 
     <modules>
-        <module>orbit/gogoproto-java</module>
         <module>cell/io.cellery.security.cell.sts.server</module>
         <module>global/io.cellery.security.extensions</module>
         <module>global/io.cellery.security.sts.endpoint.core</module>
