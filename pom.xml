@@ -172,9 +172,9 @@
                 <version>${log4j.slf4j.impl.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.cellery.security</groupId>
+                <groupId>org.wso2.orbit.gogoproto-java</groupId>
                 <artifactId>gogoproto-java</artifactId>
-                <version>${project.version}</version>
+                <version>${gogo-proto.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
@@ -359,6 +359,7 @@
 
     <properties>
         <google.protobuf.java.version>3.6.1</google.protobuf.java.version>
+        <gogo-proto.version>1.0.0.wso2v1</gogo-proto.version>
         <proto.google.common.protos.version>1.12.0</proto.google.common.protos.version>
         <json.simple.version>1.1.1</json.simple.version>
         <commons.lang.version>2.6</commons.lang.version>
