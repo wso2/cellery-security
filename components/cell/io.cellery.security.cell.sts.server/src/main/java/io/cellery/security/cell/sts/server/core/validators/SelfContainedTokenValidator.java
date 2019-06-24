@@ -42,6 +42,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
     private JWTSignatureValidator jwtValidator = new JWKSBasedJWTValidator();
     private static final Logger log = LoggerFactory.getLogger(SelfContainedTokenValidator.class);
     private static String globalIssuer = "https://sts.cellery.io";
+    public static final String KNATIVE_ACTIVATOR_WORKLOAD_REGEX = "^activator-.*\\.knative-serving$";
 
     /**
      * Validates a self contained access security.
@@ -118,8 +119,16 @@ public class SelfContainedTokenValidator implements TokenValidator {
             return;
         }
         String issuer = globalIssuer;
+        String workload = request.getSource().getWorkload();
         if (StringUtils.isNotEmpty(request.getSource().getCellInstanceName())) {
             issuer = CellStsUtils.getIssuerName(request.getSource().getCellInstanceName());
+        } else if (StringUtils.isNotEmpty(workload) && workload.matches(KNATIVE_ACTIVATOR_WORKLOAD_REGEX)) {
+            try {
+                log.debug("Request is received from the knative activator. Setting issuer to this cell");
+                issuer = CellStsUtils.getIssuerName(CellStsUtils.getMyCellName());
+            } catch (CelleryCellSTSException e) {
+                throw new TokenValidationFailureException("Cannot infer the issuer", e);
+            }
         }
         String issuerInToken = claimsSet.getIssuer();
         if (StringUtils.isEmpty(issuerInToken)) {
@@ -148,18 +157,29 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
 
         String jwkEndpoint = CellStsConfiguration.getInstance().getGlobalJWKEndpoint();
-
         String sourceCell = cellStsRequest.getSource().getCellInstanceName();
+        String workload = cellStsRequest.getSource().getWorkload();
+
+        if (StringUtils.isEmpty(sourceCell) && StringUtils.isNotEmpty(workload)
+                && workload.matches(KNATIVE_ACTIVATOR_WORKLOAD_REGEX)) {
+            try {
+                log.debug("Request is received from the knative activator. Setting source cell to this cell");
+                sourceCell = CellStsUtils.getMyCellName();
+            } catch (CelleryCellSTSException e) {
+                throw new TokenValidationFailureException("Cannot infer the source cell name", e);
+            }
+        }
+
         if (StringUtils.isNotEmpty(sourceCell)) {
-            int port = resolvePort(cellStsRequest.getSource().getCellInstanceName());
+            int port = resolvePort(sourceCell);
             try {
                 String hostname;
                 if (StringUtils.equalsIgnoreCase(sourceCell, CellStsUtils.getMyCellName())) {
                     hostname = "localhost";
                 } else {
-                    hostname = CellStsUtils.getIssuerName(cellStsRequest.getSource().getCellInstanceName());
+                    hostname = CellStsUtils.getIssuerName(sourceCell);
                 }
-                jwkEndpoint = "http://" + hostname + ":" + port;
+                jwkEndpoint = "https://" + hostname + ":" + port;
             } catch (CelleryCellSTSException e) {
                 throw new TokenValidationFailureException("Error while retrieving cell name", e);
             }

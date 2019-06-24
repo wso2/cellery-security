@@ -27,8 +27,6 @@ import io.cellery.security.cell.sts.server.core.service.CelleryCellSTSException;
 import io.cellery.security.cell.sts.server.core.service.CelleryCellStsService;
 import io.cellery.security.cell.sts.server.core.service.CelleryGWInboundInterceptorService;
 import io.cellery.security.cell.sts.server.core.service.CelleryGWSTSService;
-import io.cellery.security.cell.sts.server.jwks.JWKSServer;
-import io.cellery.security.cell.sts.server.jwks.KeyResolverException;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -142,16 +140,13 @@ public class CelleryCellSTSServer {
         int inboundListeningPort = getPortFromEnvVariable("inboundPort", 8080);
         int outboundListeningPort = getPortFromEnvVariable("outboundPort", 8081);
         int gatewayInboundPort = getPortFromEnvVariable("gatewayInboundPort", 8082);
-        int jwksEndpointPort = getPortFromEnvVariable("jwksPort", 8090);
 
         try {
             server = new CelleryCellSTSServer(inboundListeningPort, outboundListeningPort, gatewayInboundPort);
             server.start();
-            JWKSServer jwksServer = new JWKSServer(jwksEndpointPort);
-            jwksServer.startServer();
             watchConfigChanges();
             server.blockUntilShutdown();
-        } catch (CelleryCellSTSException | IOException | KeyResolverException | InterruptedException e) {
+        } catch (CelleryCellSTSException | IOException | InterruptedException e) {
             log.error("Error while starting up the Cell STS.", e);
             // To make the pod go to CrashLoopBackOff state if we encounter any error while starting up
             System.exit(1);
