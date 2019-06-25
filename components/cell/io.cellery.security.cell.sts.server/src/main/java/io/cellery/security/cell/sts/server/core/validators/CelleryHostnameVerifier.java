@@ -45,7 +45,8 @@ public class CelleryHostnameVerifier implements HostnameVerifier {
             {"::1", "127.0.0.1", "localhost", "localhost.localdomain"};
 
     // These hosts are only used in dev or demo. In production proper SANs should be added to certificates.
-    private static final String[] CELLERY_HOSTS = {"idp.cellery-system", "wso2-apim", "wso2-apim-gateway"};
+    private static final String[] CELLERY_HOSTS = {"gateway.cellery-system", "idp.cellery-system",
+            "wso2-apim", "wso2-apim-gateway"};
 
     static boolean containsHost(String host, String[] escapedHosts) {
 

@@ -50,9 +50,8 @@ public class CelleryHostnameVerifierTest {
     public Object[][] validHostnameDataProvider() {
 
         return new Object[][]{
-                {"LOCALHOST"}, {"localhost"}, {"127.0.0.1"}, {"idp.cellery-system"}, {"wso2-apim"},
-                {"wso2-apim-gateway"}
-
+                {"LOCALHOST"}, {"localhost"}, {"127.0.0.1"}, {"gateway.cellery-system"}, {"idp.cellery-system"},
+                {"wso2-apim"}, {"wso2-apim-gateway"}
         };
     }
 
