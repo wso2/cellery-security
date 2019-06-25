@@ -62,6 +62,7 @@ public class CelleryCellStsService {
     protected static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
     protected static final String AUTHORIZATION_HEADER_NAME = "authorization";
     protected static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
+    protected static final String KNATIVE_PROBE_HEADER_NAME = "k-network-probe";
     protected static final TokenValidator TOKEN_VALIDATOR = new SelfContainedTokenValidator();
     protected static final CellSTSRequestValidator REQUEST_VALIDATOR = new DefaultCellSTSReqValidator();
     protected static final AuthorizationService AUTHORIZATION_SERVICE = new AuthorizationService();
@@ -81,6 +82,11 @@ public class CelleryCellStsService {
     public void handleInboundRequest(CellStsRequest cellStsRequest,
                                      CellStsResponse cellStsResponse) throws CelleryCellSTSException {
 
+        if (cellStsRequest.getRequestHeaders().containsKey(KNATIVE_PROBE_HEADER_NAME)) {
+            log.debug("Ignoring knative probe request: {}:{} ", KNATIVE_PROBE_HEADER_NAME,
+                    cellStsRequest.getRequestHeaders().get(KNATIVE_PROBE_HEADER_NAME));
+            return;
+        }
         // Extract the requestId
         String requestId = cellStsRequest.getRequestId();
         JWTClaimsSet jwtClaims;
