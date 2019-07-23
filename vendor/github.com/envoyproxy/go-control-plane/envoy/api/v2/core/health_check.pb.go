@@ -3,20 +3,21 @@
 
 package core
 
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import _ "github.com/gogo/protobuf/gogoproto"
-import types "github.com/gogo/protobuf/types"
-import _ "github.com/lyft/protoc-gen-validate/validate"
+import (
+	bytes "bytes"
+	fmt "fmt"
+	io "io"
+	math "math"
+	time "time"
 
-import time "time"
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	types "github.com/gogo/protobuf/types"
 
-import bytes "bytes"
-
-import github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
-
-import io "io"
+	_type "github.com/envoyproxy/go-control-plane/envoy/type"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -49,6 +50,8 @@ const (
 	// Health check timed out. This is part of HDS and is interpreted by Envoy as
 	// *UNHEALTHY*.
 	HealthStatus_TIMEOUT HealthStatus = 4
+	// Degraded.
+	HealthStatus_DEGRADED HealthStatus = 5
 )
 
 var HealthStatus_name = map[int32]string{
@@ -57,20 +60,24 @@ var HealthStatus_name = map[int32]string{
 	2: "UNHEALTHY",
 	3: "DRAINING",
 	4: "TIMEOUT",
+	5: "DEGRADED",
 }
+
 var HealthStatus_value = map[string]int32{
 	"UNKNOWN":   0,
 	"HEALTHY":   1,
 	"UNHEALTHY": 2,
 	"DRAINING":  3,
 	"TIMEOUT":   4,
+	"DEGRADED":  5,
 }
 
 func (x HealthStatus) String() string {
 	return proto.EnumName(HealthStatus_name, int32(x))
 }
+
 func (HealthStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0}
 }
 
 type HealthCheck struct {
@@ -79,7 +86,11 @@ type HealthCheck struct {
 	Timeout *time.Duration `protobuf:"bytes,1,opt,name=timeout,proto3,stdduration" json:"timeout,omitempty"`
 	// The interval between health checks.
 	Interval *time.Duration `protobuf:"bytes,2,opt,name=interval,proto3,stdduration" json:"interval,omitempty"`
-	// An optional jitter amount in millseconds. If specified, during every
+	// An optional jitter amount in milliseconds. If specified, Envoy will start health
+	// checking after for a random time in ms between 0 and initial_jitter. This only
+	// applies to the first health check.
+	InitialJitter *types.Duration `protobuf:"bytes,20,opt,name=initial_jitter,json=initialJitter,proto3" json:"initial_jitter,omitempty"`
+	// An optional jitter amount in milliseconds. If specified, during every
 	// interval Envoy will add interval_jitter to the wait time.
 	IntervalJitter *types.Duration `protobuf:"bytes,3,opt,name=interval_jitter,json=intervalJitter,proto3" json:"interval_jitter,omitempty"`
 	// An optional jitter amount as a percentage of interval_ms. If specified,
@@ -151,7 +162,7 @@ func (m *HealthCheck) Reset()         { *m = HealthCheck{} }
 func (m *HealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck) ProtoMessage()    {}
 func (*HealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0}
 }
 func (m *HealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -168,8 +179,8 @@ func (m *HealthCheck) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck.Merge(dst, src)
+func (m *HealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck.Merge(m, src)
 }
 func (m *HealthCheck) XXX_Size() int {
 	return m.Size()
@@ -222,6 +233,13 @@ func (m *HealthCheck) GetTimeout() *time.Duration {
 func (m *HealthCheck) GetInterval() *time.Duration {
 	if m != nil {
 		return m.Interval
+	}
+	return nil
+}
+
+func (m *HealthCheck) GetInitialJitter() *types.Duration {
+	if m != nil {
+		return m.InitialJitter
 	}
 	return nil
 }
@@ -465,7 +483,7 @@ func (m *HealthCheck_Payload) Reset()         { *m = HealthCheck_Payload{} }
 func (m *HealthCheck_Payload) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_Payload) ProtoMessage()    {}
 func (*HealthCheck_Payload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 0}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 0}
 }
 func (m *HealthCheck_Payload) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -482,8 +500,8 @@ func (m *HealthCheck_Payload) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_Payload) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_Payload.Merge(dst, src)
+func (m *HealthCheck_Payload) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_Payload.Merge(m, src)
 }
 func (m *HealthCheck_Payload) XXX_Size() int {
 	return m.Size()
@@ -598,7 +616,7 @@ func _HealthCheck_Payload_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-// [#comment:next free field: 9]
+// [#comment:next free field: 10]
 type HealthCheck_HttpHealthCheck struct {
 	// The value of the host header in the HTTP health check request. If
 	// left empty (default value), the name of the cluster this health check is associated
@@ -624,17 +642,21 @@ type HealthCheck_HttpHealthCheck struct {
 	// health checked cluster.
 	RequestHeadersToRemove []string `protobuf:"bytes,8,rep,name=request_headers_to_remove,json=requestHeadersToRemove,proto3" json:"request_headers_to_remove,omitempty"`
 	// If set, health checks will be made using http/2.
-	UseHttp2             bool     `protobuf:"varint,7,opt,name=use_http2,json=useHttp2,proto3" json:"use_http2,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	UseHttp2 bool `protobuf:"varint,7,opt,name=use_http2,json=useHttp2,proto3" json:"use_http2,omitempty"`
+	// Specifies a list of HTTP response statuses considered healthy. If provided, replaces default
+	// 200-only policy - 200 must be included explicitly as needed. Ranges follow half-open
+	// semantics of :ref:`Int64Range <envoy_api_msg_type.Int64Range>`.
+	ExpectedStatuses     []*_type.Int64Range `protobuf:"bytes,9,rep,name=expected_statuses,json=expectedStatuses,proto3" json:"expected_statuses,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *HealthCheck_HttpHealthCheck) Reset()         { *m = HealthCheck_HttpHealthCheck{} }
 func (m *HealthCheck_HttpHealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_HttpHealthCheck) ProtoMessage()    {}
 func (*HealthCheck_HttpHealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 1}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 1}
 }
 func (m *HealthCheck_HttpHealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -651,8 +673,8 @@ func (m *HealthCheck_HttpHealthCheck) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_HttpHealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_HttpHealthCheck.Merge(dst, src)
+func (m *HealthCheck_HttpHealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_HttpHealthCheck.Merge(m, src)
 }
 func (m *HealthCheck_HttpHealthCheck) XXX_Size() int {
 	return m.Size()
@@ -719,6 +741,13 @@ func (m *HealthCheck_HttpHealthCheck) GetUseHttp2() bool {
 	return false
 }
 
+func (m *HealthCheck_HttpHealthCheck) GetExpectedStatuses() []*_type.Int64Range {
+	if m != nil {
+		return m.ExpectedStatuses
+	}
+	return nil
+}
+
 type HealthCheck_TcpHealthCheck struct {
 	// Empty payloads imply a connect-only health check.
 	Send *HealthCheck_Payload `protobuf:"bytes,1,opt,name=send,proto3" json:"send,omitempty"`
@@ -735,7 +764,7 @@ func (m *HealthCheck_TcpHealthCheck) Reset()         { *m = HealthCheck_TcpHealt
 func (m *HealthCheck_TcpHealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_TcpHealthCheck) ProtoMessage()    {}
 func (*HealthCheck_TcpHealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 2}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 2}
 }
 func (m *HealthCheck_TcpHealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -752,8 +781,8 @@ func (m *HealthCheck_TcpHealthCheck) XXX_Marshal(b []byte, deterministic bool) (
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_TcpHealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_TcpHealthCheck.Merge(dst, src)
+func (m *HealthCheck_TcpHealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_TcpHealthCheck.Merge(m, src)
 }
 func (m *HealthCheck_TcpHealthCheck) XXX_Size() int {
 	return m.Size()
@@ -793,7 +822,7 @@ func (m *HealthCheck_RedisHealthCheck) Reset()         { *m = HealthCheck_RedisH
 func (m *HealthCheck_RedisHealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_RedisHealthCheck) ProtoMessage()    {}
 func (*HealthCheck_RedisHealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 3}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 3}
 }
 func (m *HealthCheck_RedisHealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -810,8 +839,8 @@ func (m *HealthCheck_RedisHealthCheck) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_RedisHealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_RedisHealthCheck.Merge(dst, src)
+func (m *HealthCheck_RedisHealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_RedisHealthCheck.Merge(m, src)
 }
 func (m *HealthCheck_RedisHealthCheck) XXX_Size() int {
 	return m.Size()
@@ -853,7 +882,7 @@ func (m *HealthCheck_GrpcHealthCheck) Reset()         { *m = HealthCheck_GrpcHea
 func (m *HealthCheck_GrpcHealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_GrpcHealthCheck) ProtoMessage()    {}
 func (*HealthCheck_GrpcHealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 4}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 4}
 }
 func (m *HealthCheck_GrpcHealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -870,8 +899,8 @@ func (m *HealthCheck_GrpcHealthCheck) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_GrpcHealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_GrpcHealthCheck.Merge(dst, src)
+func (m *HealthCheck_GrpcHealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_GrpcHealthCheck.Merge(m, src)
 }
 func (m *HealthCheck_GrpcHealthCheck) XXX_Size() int {
 	return m.Size()
@@ -916,7 +945,7 @@ func (m *HealthCheck_CustomHealthCheck) Reset()         { *m = HealthCheck_Custo
 func (m *HealthCheck_CustomHealthCheck) String() string { return proto.CompactTextString(m) }
 func (*HealthCheck_CustomHealthCheck) ProtoMessage()    {}
 func (*HealthCheck_CustomHealthCheck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_health_check_716df7b498b2ed9f, []int{0, 5}
+	return fileDescriptor_b6ca44dd529b90bd, []int{0, 5}
 }
 func (m *HealthCheck_CustomHealthCheck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -933,8 +962,8 @@ func (m *HealthCheck_CustomHealthCheck) XXX_Marshal(b []byte, deterministic bool
 		return b[:n], nil
 	}
 }
-func (dst *HealthCheck_CustomHealthCheck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HealthCheck_CustomHealthCheck.Merge(dst, src)
+func (m *HealthCheck_CustomHealthCheck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HealthCheck_CustomHealthCheck.Merge(m, src)
 }
 func (m *HealthCheck_CustomHealthCheck) XXX_Size() int {
 	return m.Size()
@@ -1065,6 +1094,7 @@ func _HealthCheck_CustomHealthCheck_OneofSizer(msg proto.Message) (n int) {
 }
 
 func init() {
+	proto.RegisterEnum("envoy.api.v2.core.HealthStatus", HealthStatus_name, HealthStatus_value)
 	proto.RegisterType((*HealthCheck)(nil), "envoy.api.v2.core.HealthCheck")
 	proto.RegisterType((*HealthCheck_Payload)(nil), "envoy.api.v2.core.HealthCheck.Payload")
 	proto.RegisterType((*HealthCheck_HttpHealthCheck)(nil), "envoy.api.v2.core.HealthCheck.HttpHealthCheck")
@@ -1072,8 +1102,93 @@ func init() {
 	proto.RegisterType((*HealthCheck_RedisHealthCheck)(nil), "envoy.api.v2.core.HealthCheck.RedisHealthCheck")
 	proto.RegisterType((*HealthCheck_GrpcHealthCheck)(nil), "envoy.api.v2.core.HealthCheck.GrpcHealthCheck")
 	proto.RegisterType((*HealthCheck_CustomHealthCheck)(nil), "envoy.api.v2.core.HealthCheck.CustomHealthCheck")
-	proto.RegisterEnum("envoy.api.v2.core.HealthStatus", HealthStatus_name, HealthStatus_value)
 }
+
+func init() {
+	proto.RegisterFile("envoy/api/v2/core/health_check.proto", fileDescriptor_b6ca44dd529b90bd)
+}
+
+var fileDescriptor_b6ca44dd529b90bd = []byte{
+	// 1224 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x96, 0xcb, 0x6e, 0xdb, 0x46,
+	0x17, 0xc7, 0x45, 0x4b, 0xb6, 0xa4, 0x23, 0x59, 0xa6, 0x46, 0x89, 0xcd, 0xe8, 0xf3, 0xe7, 0xa8,
+	0x85, 0x51, 0x18, 0x01, 0x2a, 0xb5, 0x4a, 0x91, 0x22, 0x5d, 0xc5, 0xb2, 0x15, 0x4b, 0x69, 0xa2,
+	0x18, 0x13, 0x39, 0x45, 0x80, 0x16, 0xec, 0x98, 0x1c, 0x53, 0x6c, 0x68, 0x0e, 0x3b, 0x1c, 0x2a,
+	0xd1, 0x4b, 0x74, 0xd1, 0x55, 0x1f, 0xa1, 0xc8, 0xa6, 0xdb, 0xa2, 0xab, 0x2c, 0xbb, 0xec, 0x1b,
+	0xb4, 0xf0, 0xaa, 0xe9, 0x23, 0x74, 0x55, 0xcc, 0x90, 0x92, 0x75, 0x71, 0x61, 0x1b, 0xdd, 0x71,
+	0xce, 0x39, 0xff, 0xdf, 0x5c, 0xce, 0x05, 0x84, 0x6d, 0xea, 0x0f, 0xd9, 0xa8, 0x41, 0x02, 0xb7,
+	0x31, 0x6c, 0x36, 0x2c, 0xc6, 0x69, 0x63, 0x40, 0x89, 0x27, 0x06, 0xa6, 0x35, 0xa0, 0xd6, 0xcb,
+	0x7a, 0xc0, 0x99, 0x60, 0xa8, 0xac, 0xa2, 0xea, 0x24, 0x70, 0xeb, 0xc3, 0x66, 0x5d, 0x46, 0x55,
+	0x37, 0x17, 0x85, 0xc7, 0x24, 0xa4, 0xb1, 0xa0, 0xba, 0x1e, 0x7b, 0xc5, 0x28, 0xa0, 0x0d, 0x4e,
+	0x7c, 0x67, 0x6c, 0xbf, 0xe5, 0x30, 0xe6, 0x78, 0xb4, 0xa1, 0x56, 0xc7, 0xd1, 0x49, 0x83, 0xf8,
+	0xa3, 0xc4, 0xb5, 0x35, 0xef, 0xb2, 0x23, 0x4e, 0x84, 0xcb, 0xfc, 0xc4, 0xbf, 0x39, 0xef, 0x0f,
+	0x05, 0x8f, 0x2c, 0xf1, 0x6f, 0xea, 0x57, 0x9c, 0x04, 0x01, 0xe5, 0x61, 0xe2, 0xdf, 0x18, 0x12,
+	0xcf, 0xb5, 0x89, 0xa0, 0x8d, 0xf1, 0x47, 0xe2, 0xb8, 0xe1, 0x30, 0x87, 0xa9, 0xcf, 0x86, 0xfc,
+	0x8a, 0xad, 0xef, 0xff, 0x5d, 0x81, 0x42, 0x47, 0xbd, 0xc3, 0x9e, 0x7c, 0x06, 0xd4, 0x86, 0xac,
+	0x70, 0x4f, 0x29, 0x8b, 0x84, 0xa1, 0xd5, 0xb4, 0x9d, 0x42, 0xf3, 0x56, 0x3d, 0xde, 0xb0, 0x3e,
+	0xde, 0xb0, 0xbe, 0x9f, 0x1c, 0xb7, 0xa5, 0xff, 0xf0, 0xfb, 0x6d, 0xed, 0x97, 0x77, 0x6f, 0xd3,
+	0xd9, 0x37, 0x5a, 0x26, 0xa7, 0xdd, 0x49, 0xe1, 0xb1, 0x16, 0x1d, 0x40, 0xce, 0xf5, 0x05, 0xe5,
+	0x43, 0xe2, 0x19, 0x4b, 0xd7, 0xe7, 0x4c, 0xc4, 0xe8, 0x01, 0x94, 0x5c, 0xdf, 0x15, 0x2e, 0xf1,
+	0xcc, 0x6f, 0x5c, 0x21, 0x28, 0x37, 0x6e, 0x5c, 0x82, 0xc3, 0xab, 0x89, 0xe0, 0x91, 0x8a, 0x47,
+	0x2d, 0x58, 0x1b, 0xd3, 0xc6, 0x88, 0xf4, 0x65, 0x88, 0xd2, 0x58, 0x91, 0x30, 0xee, 0xc1, 0xc6,
+	0x1c, 0xc3, 0x0c, 0x28, 0xb7, 0xa8, 0x2f, 0x0c, 0x54, 0xd3, 0x76, 0x56, 0xf1, 0xcd, 0x59, 0xc1,
+	0x61, 0xec, 0x44, 0x4f, 0xa0, 0x12, 0xf9, 0x71, 0x99, 0x8d, 0x4c, 0x31, 0xe0, 0x34, 0x1c, 0x30,
+	0xcf, 0x36, 0x32, 0x6a, 0xff, 0xcd, 0x85, 0xfd, 0x8f, 0xba, 0xbe, 0xb8, 0xdb, 0x7c, 0x4e, 0xbc,
+	0x88, 0x62, 0x34, 0x11, 0xf6, 0xc7, 0x3a, 0xd4, 0x85, 0xf2, 0x22, 0x6c, 0xf9, 0x0a, 0x30, 0x7d,
+	0x01, 0xf5, 0x29, 0xe4, 0x88, 0x27, 0xcc, 0x80, 0x71, 0x61, 0xac, 0x5c, 0x81, 0x90, 0x25, 0x9e,
+	0x38, 0x64, 0x5c, 0xa0, 0x36, 0xe8, 0x9c, 0x46, 0x21, 0x35, 0x2d, 0xe6, 0xfb, 0xd4, 0x92, 0xcf,
+	0x65, 0x64, 0x15, 0xa0, 0xba, 0x00, 0x68, 0x31, 0xe6, 0xc5, 0xf2, 0x35, 0xa5, 0xd9, 0x9b, 0x48,
+	0xd0, 0x97, 0x50, 0x1e, 0x08, 0x11, 0x98, 0xd3, 0x3d, 0x68, 0xe4, 0x14, 0xa7, 0x5e, 0x5f, 0x68,
+	0xc2, 0xfa, 0x54, 0x89, 0xd6, 0x3b, 0x42, 0x04, 0x53, 0xeb, 0x4e, 0x0a, 0xaf, 0x0d, 0x66, 0x4d,
+	0xe8, 0x05, 0xe8, 0xc2, 0x9a, 0x83, 0xe7, 0x15, 0xfc, 0xc3, 0x4b, 0xe0, 0x7d, 0x6b, 0x8e, 0x5d,
+	0x12, 0x33, 0x16, 0x79, 0x70, 0x87, 0x07, 0xd6, 0x2c, 0xbb, 0x70, 0xa5, 0x83, 0x1f, 0xf0, 0xc0,
+	0x9a, 0x3b, 0xb8, 0x33, 0x6b, 0x42, 0xc7, 0x50, 0xb1, 0xa2, 0x50, 0xb0, 0xd3, 0x59, 0xfe, 0xaa,
+	0xe2, 0x7f, 0x74, 0x09, 0x7f, 0x4f, 0x29, 0x67, 0x77, 0x28, 0x5b, 0xf3, 0x46, 0x74, 0x04, 0x15,
+	0x9f, 0x99, 0x82, 0x93, 0x93, 0x13, 0xd7, 0x32, 0x27, 0x6d, 0x5a, 0xbc, 0xac, 0x4d, 0x41, 0xb6,
+	0xe8, 0xf2, 0x1b, 0x6d, 0xe9, 0x4e, 0x0a, 0x97, 0x7d, 0xd6, 0x8f, 0x01, 0xdd, 0x71, 0xa7, 0xf6,
+	0xe1, 0xbc, 0x64, 0xcf, 0xa9, 0xa5, 0x6b, 0x51, 0x27, 0x80, 0x09, 0xf5, 0x2b, 0xd8, 0x38, 0xa7,
+	0x52, 0xdb, 0xa1, 0xe7, 0xe8, 0xb5, 0xeb, 0xa0, 0x6f, 0x4e, 0x28, 0x6d, 0xdb, 0xa1, 0x13, 0xfc,
+	0x0b, 0xb8, 0x79, 0x31, 0x5c, 0xbf, 0x0e, 0xbc, 0x72, 0x11, 0x7a, 0x1b, 0x4a, 0x74, 0x48, 0x7d,
+	0x61, 0x7a, 0xcc, 0x31, 0x03, 0x22, 0x06, 0x46, 0xb9, 0xa6, 0xed, 0xe4, 0x71, 0x51, 0x59, 0x1f,
+	0x33, 0xe7, 0x90, 0x88, 0x01, 0x7a, 0x08, 0x35, 0xe2, 0xbd, 0x22, 0xa3, 0x50, 0x85, 0x4d, 0x27,
+	0xdd, 0x3c, 0x21, 0xae, 0x17, 0x71, 0x1a, 0x1a, 0x95, 0x9a, 0xb6, 0x93, 0xc3, 0x9b, 0x71, 0xdc,
+	0x63, 0xe6, 0x4c, 0x25, 0xf3, 0x61, 0x12, 0x53, 0x7d, 0x0e, 0xd9, 0x43, 0x32, 0xf2, 0x18, 0xb1,
+	0xd1, 0x6d, 0xc8, 0x08, 0xfa, 0x3a, 0x9e, 0xdf, 0xf9, 0x56, 0x5e, 0x9e, 0x33, 0xc3, 0x97, 0x6a,
+	0x5a, 0x27, 0x85, 0x95, 0x03, 0x19, 0xb0, 0x72, 0xec, 0xfa, 0x84, 0x8f, 0xd4, 0x68, 0x2e, 0x76,
+	0x52, 0x38, 0x59, 0xb7, 0x74, 0xc8, 0x06, 0x09, 0x65, 0xf9, 0xe7, 0x77, 0x6f, 0xd3, 0x5a, 0xf5,
+	0xaf, 0x34, 0xac, 0xcd, 0x35, 0x1c, 0x42, 0x90, 0x19, 0xb0, 0x30, 0xd9, 0x00, 0xab, 0x6f, 0xf4,
+	0x7f, 0xc8, 0xa8, 0x3b, 0x2e, 0xcd, 0x6d, 0x8a, 0x95, 0x19, 0x7d, 0x06, 0x99, 0x90, 0xfa, 0x76,
+	0x32, 0x79, 0x3f, 0xb8, 0xa4, 0x90, 0x93, 0x9b, 0x60, 0xa5, 0x41, 0x0f, 0x20, 0xcb, 0xa9, 0x45,
+	0xdd, 0x21, 0x4d, 0x06, 0xe7, 0x55, 0xe5, 0x63, 0x19, 0x7a, 0x0f, 0x8a, 0x21, 0xe5, 0x43, 0xd7,
+	0xa2, 0xa6, 0x4f, 0x4e, 0xa9, 0x1a, 0x99, 0x79, 0x5c, 0x48, 0x6c, 0x3d, 0x72, 0x4a, 0xd1, 0x09,
+	0xac, 0x73, 0xfa, 0x6d, 0x44, 0x43, 0x21, 0x93, 0x60, 0x53, 0x1e, 0x9a, 0x82, 0x99, 0xc4, 0xb6,
+	0x8d, 0x95, 0x5a, 0x7a, 0xa7, 0xd0, 0xdc, 0xbe, 0x78, 0x4f, 0x9b, 0x72, 0x35, 0xe0, 0x9e, 0x06,
+	0xaa, 0x28, 0x0a, 0xf2, 0xde, 0x2b, 0xdf, 0x6b, 0x69, 0xfd, 0xcf, 0x2c, 0xae, 0x24, 0xc0, 0x38,
+	0x2c, 0xec, 0xb3, 0x5d, 0xdb, 0x46, 0xf7, 0xe1, 0xd6, 0x05, 0xfb, 0x70, 0x7a, 0xca, 0x86, 0xd4,
+	0xc8, 0xd5, 0xd2, 0x3b, 0x79, 0xbc, 0x3e, 0xaf, 0xc3, 0xca, 0x8b, 0xfe, 0x07, 0x79, 0x39, 0x77,
+	0xe5, 0xac, 0x6b, 0xaa, 0x91, 0x9b, 0xc3, 0xb9, 0x28, 0xa4, 0x32, 0x3b, 0x4d, 0xb4, 0x07, 0x65,
+	0xfa, 0x3a, 0xa0, 0x96, 0xa0, 0xb6, 0x19, 0x0a, 0x22, 0xa2, 0x90, 0x86, 0x46, 0x5e, 0x1d, 0x7d,
+	0x3d, 0x39, 0xba, 0xfc, 0x47, 0xa9, 0x77, 0x7d, 0x71, 0xef, 0x13, 0x2c, 0x7f, 0x54, 0xb0, 0x3e,
+	0x16, 0x3c, 0x4b, 0xe2, 0xab, 0xdf, 0x69, 0x50, 0x9a, 0x1d, 0x80, 0x93, 0xc4, 0x69, 0xff, 0x2d,
+	0x71, 0x4b, 0xea, 0x24, 0xd7, 0x4d, 0x5c, 0x75, 0x1b, 0x74, 0x4c, 0x6d, 0x37, 0x9c, 0x3e, 0x91,
+	0x0e, 0xe9, 0x97, 0x74, 0x94, 0x14, 0x9f, 0xfc, 0xac, 0x62, 0x58, 0x9b, 0x1b, 0xad, 0x0b, 0x19,
+	0xd7, 0x16, 0x33, 0xbe, 0x09, 0x79, 0x12, 0x89, 0x01, 0xe3, 0xae, 0x88, 0x1b, 0x21, 0x8f, 0xcf,
+	0x0d, 0xd5, 0x9f, 0x34, 0x28, 0x2f, 0xcc, 0x53, 0x59, 0xe5, 0xe7, 0xb8, 0x99, 0x2a, 0x97, 0x66,
+	0xf4, 0x31, 0xac, 0x58, 0xcc, 0x3f, 0x71, 0x9d, 0xe4, 0x9f, 0x67, 0x63, 0x61, 0x7c, 0x3c, 0x53,
+	0xbf, 0x72, 0xb2, 0xe3, 0xe2, 0x40, 0x74, 0x1f, 0x8a, 0x32, 0x2f, 0xb6, 0x99, 0x08, 0xe3, 0x06,
+	0xb9, 0xb1, 0x20, 0xdc, 0xf5, 0x47, 0x9d, 0x14, 0x2e, 0xa8, 0xd8, 0x3d, 0x15, 0xda, 0x5a, 0x85,
+	0x42, 0x2c, 0x32, 0xa5, 0xb5, 0xb5, 0x01, 0xa5, 0xe9, 0xf1, 0x41, 0x79, 0xd2, 0xc2, 0x8f, 0x32,
+	0x39, 0xd0, 0x0b, 0x18, 0x71, 0xf9, 0x90, 0x33, 0x13, 0xe6, 0xce, 0xd7, 0x50, 0x8c, 0x6f, 0x17,
+	0x57, 0x00, 0x2a, 0x40, 0xf6, 0xa8, 0xf7, 0x79, 0xef, 0xe9, 0x17, 0x3d, 0x3d, 0x25, 0x17, 0x9d,
+	0xf6, 0xee, 0xe3, 0x7e, 0xe7, 0x85, 0xae, 0xa1, 0x55, 0xc8, 0x1f, 0xf5, 0xc6, 0xcb, 0x25, 0x54,
+	0x84, 0xdc, 0x3e, 0xde, 0xed, 0xf6, 0xba, 0xbd, 0x03, 0x3d, 0x2d, 0x23, 0xfb, 0xdd, 0x27, 0xed,
+	0xa7, 0x47, 0x7d, 0x3d, 0xa3, 0x5c, 0xed, 0x03, 0xbc, 0xbb, 0xdf, 0xde, 0xd7, 0x97, 0x5b, 0xed,
+	0x1f, 0xcf, 0xb6, 0xb4, 0x5f, 0xcf, 0xb6, 0xb4, 0xdf, 0xce, 0xb6, 0xb4, 0x3f, 0xce, 0xb6, 0x34,
+	0xb8, 0xed, 0xb2, 0xb8, 0x0a, 0x02, 0xce, 0x5e, 0x8f, 0x16, 0x0b, 0xa2, 0xa5, 0x4f, 0x3d, 0xf8,
+	0xa1, 0xbc, 0xfe, 0xa1, 0x76, 0xbc, 0xa2, 0xde, 0xe1, 0xee, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff,
+	0x36, 0x02, 0xaa, 0xc6, 0xc5, 0x0b, 0x00, 0x00,
+}
+
 func (this *HealthCheck) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1109,6 +1224,9 @@ func (this *HealthCheck) Equal(that interface{}) bool {
 	} else if this.Interval != nil {
 		return false
 	} else if that1.Interval != nil {
+		return false
+	}
+	if !this.InitialJitter.Equal(that1.InitialJitter) {
 		return false
 	}
 	if !this.IntervalJitter.Equal(that1.IntervalJitter) {
@@ -1390,6 +1508,14 @@ func (this *HealthCheck_HttpHealthCheck) Equal(that interface{}) bool {
 	}
 	if this.UseHttp2 != that1.UseHttp2 {
 		return false
+	}
+	if len(this.ExpectedStatuses) != len(that1.ExpectedStatuses) {
+		return false
+	}
+	for i := range this.ExpectedStatuses {
+		if !this.ExpectedStatuses[i].Equal(that1.ExpectedStatuses[i]) {
+			return false
+		}
 	}
 	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
 		return false
@@ -1733,6 +1859,18 @@ func (m *HealthCheck) MarshalTo(dAtA []byte) (int, error) {
 		}
 		i++
 	}
+	if m.InitialJitter != nil {
+		dAtA[i] = 0xa2
+		i++
+		dAtA[i] = 0x1
+		i++
+		i = encodeVarintHealthCheck(dAtA, i, uint64(m.InitialJitter.Size()))
+		n13, err := m.InitialJitter.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n13
+	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
 	}
@@ -1745,11 +1883,11 @@ func (m *HealthCheck_HttpHealthCheck_) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x42
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.HttpHealthCheck.Size()))
-		n13, err := m.HttpHealthCheck.MarshalTo(dAtA[i:])
+		n14, err := m.HttpHealthCheck.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n13
+		i += n14
 	}
 	return i, nil
 }
@@ -1759,11 +1897,11 @@ func (m *HealthCheck_TcpHealthCheck_) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x4a
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.TcpHealthCheck.Size()))
-		n14, err := m.TcpHealthCheck.MarshalTo(dAtA[i:])
+		n15, err := m.TcpHealthCheck.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n14
+		i += n15
 	}
 	return i, nil
 }
@@ -1773,11 +1911,11 @@ func (m *HealthCheck_GrpcHealthCheck_) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x5a
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.GrpcHealthCheck.Size()))
-		n15, err := m.GrpcHealthCheck.MarshalTo(dAtA[i:])
+		n16, err := m.GrpcHealthCheck.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n15
+		i += n16
 	}
 	return i, nil
 }
@@ -1787,11 +1925,11 @@ func (m *HealthCheck_CustomHealthCheck_) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x6a
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.CustomHealthCheck.Size()))
-		n16, err := m.CustomHealthCheck.MarshalTo(dAtA[i:])
+		n17, err := m.CustomHealthCheck.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n16
+		i += n17
 	}
 	return i, nil
 }
@@ -1811,11 +1949,11 @@ func (m *HealthCheck_Payload) MarshalTo(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	if m.Payload != nil {
-		nn17, err := m.Payload.MarshalTo(dAtA[i:])
+		nn18, err := m.Payload.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += nn17
+		i += nn18
 	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
@@ -1872,21 +2010,21 @@ func (m *HealthCheck_HttpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x1a
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.Send.Size()))
-		n18, err := m.Send.MarshalTo(dAtA[i:])
+		n19, err := m.Send.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n18
+		i += n19
 	}
 	if m.Receive != nil {
 		dAtA[i] = 0x22
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.Receive.Size()))
-		n19, err := m.Receive.MarshalTo(dAtA[i:])
+		n20, err := m.Receive.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n19
+		i += n20
 	}
 	if len(m.ServiceName) > 0 {
 		dAtA[i] = 0x2a
@@ -1931,6 +2069,18 @@ func (m *HealthCheck_HttpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
 			i += copy(dAtA[i:], s)
 		}
 	}
+	if len(m.ExpectedStatuses) > 0 {
+		for _, msg := range m.ExpectedStatuses {
+			dAtA[i] = 0x4a
+			i++
+			i = encodeVarintHealthCheck(dAtA, i, uint64(msg.Size()))
+			n, err := msg.MarshalTo(dAtA[i:])
+			if err != nil {
+				return 0, err
+			}
+			i += n
+		}
+	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
 	}
@@ -1956,11 +2106,11 @@ func (m *HealthCheck_TcpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0xa
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.Send.Size()))
-		n20, err := m.Send.MarshalTo(dAtA[i:])
+		n21, err := m.Send.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n20
+		i += n21
 	}
 	if len(m.Receive) > 0 {
 		for _, msg := range m.Receive {
@@ -2062,11 +2212,11 @@ func (m *HealthCheck_CustomHealthCheck) MarshalTo(dAtA []byte) (int, error) {
 		i += copy(dAtA[i:], m.Name)
 	}
 	if m.ConfigType != nil {
-		nn21, err := m.ConfigType.MarshalTo(dAtA[i:])
+		nn22, err := m.ConfigType.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += nn21
+		i += nn22
 	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
@@ -2080,11 +2230,11 @@ func (m *HealthCheck_CustomHealthCheck_Config) MarshalTo(dAtA []byte) (int, erro
 		dAtA[i] = 0x12
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.Config.Size()))
-		n22, err := m.Config.MarshalTo(dAtA[i:])
+		n23, err := m.Config.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n22
+		i += n23
 	}
 	return i, nil
 }
@@ -2094,11 +2244,11 @@ func (m *HealthCheck_CustomHealthCheck_TypedConfig) MarshalTo(dAtA []byte) (int,
 		dAtA[i] = 0x1a
 		i++
 		i = encodeVarintHealthCheck(dAtA, i, uint64(m.TypedConfig.Size()))
-		n23, err := m.TypedConfig.MarshalTo(dAtA[i:])
+		n24, err := m.TypedConfig.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n23
+		i += n24
 	}
 	return i, nil
 }
@@ -2173,6 +2323,10 @@ func (m *HealthCheck) Size() (n int) {
 	}
 	if m.AlwaysLogHealthCheckFailures {
 		n += 3
+	}
+	if m.InitialJitter != nil {
+		l = m.InitialJitter.Size()
+		n += 2 + l + sovHealthCheck(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2303,6 +2457,12 @@ func (m *HealthCheck_HttpHealthCheck) Size() (n int) {
 	if len(m.RequestHeadersToRemove) > 0 {
 		for _, s := range m.RequestHeadersToRemove {
 			l = len(s)
+			n += 1 + l + sovHealthCheck(uint64(l))
+		}
+	}
+	if len(m.ExpectedStatuses) > 0 {
+		for _, e := range m.ExpectedStatuses {
+			l = e.Size()
 			n += 1 + l + sovHealthCheck(uint64(l))
 		}
 	}
@@ -2442,7 +2602,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -2470,7 +2630,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2479,6 +2639,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2503,7 +2666,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2512,6 +2675,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2536,7 +2702,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2545,6 +2711,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2569,7 +2738,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2578,6 +2747,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2602,7 +2774,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2611,6 +2783,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2635,7 +2810,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2644,6 +2819,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2668,7 +2846,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2677,6 +2855,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2701,7 +2882,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2710,6 +2891,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2733,7 +2917,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2742,6 +2926,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2765,7 +2952,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2774,6 +2961,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2797,7 +2987,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2806,6 +2996,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2830,7 +3023,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2839,6 +3032,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2862,7 +3058,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2871,6 +3067,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2895,7 +3094,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2904,6 +3103,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2928,7 +3130,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2937,6 +3139,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2961,7 +3166,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2971,6 +3176,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -2990,7 +3198,7 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IntervalJitterPercent |= (uint32(b) & 0x7F) << shift
+				m.IntervalJitterPercent |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3009,12 +3217,48 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= (int(b) & 0x7F) << shift
+				v |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 			m.AlwaysLogHealthCheckFailures = bool(v != 0)
+		case 20:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InitialJitter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowHealthCheck
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.InitialJitter == nil {
+				m.InitialJitter = &types.Duration{}
+			}
+			if err := m.InitialJitter.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipHealthCheck(dAtA[iNdEx:])
@@ -3022,6 +3266,9 @@ func (m *HealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3052,7 +3299,7 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3080,7 +3327,7 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3090,6 +3337,9 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3109,7 +3359,7 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= (int(b) & 0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3118,6 +3368,9 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3132,6 +3385,9 @@ func (m *HealthCheck_Payload) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3162,7 +3418,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3190,7 +3446,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3200,6 +3456,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3219,7 +3478,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3229,6 +3488,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3248,7 +3510,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3257,6 +3519,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3281,7 +3546,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3290,6 +3555,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3314,7 +3582,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3324,6 +3592,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3343,7 +3614,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3352,6 +3623,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3374,7 +3648,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= (int(b) & 0x7F) << shift
+				v |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3394,7 +3668,7 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3404,10 +3678,47 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
 			m.RequestHeadersToRemove = append(m.RequestHeadersToRemove, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExpectedStatuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowHealthCheck
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ExpectedStatuses = append(m.ExpectedStatuses, &_type.Int64Range{})
+			if err := m.ExpectedStatuses[len(m.ExpectedStatuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -3416,6 +3727,9 @@ func (m *HealthCheck_HttpHealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3446,7 +3760,7 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3474,7 +3788,7 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3483,6 +3797,9 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3507,7 +3824,7 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3516,6 +3833,9 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3531,6 +3851,9 @@ func (m *HealthCheck_TcpHealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3561,7 +3884,7 @@ func (m *HealthCheck_RedisHealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3589,7 +3912,7 @@ func (m *HealthCheck_RedisHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3599,6 +3922,9 @@ func (m *HealthCheck_RedisHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3611,6 +3937,9 @@ func (m *HealthCheck_RedisHealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3641,7 +3970,7 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3669,7 +3998,7 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3679,6 +4008,9 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3698,7 +4030,7 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3708,6 +4040,9 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3720,6 +4055,9 @@ func (m *HealthCheck_GrpcHealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3750,7 +4088,7 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -3778,7 +4116,7 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3788,6 +4126,9 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3807,7 +4148,7 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3816,6 +4157,9 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3839,7 +4183,7 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= (int(b) & 0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3848,6 +4192,9 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthHealthCheck
 			}
 			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
@@ -3864,6 +4211,9 @@ func (m *HealthCheck_CustomHealthCheck) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthHealthCheck
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthHealthCheck
 			}
 			if (iNdEx + skippy) > l {
@@ -3933,8 +4283,11 @@ func skipHealthCheck(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			iNdEx += length
 			if length < 0 {
+				return 0, ErrInvalidLengthHealthCheck
+			}
+			iNdEx += length
+			if iNdEx < 0 {
 				return 0, ErrInvalidLengthHealthCheck
 			}
 			return iNdEx, nil
@@ -3965,6 +4318,9 @@ func skipHealthCheck(dAtA []byte) (n int, err error) {
 					return 0, err
 				}
 				iNdEx = start + next
+				if iNdEx < 0 {
+					return 0, ErrInvalidLengthHealthCheck
+				}
 			}
 			return iNdEx, nil
 		case 4:
@@ -3983,82 +4339,3 @@ var (
 	ErrInvalidLengthHealthCheck = fmt.Errorf("proto: negative length found during unmarshaling")
 	ErrIntOverflowHealthCheck   = fmt.Errorf("proto: integer overflow")
 )
-
-func init() {
-	proto.RegisterFile("envoy/api/v2/core/health_check.proto", fileDescriptor_health_check_716df7b498b2ed9f)
-}
-
-var fileDescriptor_health_check_716df7b498b2ed9f = []byte{
-	// 1128 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x96, 0xcf, 0x6f, 0x1b, 0x45,
-	0x14, 0xc7, 0xbd, 0xb6, 0xeb, 0x1f, 0xcf, 0x8e, 0xbd, 0x1e, 0xb7, 0xcd, 0xd6, 0x84, 0xd4, 0xa0,
-	0x08, 0x59, 0x95, 0xb0, 0xc1, 0x95, 0x40, 0xe5, 0x44, 0x9c, 0xa6, 0xb1, 0x4b, 0xea, 0x44, 0x53,
-	0xa7, 0x28, 0x12, 0x68, 0x35, 0xd9, 0x1d, 0xaf, 0x97, 0x6e, 0x76, 0x96, 0xd9, 0x59, 0x17, 0xff,
-	0x13, 0x1c, 0x38, 0xf1, 0x0f, 0x20, 0xa1, 0x5e, 0xb8, 0x22, 0x4e, 0x3d, 0x72, 0xe4, 0x3f, 0x00,
-	0xe5, 0x44, 0xcf, 0xfc, 0x03, 0x68, 0x67, 0xd7, 0xbf, 0x83, 0x92, 0x88, 0xdb, 0xcc, 0x7b, 0xef,
-	0xfb, 0x99, 0xf7, 0x66, 0xde, 0x3e, 0x2d, 0xec, 0x50, 0x77, 0xcc, 0x26, 0x2d, 0xe2, 0xd9, 0xad,
-	0x71, 0xbb, 0x65, 0x30, 0x4e, 0x5b, 0x23, 0x4a, 0x1c, 0x31, 0xd2, 0x8d, 0x11, 0x35, 0x5e, 0x36,
-	0x3d, 0xce, 0x04, 0x43, 0x15, 0x19, 0xd5, 0x24, 0x9e, 0xdd, 0x1c, 0xb7, 0x9b, 0x61, 0x54, 0x6d,
-	0x6b, 0x5d, 0x78, 0x46, 0x7c, 0x1a, 0x09, 0x6a, 0xf7, 0x2c, 0xc6, 0x2c, 0x87, 0xb6, 0xe4, 0xee,
-	0x2c, 0x18, 0xb6, 0x88, 0x3b, 0x89, 0x5d, 0xdb, 0xab, 0x2e, 0x33, 0xe0, 0x44, 0xd8, 0xcc, 0x8d,
-	0xfd, 0x5b, 0xab, 0x7e, 0x5f, 0xf0, 0xc0, 0x10, 0xff, 0xa5, 0x7e, 0xc5, 0x89, 0xe7, 0x51, 0xee,
-	0xc7, 0xfe, 0xcd, 0x31, 0x71, 0x6c, 0x93, 0x08, 0xda, 0x9a, 0x2e, 0x62, 0xc7, 0x6d, 0x8b, 0x59,
-	0x4c, 0x2e, 0x5b, 0xe1, 0x2a, 0xb2, 0xbe, 0xff, 0x0f, 0x82, 0x42, 0x57, 0xd6, 0xbb, 0x17, 0x96,
-	0x8b, 0xf6, 0x21, 0x2b, 0xec, 0x73, 0xca, 0x02, 0xa1, 0x29, 0x75, 0xa5, 0x51, 0x68, 0xdf, 0x6b,
-	0x46, 0x07, 0x36, 0xa7, 0x07, 0x36, 0x1f, 0xc7, 0xe9, 0x76, 0xd4, 0x1f, 0xff, 0xbc, 0xaf, 0xfc,
-	0xf6, 0xf6, 0x4d, 0x2a, 0xfb, 0x5a, 0x49, 0xe7, 0x94, 0x07, 0x09, 0x3c, 0xd5, 0xa2, 0x03, 0xc8,
-	0xd9, 0xae, 0xa0, 0x7c, 0x4c, 0x1c, 0x2d, 0x79, 0x73, 0xce, 0x4c, 0x8c, 0x3a, 0x50, 0x9e, 0xae,
-	0xf5, 0x6f, 0x6c, 0x21, 0x28, 0xd7, 0x52, 0x57, 0xf0, 0x70, 0x69, 0xaa, 0x78, 0x2a, 0x05, 0xe8,
-	0x19, 0x54, 0x03, 0x37, 0x7a, 0xd4, 0x89, 0x2e, 0x46, 0x9c, 0xfa, 0x23, 0xe6, 0x98, 0x5a, 0x5a,
-	0x72, 0xb6, 0xd6, 0x38, 0x27, 0x3d, 0x57, 0x3c, 0x6c, 0xbf, 0x20, 0x4e, 0x40, 0x31, 0x9a, 0x09,
-	0x07, 0x53, 0x1d, 0xea, 0x41, 0x65, 0x1d, 0x76, 0xeb, 0x1a, 0x30, 0x75, 0x0d, 0xf5, 0x29, 0xe4,
-	0x88, 0x23, 0x74, 0x8f, 0x71, 0xa1, 0x65, 0xae, 0x41, 0xc8, 0x12, 0x47, 0x1c, 0x33, 0x2e, 0xd0,
-	0x3e, 0xa8, 0x9c, 0x06, 0x3e, 0xd5, 0x0d, 0xe6, 0xba, 0xd4, 0x08, 0xcb, 0xd6, 0xb2, 0x12, 0x50,
-	0x5b, 0x03, 0x74, 0x18, 0x73, 0x22, 0x79, 0x59, 0x6a, 0xf6, 0x66, 0x12, 0xf4, 0x15, 0x54, 0x46,
-	0x42, 0x78, 0xfa, 0x62, 0xc7, 0x6b, 0x39, 0xc9, 0x69, 0x36, 0xd7, 0x5a, 0xbe, 0xb9, 0xd0, 0x28,
-	0xcd, 0xae, 0x10, 0xde, 0xc2, 0xbe, 0x9b, 0xc0, 0xe5, 0xd1, 0xb2, 0x09, 0x9d, 0x82, 0x2a, 0x8c,
-	0x15, 0x78, 0x5e, 0xc2, 0x3f, 0xbc, 0x02, 0x3e, 0x30, 0x56, 0xd8, 0x25, 0xb1, 0x64, 0x09, 0x13,
-	0xb7, 0xb8, 0x67, 0x2c, 0xb3, 0x0b, 0xd7, 0x4a, 0xfc, 0x80, 0x7b, 0xc6, 0x4a, 0xe2, 0xd6, 0xb2,
-	0x09, 0x9d, 0x40, 0xd5, 0x65, 0xba, 0xe0, 0x64, 0x38, 0xb4, 0x0d, 0x7d, 0xd6, 0xc8, 0xc5, 0xab,
-	0x1a, 0x19, 0xc2, 0x26, 0xbe, 0xf5, 0x5a, 0x49, 0x3e, 0x48, 0xe0, 0x8a, 0xcb, 0x06, 0x11, 0xa0,
-	0x37, 0xed, 0xe5, 0x33, 0xa8, 0x1a, 0x81, 0x2f, 0xd8, 0xf9, 0x72, 0xda, 0x1b, 0x12, 0xfb, 0xd1,
-	0x15, 0x69, 0xef, 0x49, 0xe5, 0x72, 0xe2, 0x15, 0x63, 0xd5, 0x88, 0x06, 0x30, 0x6f, 0xd9, 0x79,
-	0xe6, 0xa5, 0x1b, 0x65, 0x3e, 0x03, 0xcc, 0x32, 0xff, 0x1a, 0x36, 0xe7, 0x54, 0x6a, 0x5a, 0x74,
-	0x8e, 0x2e, 0xdf, 0x04, 0x7d, 0x67, 0x46, 0xd9, 0x37, 0x2d, 0x3a, 0xc3, 0x9f, 0xc2, 0x9d, 0xcb,
-	0xe1, 0xea, 0x4d, 0xe0, 0xd5, 0xcb, 0xd0, 0x3b, 0x50, 0xa2, 0x63, 0xea, 0x0a, 0xdd, 0x61, 0x96,
-	0xee, 0x11, 0x31, 0xd2, 0x2a, 0x75, 0xa5, 0x91, 0xc7, 0x45, 0x69, 0x3d, 0x64, 0xd6, 0x31, 0x11,
-	0x23, 0xf4, 0x09, 0x6c, 0xae, 0x4c, 0x19, 0xdd, 0xa3, 0xdc, 0xa0, 0xae, 0xd0, 0x50, 0x5d, 0x69,
-	0x6c, 0xe0, 0x3b, 0xcb, 0x23, 0xe5, 0x38, 0x72, 0xa2, 0x27, 0x50, 0x27, 0xce, 0x2b, 0x32, 0xf1,
-	0x25, 0x7e, 0xf1, 0x55, 0xf5, 0x21, 0xb1, 0x9d, 0x80, 0x53, 0x5f, 0xab, 0xd6, 0x95, 0x46, 0x0e,
-	0x6f, 0x45, 0x71, 0x87, 0xcc, 0x5a, 0x78, 0xad, 0x27, 0x71, 0x4c, 0xed, 0x05, 0x64, 0x8f, 0xc9,
-	0xc4, 0x61, 0xc4, 0x44, 0xf7, 0x21, 0x2d, 0xe8, 0x77, 0xd1, 0xf4, 0xcd, 0x77, 0xf2, 0x61, 0x7d,
-	0x69, 0x9e, 0xac, 0x2b, 0xdd, 0x04, 0x96, 0x0e, 0xa4, 0x41, 0xe6, 0xcc, 0x76, 0x09, 0x9f, 0xc8,
-	0xc1, 0x5a, 0xec, 0x26, 0x70, 0xbc, 0xef, 0xa8, 0x90, 0xf5, 0x62, 0xca, 0xad, 0x5f, 0xdf, 0xbe,
-	0x49, 0x29, 0xb5, 0x9f, 0x52, 0x50, 0x5e, 0xf9, 0x50, 0x11, 0x82, 0xf4, 0x88, 0xf9, 0xf1, 0x01,
-	0x58, 0xae, 0xd1, 0xbb, 0x90, 0x96, 0x77, 0x93, 0x5c, 0x39, 0x14, 0x4b, 0x33, 0xfa, 0x0c, 0xd2,
-	0x3e, 0x75, 0xcd, 0x78, 0xf2, 0x7e, 0x70, 0x45, 0xa7, 0xc6, 0x95, 0x60, 0xa9, 0x41, 0x9f, 0x43,
-	0x96, 0x53, 0x83, 0xda, 0x63, 0x1a, 0x0f, 0xdc, 0xeb, 0xca, 0xa7, 0x32, 0xf4, 0x1e, 0x14, 0x7d,
-	0xca, 0xc7, 0xb6, 0x41, 0x75, 0x97, 0x9c, 0x53, 0x39, 0x6a, 0xf3, 0xb8, 0x10, 0xdb, 0xfa, 0xe4,
-	0x9c, 0xa2, 0x21, 0xdc, 0xe5, 0xf4, 0xdb, 0x80, 0xfa, 0x22, 0x7c, 0x04, 0x93, 0x72, 0x5f, 0x17,
-	0x4c, 0x27, 0xa6, 0xa9, 0x65, 0xea, 0xa9, 0x46, 0xa1, 0xbd, 0x73, 0xf9, 0x99, 0x26, 0xe5, 0x72,
-	0x30, 0x1e, 0x79, 0xb2, 0x99, 0x0a, 0x61, 0xdd, 0x99, 0x1f, 0x94, 0x94, 0xfa, 0x77, 0x16, 0x57,
-	0x63, 0x60, 0x14, 0xe6, 0x0f, 0xd8, 0xae, 0x69, 0xa2, 0x77, 0x20, 0x1f, 0x0e, 0xdd, 0x70, 0xd0,
-	0xb5, 0xe5, 0xbc, 0xcd, 0xe1, 0x5c, 0xe0, 0xd3, 0xf0, 0x8a, 0xdb, 0xe8, 0x11, 0xdc, 0xbb, 0x24,
-	0x09, 0x4e, 0xcf, 0xd9, 0x98, 0x6a, 0xb9, 0x7a, 0xaa, 0x91, 0xc7, 0x77, 0x57, 0xa1, 0x58, 0x7a,
-	0x6b, 0xdf, 0x2b, 0x50, 0x5a, 0x9e, 0x79, 0xb3, 0x3b, 0x57, 0xfe, 0xdf, 0x9d, 0x27, 0x65, 0xfd,
-	0x37, 0xbd, 0xf3, 0xda, 0x0e, 0xa8, 0x98, 0x9a, 0xb6, 0xbf, 0x98, 0x91, 0x0a, 0xa9, 0x97, 0x74,
-	0x12, 0xf7, 0x4d, 0xb8, 0xac, 0x61, 0x28, 0xaf, 0x4c, 0xd3, 0xb5, 0xc7, 0x52, 0xd6, 0x1f, 0x6b,
-	0x0b, 0xf2, 0x24, 0x10, 0x23, 0xc6, 0x6d, 0x11, 0xf5, 0x70, 0x1e, 0xcf, 0x0d, 0xb5, 0x5f, 0x14,
-	0xa8, 0xac, 0xcd, 0xba, 0xb0, 0x41, 0xe7, 0xb8, 0xa5, 0x06, 0x0d, 0xcd, 0xe8, 0x63, 0xc8, 0x18,
-	0xcc, 0x1d, 0xda, 0x56, 0xfc, 0xb3, 0xb1, 0xb9, 0x36, 0x31, 0x9e, 0xcb, 0x7f, 0xa8, 0xf0, 0x63,
-	0x89, 0x02, 0xd1, 0x23, 0x28, 0x8a, 0x89, 0x47, 0x4d, 0x3d, 0x16, 0x46, 0xbd, 0x7d, 0x7b, 0x4d,
-	0xb8, 0xeb, 0x4e, 0xba, 0x09, 0x5c, 0x90, 0xb1, 0x7b, 0x32, 0xb4, 0xb3, 0x01, 0x85, 0x48, 0xa4,
-	0x87, 0xd6, 0xce, 0x26, 0x94, 0x16, 0xbf, 0x7c, 0xca, 0xe3, 0xaf, 0xef, 0x69, 0x3a, 0x07, 0x6a,
-	0x01, 0x23, 0x1e, 0x5e, 0xe4, 0xd2, 0x70, 0x78, 0x80, 0xa1, 0x18, 0x55, 0xf7, 0x5c, 0x10, 0x11,
-	0xf8, 0xa8, 0x00, 0xd9, 0x93, 0xfe, 0x17, 0xfd, 0xa3, 0x2f, 0xfb, 0x6a, 0x22, 0xdc, 0x74, 0xf7,
-	0x77, 0x0f, 0x07, 0xdd, 0x53, 0x55, 0x41, 0x1b, 0x90, 0x3f, 0xe9, 0x4f, 0xb7, 0x49, 0x54, 0x84,
-	0xdc, 0x63, 0xbc, 0xdb, 0xeb, 0xf7, 0xfa, 0x07, 0x6a, 0x2a, 0x8c, 0x1c, 0xf4, 0x9e, 0xed, 0x1f,
-	0x9d, 0x0c, 0xd4, 0x74, 0x47, 0xfd, 0xf9, 0x62, 0x5b, 0xf9, 0xfd, 0x62, 0x5b, 0xf9, 0xe3, 0x62,
-	0x5b, 0xf9, 0xeb, 0x62, 0x5b, 0x39, 0xcb, 0xc8, 0x22, 0x1e, 0xfe, 0x1b, 0x00, 0x00, 0xff, 0xff,
-	0xf2, 0xf3, 0x61, 0x7f, 0xe3, 0x0a, 0x00, 0x00,
-}

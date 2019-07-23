@@ -147,6 +147,11 @@
             </dependency>
 
             <dependency>
+                <groupId>io.envoyproxy.controlplane</groupId>
+                <artifactId>api</artifactId>
+                <version>${envoy.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty-shaded</artifactId>
                 <version>${grpc.version}</version>
@@ -358,6 +363,7 @@
     </build>
 
     <properties>
+        <envoy.version>0.1.15</envoy.version>
         <google.protobuf.java.version>3.6.1</google.protobuf.java.version>
         <gogo-proto.version>1.0.0.wso2v1</gogo-proto.version>
         <proto.google.common.protos.version>1.12.0</proto.google.common.protos.version>
