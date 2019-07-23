@@ -10,16 +10,25 @@
   version = "v2.0.0"
 
 [[projects]]
-  digest = "1:2ad03693211fcdebd91faa2262e2ddfc9124cbfc112a7501366a861c4f3ce5e6"
+  digest = "1:20e9960dfd0235ac0f38b18123b3f9e555efbd04783d883fc1e0af81c584cc2f"
   name = "github.com/envoyproxy/go-control-plane"
   packages = [
     "envoy/api/v2/core",
+    "envoy/service/auth/v2",
     "envoy/service/auth/v2alpha",
     "envoy/type",
   ]
   pruneopts = "UT"
-  revision = "8a91fb26f4e6553d2e21fa76e07d33b93a4f66e7"
-  version = "v0.6.6"
+  revision = "0f0598e8dab0c0306119ca6fff632b0a672cbfa1"
+  version = "v0.8.2"
+
+[[projects]]
+  digest = "1:743f8008a7fed04ef0d52261aef346766bbd5b3e360b90296d85289f8ef5c2e2"
+  name = "github.com/envoyproxy/protoc-gen-validate"
+  packages = ["validate"]
+  pruneopts = "UT"
+  revision = "9eff07ddfcb4001aa1aab280648153f46e1a8ddc"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:3fdbd53962bb796a751552e6be1fb3dbd293d6d5851c0c48f611a82480769d7c"
@@ -57,13 +66,6 @@
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
-
-[[projects]]
-  digest = "1:dfe5159383dfcd370555c35374ac99022906f987b55cc65a830fb9ced970b4b1"
-  name = "github.com/lyft/protoc-gen-validate"
-  packages = ["validate"]
-  pruneopts = "UT"
-  revision = "f9d2b11e44149635b23a002693b76512b01ae515"
 
 [[projects]]
   branch = "master"
@@ -171,7 +173,7 @@
   revision = "bd9b4fb69e2ffd37621a6caa54dcbead29b546f2"
 
 [[projects]]
-  digest = "1:8c8ed249fa6a8db070bf2082f02052c697695fa5e1558b4e28dd0fb5f15f70a2"
+  digest = "1:1034e173c33bdc30b8c3e69beedd737002357a890292cec27dedca9408a614e0"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -188,6 +190,7 @@
     "grpclog",
     "internal",
     "internal/backoff",
+    "internal/balancerload",
     "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
@@ -204,13 +207,14 @@
     "resolver",
     "resolver/dns",
     "resolver/passthrough",
+    "serviceconfig",
     "stats",
     "status",
     "tap",
   ]
   pruneopts = "UT"
-  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
-  version = "v1.17.0"
+  revision = "1d89a3c832915b2314551c1d2a506874d62e53f7"
+  version = "v1.22.0"
 
 [[projects]]
   digest = "1:005cbf8b937fcb1694b9dbb845b0aef618627be7faf7bb330eb2490e3f506ef8"

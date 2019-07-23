@@ -17,7 +17,7 @@ import (
 
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
+	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
 	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"

@@ -19,9 +19,9 @@
 
 package io.cellery.security.cell.sts.server.core.service;
 
-import io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha.ExternalAuth;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
+import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class CelleryGWInboundInterceptorService extends CelleryCellInterceptorSe
         super(cellStsService);
     }
 
-    protected CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
+    protected CellStsRequest buildCellStsRequest(CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
         return getCellStsRequestBuilder(requestFromProxy).setIsGatewayIncomingRequest(true).build();

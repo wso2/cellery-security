@@ -22,16 +22,19 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
-import io.cellery.security.cell.sts.server.core.generated.envoy.core.Base;
-import io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha.AttributeContextOuterClass;
-import io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha.AuthorizationGrpc;
-import io.cellery.security.cell.sts.server.core.generated.envoy.service.auth.v2alpha.ExternalAuth;
 import io.cellery.security.cell.sts.server.core.generated.istio.mixer.v1.AttributesOuterClass;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
 import io.cellery.security.cell.sts.server.core.model.RequestContext;
 import io.cellery.security.cell.sts.server.core.model.RequestDestination;
 import io.cellery.security.cell.sts.server.core.model.RequestSource;
+import io.envoyproxy.envoy.api.v2.core.HeaderValue;
+import io.envoyproxy.envoy.api.v2.core.HeaderValueOption;
+import io.envoyproxy.envoy.service.auth.v2.AttributeContext;
+import io.envoyproxy.envoy.service.auth.v2.AuthorizationGrpc;
+import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
+import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
+import io.envoyproxy.envoy.service.auth.v2.OkHttpResponse;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -68,10 +71,10 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     }
 
     @Override
-    public final void check(ExternalAuth.CheckRequest requestFromProxy,
-                            StreamObserver<ExternalAuth.CheckResponse> responseObserver) {
+    public final void check(CheckRequest requestFromProxy,
+                            StreamObserver<CheckResponse> responseObserver) {
 
-        ExternalAuth.CheckResponse responseToProxy;
+        CheckResponse responseToProxy;
         try {
             // Add request ID for log correlation.
             MDC.put(REQUEST_ID, getRequestId(requestFromProxy));
@@ -99,7 +102,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
             handleRequest(cellStsRequest, cellStsResponse);
 
             // Build the response to envoy proxy response from Cell STS Response
-            responseToProxy = ExternalAuth.CheckResponse.newBuilder()
+            responseToProxy = CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(buildOkHttpResponseWithHeaders(cellStsResponse.getResponseHeaders()))
                     .build();
@@ -120,28 +123,28 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     protected abstract void handleRequest(CellStsRequest cellStsRequest,
                                           CellStsResponse cellStsResponse) throws CelleryCellSTSException;
 
-    private ExternalAuth.CheckResponse buildErrorResponse() {
+    private CheckResponse buildErrorResponse() {
 
-        return ExternalAuth.CheckResponse.newBuilder()
+        return CheckResponse.newBuilder()
                 .setStatus(Status.newBuilder().setCode(Code.PERMISSION_DENIED_VALUE).build())
                 .build();
     }
 
-    private ExternalAuth.OkHttpResponse buildOkHttpResponseWithHeaders(Map<String, String> headers) {
+    private OkHttpResponse buildOkHttpResponseWithHeaders(Map<String, String> headers) {
 
-        ExternalAuth.OkHttpResponse.Builder builder = ExternalAuth.OkHttpResponse.newBuilder();
+        OkHttpResponse.Builder builder = OkHttpResponse.newBuilder();
         headers.forEach((key, value) -> builder.addHeaders(buildHeader(key, value)));
         return builder.build();
     }
 
-    private Base.HeaderValueOption buildHeader(String headerName, String headerValue) {
+    private HeaderValueOption buildHeader(String headerName, String headerValue) {
 
-        return Base.HeaderValueOption.newBuilder()
-                .setHeader(Base.HeaderValue.newBuilder().setKey(headerName).setValue(headerValue))
+        return HeaderValueOption.newBuilder()
+                .setHeader(HeaderValue.newBuilder().setKey(headerName).setValue(headerValue))
                 .build();
     }
 
-    private String getRequestId(ExternalAuth.CheckRequest request) throws CelleryCellSTSException {
+    private String getRequestId(CheckRequest request) throws CelleryCellSTSException {
 
         String id = request.getAttributes().getRequest().getHttp().getHeadersMap().get(REQUEST_ID_HEADER);
         if (StringUtils.isBlank(id)) {
@@ -150,7 +153,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return id;
     }
 
-    private String getDestination(ExternalAuth.CheckRequest request) {
+    private String getDestination(CheckRequest request) {
 
         String destination = "";
 
@@ -173,13 +176,13 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return destination;
     }
 
-    protected CellStsRequest buildCellStsRequest(ExternalAuth.CheckRequest requestFromProxy)
+    protected CellStsRequest buildCellStsRequest(CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
         return getCellStsRequestBuilder(requestFromProxy).build();
     }
 
-    protected CellStsRequest.CellStsRequestBuilder getCellStsRequestBuilder(ExternalAuth.CheckRequest requestFromProxy)
+    protected CellStsRequest.CellStsRequestBuilder getCellStsRequestBuilder(CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
         return new CellStsRequest.CellStsRequestBuilder()
@@ -190,7 +193,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 .setRequestContext(buildRequestContext(requestFromProxy));
     }
 
-    private AttributesOuterClass.Attributes getAttributesFromRequest(ExternalAuth.CheckRequest requestFromProxy) {
+    private AttributesOuterClass.Attributes getAttributesFromRequest(CheckRequest requestFromProxy) {
 
         String mixerAttributesHeaderValue = getMixerAttributesHeader(requestFromProxy);
 
@@ -206,14 +209,14 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return null;
     }
 
-    private String getMixerAttributesHeader(ExternalAuth.CheckRequest requestFromProxy) {
+    private String getMixerAttributesHeader(CheckRequest requestFromProxy) {
 
         return requestFromProxy.getAttributes().getRequest().getHttp().getHeadersMap().get(ISTIO_ATTRIBUTES_HEADER);
     }
 
-    private RequestContext buildRequestContext(ExternalAuth.CheckRequest checkRequest) {
+    private RequestContext buildRequestContext(CheckRequest checkRequest) {
 
-        AttributeContextOuterClass.AttributeContext.HttpRequest httpRequest =
+        AttributeContext.HttpRequest httpRequest =
                 checkRequest.getAttributes().getRequest().getHttp();
 
         return new RequestContext()
@@ -223,7 +226,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 .setPath(httpRequest.getPath());
     }
 
-    private RequestSource buildRequestSource(ExternalAuth.CheckRequest checkRequest) {
+    private RequestSource buildRequestSource(CheckRequest checkRequest) {
 
         AttributesOuterClass.Attributes attributesFromRequest = getAttributesFromRequest(checkRequest);
         RequestSource.RequestSourceBuilder requestSourceBuilder = new RequestSource.RequestSourceBuilder();
@@ -254,7 +257,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         return workloadName.split("--")[0];
     }
 
-    private RequestDestination buildRequestDestination(ExternalAuth.CheckRequest checkRequest) {
+    private RequestDestination buildRequestDestination(CheckRequest checkRequest) {
 
         RequestDestination.RequestDestinationBuilder destinationBuilder =
                 new RequestDestination.RequestDestinationBuilder();
