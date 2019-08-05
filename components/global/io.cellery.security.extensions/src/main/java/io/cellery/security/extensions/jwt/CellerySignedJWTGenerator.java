@@ -39,6 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,10 +57,15 @@ public class CellerySignedJWTGenerator extends JWTGenerator {
 
         CellerySignedJWTBuilder jwtBuilder = new CellerySignedJWTBuilder();
         try {
+            Map<String, Object> claimsFromSignedJWT = getClaimsFromSignedJWT(validationContext);
+            Map<String, String> customClaims = populateCustomClaims(validationContext);
+            Map<String, Object> accumulatedClaims = new HashMap<>();
+            accumulatedClaims.putAll(claimsFromSignedJWT);
+            accumulatedClaims.putAll(customClaims);
             return jwtBuilder.subject(getEndUserName(validationContext))
                     .scopes(getScopes(validationContext))
                     .claim(CONSUMER_KEY_CLAIM, getConsumerKey(validationContext))
-                    .claims(getClaimsFromSignedJWT(validationContext))
+                    .claims(accumulatedClaims)
                     .audience(getDestinationCell(validationContext))
                     .build();
         } catch (CelleryAuthException e) {
