@@ -11,14 +11,13 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-
 	"path"
 	"strings"
 
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
-	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
+	"github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
 	"golang.org/x/oauth2"
@@ -29,6 +28,7 @@ import (
 const (
 	IdTokenCookie  = "idtoken"
 	RedirectCookie = "redirect"
+	xInstanceId    = "x-instance-id"
 )
 
 type Authenticator struct {
@@ -133,12 +133,12 @@ func validateCookieForNonSecuredPaths(req *http.Request, a *Authenticator) (*ext
 			log.Printf("Error while validating token for non secured path. Hence ignoring error: %v", err)
 			return buildOkCheckResponseWithoutAuthAndSub(), nil
 		} else {
-			token, sub, err := a.buildForwardHeaders(cookie.Value)
+			token, sub, subHash, err := a.buildForwardHeaders(cookie.Value)
 			if err != nil {
 				fmt.Println(err)
 				return buildServerErrorCheckResponse(), nil
 			}
-			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub), nil
+			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub, subHash), nil
 		}
 	}
 	return buildOkCheckResponseWithoutAuthAndSub(), nil
@@ -151,12 +151,12 @@ func checkAndPromptAuth(req *http.Request, a *Authenticator) (*extauthz.CheckRes
 			log.Println(err)
 			return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
 		} else {
-			token, sub, err := a.buildForwardHeaders(cookie.Value)
+			token, sub, subHash, err := a.buildForwardHeaders(cookie.Value)
 			if err != nil {
 				fmt.Println(err)
 				return buildServerErrorCheckResponse(), nil
 			}
-			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub), nil
+			return buildOkCheckResponse(fmt.Sprintf("Bearer %s", token), sub, subHash), nil
 		}
 	} else {
 		return buildRedirectCheckResponse(req.URL.String(), a.authCodeURL()), nil
@@ -286,16 +286,16 @@ func (a *Authenticator) authCodeURL() string {
 	return a.oauth2Config.AuthCodeURL("state")
 }
 
-func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, error) {
+func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, int, error) {
 
 	tok, err := jwt.ParseSigned(idToken)
 	if err != nil {
-		return "", "", err
+		return "", "", -1, err
 	}
 	c := jwt.Claims{}
 	m := make(map[string]interface{})
 	if err := tok.UnsafeClaimsWithoutVerification(&c, &m); err != nil {
-		return "", "", err
+		return "", "", -1, err
 	}
 
 	c.Issuer = a.config.JwtIssuer
@@ -317,10 +317,10 @@ func (a *Authenticator) buildForwardHeaders(idToken string) (string, string, err
 
 	newJwt, err := jwt.Signed(rsaSigner).Claims(m).Claims(c).CompactSerialize()
 	if err != nil {
-		return "", "", err
+		return "", "", -1, err
 	}
 	//fmt.Println(newJwt)
-	return newJwt, subHeaderValue, nil
+	return newJwt, subHeaderValue, hash(subHeaderValue), nil
 }
 
 func toHttpRequest(checkReq *extauthz.CheckRequest) (*http.Request, error) {
@@ -399,7 +399,7 @@ func buildOkCheckResponseWithoutAuthAndSub() *extauthz.CheckResponse {
 	}
 }
 
-func buildOkCheckResponse(authzHeader string, xSubjectHeader string) *extauthz.CheckResponse {
+func buildOkCheckResponse(authzHeader string, xSubjectHeader string, subjectHash int) *extauthz.CheckResponse {
 	return &extauthz.CheckResponse{
 		Status: &googlerpc.Status{Code: int32(googlerpc.OK)},
 		HttpResponse: &extauthz.CheckResponse_OkResponse{
@@ -423,8 +423,33 @@ func buildOkCheckResponse(authzHeader string, xSubjectHeader string) *extauthz.C
 							Value: false,
 						},
 					},
+					{
+						Header: &core.HeaderValue{
+							Key:   xInstanceId,
+							Value: getInstance(subjectHash),
+						},
+						Append: &types.BoolValue{
+							Value: false,
+						},
+					},
 				},
 			},
 		},
 	}
+}
+
+func getInstance (val int) string {
+	if val % 2 == 0 {
+		return "1"
+	} else {
+		return "2"
+	}
+}
+
+func hash(s string) int {
+	hashVal := 7
+	for _, r := range s {
+		hashVal = hashVal * 31 + int(r);
+	}
+	return hashVal
 }
