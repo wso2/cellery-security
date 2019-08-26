@@ -22,6 +22,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.Constants;
 import io.cellery.security.cell.sts.server.core.exception.TokenValidationFailureException;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.config.CellStsConfiguration;
@@ -101,7 +102,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             String cellAudience = CellStsUtils.getMyCellName();
             Optional<String> audienceMatch = jwtClaimsSet.getAudience().stream().filter(audience ->
                     audience.equalsIgnoreCase(cellAudience)).findAny();
-            if (!audienceMatch.isPresent()) {
+            if (!audienceMatch.isPresent() && !Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(cellAudience)) {
                 throw new TokenValidationFailureException("Error while validating audience. Expected audience :" +
                         cellAudience);
             }
@@ -143,6 +144,13 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
 
         if (!StringUtils.equalsIgnoreCase(issuerInToken, issuer)) {
+            String destination = (String) claimsSet.getClaim(Constants.DESTINATION);
+            log.debug("Destination of the jwt is : " + destination);
+            log.debug("Destination derived from request : " + request.getDestination().getWorkload());
+            if (CellStsUtils.isCompositeSTS() && StringUtils.equals(destination,
+                    request.getDestination().getWorkload())) {
+                return;
+            }
             throw new TokenValidationFailureException("Issuer validation failed. Expected issuer : " + issuer + ". " +
                     "Received issuer: " + issuerInToken);
         }
@@ -173,26 +181,43 @@ public class SelfContainedTokenValidator implements TokenValidator {
         if (StringUtils.isNotEmpty(sourceCell)) {
             int port = resolvePort(sourceCell);
             try {
+                JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
                 String hostname;
                 if (StringUtils.equalsIgnoreCase(sourceCell, CellStsUtils.getMyCellName())) {
                     hostname = "localhost";
+                } else if (isTokenFromComposite(jwtClaimsSet.getStringClaim(Constants.DESTINATION),
+                        cellStsRequest.getDestination().getWorkload(), jwtClaimsSet.getIssuer())) {
+                    log.debug("Validating token issued by composite cell");
+                    hostname = jwtClaimsSet.getIssuer();
                 } else {
                     hostname = CellStsUtils.getIssuerName(sourceCell);
                 }
+
                 jwkEndpoint = "https://" + hostname + ":" + port;
-            } catch (CelleryCellSTSException e) {
+            } catch (CelleryCellSTSException | ParseException e) {
                 throw new TokenValidationFailureException("Error while retrieving cell name", e);
             }
         }
 
         log.debug("Calling JWKS endpoint: " + jwkEndpoint);
         try {
-            log.debug("Validating signature of the security");
+            log.debug("Validating signature of the token");
             jwtValidator.validateSignature(jwt, jwkEndpoint, jwt.getHeader().getAlgorithm().getName(), null);
         } catch (TokenValidationFailureException e) {
             throw new TokenValidationFailureException("Error while validating signature of the token", e);
         }
         log.debug("Token signature validated successfully");
+    }
+
+    private boolean isTokenFromComposite(String destinationFromToken, String destinationFromRequest, String issuer) {
+
+        log.debug("Asserting whether the token is issued by composite, Issuer :" + issuer + ". Destination from req :" +
+                " " + destinationFromRequest + ", destination from token : " + destinationFromToken);
+        if (CellStsUtils.getIssuerName(Constants.COMPOSITE_CELL_NAME).equalsIgnoreCase(issuer) &&
+                StringUtils.equals(destinationFromRequest, destinationFromToken)) {
+            return true;
+        }
+        return false;
     }
 
     private int resolvePort(String cellName) {

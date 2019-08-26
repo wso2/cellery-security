@@ -39,13 +39,13 @@ public class STSTokenGenerator {
      * @return JWT token as a String.
      * @throws CelleryCellSTSException
      */
-    public static String generateToken(String incomingJWT, String audience, String issuer) throws
+    public static String generateToken(String incomingJWT, String audience, String issuer, String destination) throws
             CelleryCellSTSException {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         JWTClaimsSet jwtClaims = getJWTClaims(incomingJWT);
         HashMap originalClaims = new HashMap(jwtClaims.getClaims());
-        replaceCellInformation(originalClaims);
+        replaceCellInformation(originalClaims, destination);
         stsjwtBuilder.subject(jwtClaims.getSubject());
         stsjwtBuilder.expiryInSeconds(1200);
         stsjwtBuilder.audience(audience);
@@ -62,14 +62,15 @@ public class STSTokenGenerator {
      * @return JWT token as a String.
      * @throws CelleryCellSTSException
      */
-    public static String generateToken(String audience, String issuer) throws CelleryCellSTSException {
+    public static String generateToken(String audience, String issuer, String destination)
+            throws CelleryCellSTSException {
 
         STSJWTBuilder stsjwtBuilder = new STSJWTBuilder();
         // Default 20 mins.
         stsjwtBuilder.expiryInSeconds(1200);
         stsjwtBuilder.audience(audience);
         stsjwtBuilder.issuer(issuer);
-        stsjwtBuilder.claims(replaceCellInformation(null));
+        stsjwtBuilder.claims(replaceCellInformation(new HashMap(), destination));
         return stsjwtBuilder.build();
     }
 
@@ -89,17 +90,19 @@ public class STSTokenGenerator {
         }
     }
 
-    private static HashMap replaceCellInformation (HashMap claims) throws CelleryCellSTSException {
+    private static HashMap replaceCellInformation (HashMap claims, String destination) throws CelleryCellSTSException {
         if (claims == null) {
             claims = new HashMap();
         }
         claims.remove(Constants.CELL_IMAGE_NAME);
         claims.remove(Constants.CELL_INSTANCE_NAME);
         claims.remove(Constants.CELL_VERSION);
+        claims.remove(Constants.DESTINATION);
 
         claims.put(Constants.CELL_IMAGE_NAME, CellStsUtils.getCellImageName());
         claims.put(Constants.CELL_INSTANCE_NAME, CellStsUtils.getMyCellName());
         claims.put(Constants.CELL_VERSION, CellStsUtils.getCellVersion());
+        claims.put(Constants.DESTINATION, destination);
         return claims;
     }
 }
