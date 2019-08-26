@@ -181,4 +181,12 @@ public class CellStsUtils {
         return systemVariable;
     }
 
+    public static boolean isCompositeSTS() {
+
+        try {
+            return Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(getMyCellName());
+        } catch (CelleryCellSTSException e) {
+            return false;
+        }
+    }
 }

@@ -47,7 +47,7 @@ public class STSTokenGeneratorTest {
 
         String issuer = "issuer-cell";
         String audience = "audience-cell";
-        String token = STSTokenGenerator.generateToken(audience, issuer);
+        String token = STSTokenGenerator.generateToken(audience, issuer, "destination");
         JWTClaimsSet jwtClaimsSet = SignedJWT.parse(token).getJWTClaimsSet();
         Assert.assertEquals(jwtClaimsSet.getClaim("cellInstanceName"), CELL_NAME);
         Assert.assertEquals(jwtClaimsSet.getIssuer(), issuer);
@@ -62,7 +62,7 @@ public class STSTokenGeneratorTest {
         String audience = "audience-cell";
         String initialToken = generateToken(audience, issuer, "Alice");
         String token = STSTokenGenerator.generateToken(initialToken, audience + "-secondary",
-                issuer + "-secondary");
+                issuer + "-secondary", "destination");
         JWTClaimsSet jwtClaimsSet = SignedJWT.parse(token).getJWTClaimsSet();
         Assert.assertEquals(jwtClaimsSet.getClaim("cellInstanceName"), CELL_NAME);
         Assert.assertEquals(jwtClaimsSet.getIssuer(), issuer + "-secondary");

@@ -110,7 +110,7 @@ public class CelleryGWSTSService extends CelleryCellStsService {
         }
         jwt = userContextStore.get(requestId);
         if (StringUtils.isEmpty(jwt)) {
-            return getTokenFromLocalSTS(CellStsUtils.getMyCellName());
+            return getTokenFromLocalSTS(CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
         }
         // Remove from cache since this is no longer required after building local jwt.
         userContextStore.remove(requestId);

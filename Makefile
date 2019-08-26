@@ -29,8 +29,8 @@ JWKS_SERVER_NAME := jwks-server
 
 VERSION ?= $(GIT_REVISION)
 
-DOCKER_REPO ?= wso2cellery
-DOCKER_IMAGE_TAG ?= $(VERSION)
+DOCKER_REPO ?= hasinthaindrajee
+DOCKER_IMAGE_TAG ?= latest
 
 .PHONY: build-java-components
 build-java-components:
@@ -45,7 +45,7 @@ docker-push: docker-push.sts-server-docker docker-push.envoy-oidc-filter docker-
 
 .PHONY: docker.sts-server-docker
 docker.sts-server-docker:
-	[ -d "docker/sts/target" ] || mvn initialize -f docker/sts/pom.xml
+	mvn initialize -f docker/sts/pom.xml
 	cd docker/sts; \
 	docker build -t ${DOCKER_REPO}/cell-sts:${DOCKER_IMAGE_TAG} .
 
