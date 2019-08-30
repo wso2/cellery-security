@@ -21,7 +21,10 @@ package io.cellery.security.cell.sts.server.core.service;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
+import com.nimbusds.jwt.JWTClaimsSet;
 import io.cellery.security.cell.sts.server.core.CellStsUtils;
+import io.cellery.security.cell.sts.server.core.Constants;
+import io.cellery.security.cell.sts.server.core.STSTokenGenerator;
 import io.cellery.security.cell.sts.server.core.generated.istio.mixer.v1.AttributesOuterClass;
 import io.cellery.security.cell.sts.server.core.model.CellStsRequest;
 import io.cellery.security.cell.sts.server.core.model.CellStsResponse;
@@ -42,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
@@ -185,11 +189,12 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
     protected CellStsRequest.CellStsRequestBuilder getCellStsRequestBuilder(CheckRequest requestFromProxy)
             throws CelleryCellSTSException {
 
+        RequestDestination destination = buildRequestDestination(requestFromProxy);
         return new CellStsRequest.CellStsRequestBuilder()
                 .setRequestId(getRequestId(requestFromProxy))
                 .setRequestHeaders(requestFromProxy.getAttributes().getRequest().getHttp().getHeaders())
-                .setSource(buildRequestSource(requestFromProxy))
-                .setDestination(buildRequestDestination(requestFromProxy))
+                .setSource(buildRequestSource(requestFromProxy, destination.getWorkload()))
+                .setDestination(destination)
                 .setRequestContext(buildRequestContext(requestFromProxy));
     }
 
@@ -226,10 +231,11 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 .setPath(httpRequest.getPath());
     }
 
-    private RequestSource buildRequestSource(CheckRequest checkRequest) {
+    private RequestSource buildRequestSource(CheckRequest checkRequest, String destinationWorkload) {
 
         AttributesOuterClass.Attributes attributesFromRequest = getAttributesFromRequest(checkRequest);
         RequestSource.RequestSourceBuilder requestSourceBuilder = new RequestSource.RequestSourceBuilder();
+
         if (attributesFromRequest != null) {
             AttributesOuterClass.Attributes.AttributeValue sourceId =
                     attributesFromRequest.getAttributesMap().get("source.uid");
@@ -237,17 +243,48 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
                 // "source.uid" -> "kubernetes://hr--hr-deployment-596946948d-vvgln.default"
                 String sourceUid = sourceId.getStringValue();
                 String sourceWorkloadName = sourceUid.replace("kubernetes://", "");
-
+                String sourceCell = extractCellNameFromWorkloadName(sourceWorkloadName);
+                // Try to figure out whether the source is a composite cell.
+                if (isCompositeSource(checkRequest, destinationWorkload)) {
+                    sourceCell = Constants.COMPOSITE_CELL_NAME;
+                }
                 requestSourceBuilder.setWorkload(sourceWorkloadName)
-                        .setCellInstanceName(extractCellNameFromWorkloadName(sourceWorkloadName));
+                        .setCellInstanceName(sourceCell);
             }
         }
         return requestSourceBuilder.build();
     }
 
+    private boolean isCompositeSource(CheckRequest checkRequest, String destinationWorkload) {
+
+        Map requestHeaders = checkRequest.getAttributes().getRequest().getHttp().getHeaders();
+        String token = CellStsUtils.extractJwtFromAuthzHeader
+                (CellStsUtils.getAuthorizationHeaderValue(requestHeaders));
+        if (StringUtils.isEmpty(token)) {
+            log.debug("No token received. Hence source shouldn't be a composite.");
+            return false;
+        }
+        try {
+            JWTClaimsSet jwtClaims = STSTokenGenerator.getJWTClaims(token);
+            String destination = jwtClaims.getStringClaim(Constants.DESTINATION);
+            String issuerCell = jwtClaims.getStringClaim(Constants.CELL_INSTANCE_NAME);
+            if (destinationWorkload.equalsIgnoreCase(destination) &&
+                    Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(issuerCell)) {
+                log.debug("Source is a composite");
+                return true;
+            }
+
+        } catch (CelleryCellSTSException | ParseException e) {
+            // This is harmless since there can be cases where tokens are not attached to reqeust.
+            log.debug("Couldn't derive source from token");
+        }
+        log.debug("Source is not a composite.");
+        return false;
+    }
+
     private String extractCellNameFromWorkloadName(String workloadName) {
 
-        // When requests reaches cells through istio ingress (after mTLS), source cell is not avialable.
+        // When requests reach cells through istio ingress (after mTLS), source cell is not available.
         if ((StringUtils.isNotEmpty(workloadName) && workloadName.startsWith(ISTIO_INGRESS_PREFIX)) || !workloadName
                 .contains("--")) {
             return null;
@@ -270,6 +307,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         if (CellStsUtils.isWorkloadExternalToCellery(destinationWorkloadName)) {
             destinationBuilder.setExternalToCellery(true);
         } else {
+            // Do not have idea about whether this is actually a cell or a composite. Hence assuming this as a cell.
             destinationBuilder.setCellName(extractCellNameFromWorkloadName(destinationWorkloadName));
         }
 
