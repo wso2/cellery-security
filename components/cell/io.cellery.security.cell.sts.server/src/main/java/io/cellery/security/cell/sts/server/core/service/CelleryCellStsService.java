@@ -60,7 +60,6 @@ public class CelleryCellStsService {
     private static final Logger log = LoggerFactory.getLogger(CelleryCellStsService.class);
 
     protected static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
-    protected static final String AUTHORIZATION_HEADER_NAME = "authorization";
     protected static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
     protected static final String KNATIVE_PROBE_HEADER_NAME = "k-network-probe";
     protected static final TokenValidator TOKEN_VALIDATOR = new SelfContainedTokenValidator();
@@ -205,8 +204,8 @@ public class CelleryCellStsService {
 
     protected String getUserContextJwt(CellStsRequest cellStsRequest) {
 
-        String authzHeaderValue = getAuthorizationHeaderValue(cellStsRequest);
-        return extractJwtFromAuthzHeader(authzHeaderValue);
+        String authzHeaderValue = CellStsUtils.getAuthorizationHeaderValue(cellStsRequest.getRequestHeaders());
+        return CellStsUtils.extractJwtFromAuthzHeader(authzHeaderValue);
     }
 
     public void handleOutboundRequest(CellStsRequest cellStsRequest,
@@ -238,12 +237,8 @@ public class CelleryCellStsService {
         if (cellStsRequest.getRequestHeaders().get(Constants.CELLERY_AUTH_SUBJECT_HEADER) != null) {
             log.info("Found user in outgoing request");
         }
-        cellStsResponse.addResponseHeader(AUTHORIZATION_HEADER_NAME, BEARER_HEADER_VALUE_PREFIX + stsToken);
-    }
-
-    private String getAuthorizationHeaderValue(CellStsRequest request) {
-
-        return request.getRequestHeaders().get(AUTHORIZATION_HEADER_NAME);
+        cellStsResponse.addResponseHeader(Constants.CELLERY_AUTHORIZATION_HEADER_NAME,
+                BEARER_HEADER_VALUE_PREFIX + stsToken);
     }
 
     private JWTClaimsSet extractUserClaimsFromJwt(String jwt) throws CelleryCellSTSException {
@@ -253,16 +248,6 @@ public class CelleryCellStsService {
         }
 
         return getJWTClaims(jwt);
-    }
-
-    private String extractJwtFromAuthzHeader(String authzHeader) {
-
-        if (StringUtils.isBlank(authzHeader)) {
-            return null;
-        }
-
-        String[] split = authzHeader.split("\\s+");
-        return split.length > 1 ? split[1] : null;
     }
 
     private JWTClaimsSet getJWTClaims(String jwt) throws CelleryCellSTSException {
@@ -295,18 +280,23 @@ public class CelleryCellStsService {
                     return getTokenFromLocalSTS(CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
                 }
                 return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
-            } else if (isIntraCellCall(request) && localContextStore.get(requestId) != null) {
+            } else if (!CellStsUtils.isCompositeSTS() && isIntraCellCall(request) &&
+                    localContextStore.get(requestId) != null) {
                 log.debug("Intra cell request with ID: {} from source workload {} to destination workload {} within " +
                                 "cell {}", requestId, request.getSource().getWorkload(),
                         request.getDestination().getWorkload());
                 return localContextStore.get(requestId);
-            } else if (!isIntraCellCall(request) && localContextStore.get(requestId) != null) {
+            } else if (!CellStsUtils.isCompositeSTS() && !isIntraCellCall(request) &&
+                    localContextStore.get(requestId) != null) {
                 log.debug("Outbound call from home cell. Building token");
                 jwt = localContextStore.get(requestId);
                 return getTokenFromLocalSTS(jwt, request.getDestination().getCellName(),
                         request.getDestination().getWorkload());
             } else if (CellStsUtils.isCompositeSTS() && userContextStore.get(requestId) != null) {
-                return getTokenAsComposite(request, userContextStore.get(requestId));
+                String token = getTokenAsComposite(request, userContextStore.get(requestId));
+                // If an initial incoming request initiates multiple outgoing requests we need to have this stored in
+                userContextStore.put(requestId, token);
+                return token;
             } else {
                 log.debug("Request initiated within cell {} to {}", request.getSource().getCellInstanceName(), request
                         .getDestination().toString());

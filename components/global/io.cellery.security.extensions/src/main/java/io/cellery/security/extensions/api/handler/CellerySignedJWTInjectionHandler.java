@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class CellerySignedJWTInjectionHandler extends AbstractHandler {
 
-    private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
+    private static final String CELLERY_AUTHORIZATION_HEADER_NAME = "cellery-authorization";
     private static final String JWT_ASSERTION_HEADER = "X-JWT-Assertion";
 
     private Log log = LogFactory.getLog(CellerySignedJWTInjectionHandler.class);
@@ -69,7 +69,7 @@ public class CellerySignedJWTInjectionHandler extends AbstractHandler {
 
     private void setAuthorizationHeader(MessageContext messageContext, String value) {
 
-        getTransportHeaders(messageContext).put(AUTHORIZATION_HEADER_NAME, value);
+        getTransportHeaders(messageContext).put(CELLERY_AUTHORIZATION_HEADER_NAME, value);
     }
 
     private void removeCellerySTSHeader(MessageContext messageContext) {

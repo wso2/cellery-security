@@ -186,7 +186,27 @@ public class CellStsUtils {
         try {
             return Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(getMyCellName());
         } catch (CelleryCellSTSException e) {
+            // This exception is harmless.
             return false;
         }
+    }
+
+    public static String extractJwtFromAuthzHeader(String authzHeader) {
+
+        if (StringUtils.isBlank(authzHeader)) {
+            return null;
+        }
+
+        String[] split = authzHeader.split("\\s+");
+        return split.length > 1 ? split[1] : null;
+    }
+
+    public static String getAuthorizationHeaderValue(Map<String, String> requestHeaders) {
+
+        String celleryAuthorizationHeader = requestHeaders.get(Constants.CELLERY_AUTHORIZATION_HEADER_NAME);
+        if (StringUtils.isBlank(celleryAuthorizationHeader)) {
+            celleryAuthorizationHeader = requestHeaders.get(Constants.AUTHORIZATION_HEADER_NAME);
+        }
+        return celleryAuthorizationHeader;
     }
 }

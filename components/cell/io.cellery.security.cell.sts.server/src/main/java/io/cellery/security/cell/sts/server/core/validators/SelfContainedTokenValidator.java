@@ -102,7 +102,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             String cellAudience = CellStsUtils.getMyCellName();
             Optional<String> audienceMatch = jwtClaimsSet.getAudience().stream().filter(audience ->
                     audience.equalsIgnoreCase(cellAudience)).findAny();
-            if (!audienceMatch.isPresent() && !Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(cellAudience)) {
+            if (!audienceMatch.isPresent() && !isReqAddressedToComposite(jwtClaimsSet, cellStsRequest)) {
                 throw new TokenValidationFailureException("Error while validating audience. Expected audience :" +
                         cellAudience);
             }
@@ -111,6 +111,34 @@ public class SelfContainedTokenValidator implements TokenValidator {
             throw new TokenValidationFailureException("Cannot infer cell name", e);
         }
 
+    }
+
+    private boolean isReqAddressedToComposite(JWTClaimsSet claimsSet, CellStsRequest request) {
+
+        String destination = (String) claimsSet.getClaim(Constants.DESTINATION);
+        log.debug("Destination of the jwt is : " + destination);
+        log.debug("Destination derived from request : " + request.getDestination().getWorkload());
+        if (!CellStsUtils.isCompositeSTS()) {
+            log.debug("Not composite STS. Hence audience has to be validated with proper cell name.");
+            return false;
+        }
+        log.debug("Composite STS checking whether the incoming jwt is addressed towards composite");
+
+        if (StringUtils.equals(destination, request.getDestination().getWorkload())) {
+            // Request has reached to the intended service in composite. Hence not validating audience
+            log.debug("Destination found in the token matches with the actual destination. Hence audience is valid " +
+                    "for composite.");
+            return true;
+        }
+        if (StringUtils.isBlank(destination) && globalIssuer.equalsIgnoreCase(claimsSet.getIssuer())) {
+            // Assumes the request is from global gateway.
+            log.debug("Destination is not available and the issuer is global. Hence audience is considered as valid " +
+                    "by composite STS.");
+            return true;
+        }
+
+        log.debug("Request is not addressed towards composite STS");
+        return false;
     }
 
     private void validateIssuer(JWTClaimsSet claimsSet, CellStsRequest request) throws TokenValidationFailureException {
@@ -144,13 +172,6 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
 
         if (!StringUtils.equalsIgnoreCase(issuerInToken, issuer)) {
-            String destination = (String) claimsSet.getClaim(Constants.DESTINATION);
-            log.debug("Destination of the jwt is : " + destination);
-            log.debug("Destination derived from request : " + request.getDestination().getWorkload());
-            if (CellStsUtils.isCompositeSTS() && StringUtils.equals(destination,
-                    request.getDestination().getWorkload())) {
-                return;
-            }
             throw new TokenValidationFailureException("Issuer validation failed. Expected issuer : " + issuer + ". " +
                     "Received issuer: " + issuerInToken);
         }

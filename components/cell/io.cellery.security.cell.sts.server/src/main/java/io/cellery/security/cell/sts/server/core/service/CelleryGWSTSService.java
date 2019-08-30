@@ -94,7 +94,8 @@ public class CelleryGWSTSService extends CelleryCellStsService {
         if (cellStsRequest.getRequestHeaders().get(Constants.CELLERY_AUTH_SUBJECT_HEADER) != null) {
             log.info("Found user in outgoing request");
         }
-        cellStsResponse.addResponseHeader(AUTHORIZATION_HEADER_NAME, BEARER_HEADER_VALUE_PREFIX + stsToken);
+        cellStsResponse.addResponseHeader(Constants.CELLERY_AUTHORIZATION_HEADER_NAME,
+                BEARER_HEADER_VALUE_PREFIX + stsToken);
     }
 
     protected String exchangeToInternalToken(CellStsRequest request) throws CelleryCellSTSException {
