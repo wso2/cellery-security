@@ -94,7 +94,7 @@ public class SelfContainedTokenValidator implements TokenValidator {
             return;
         }
 
-        if (jwtClaimsSet.getAudience().isEmpty()) {
+        if (jwtClaimsSet.getAudience().isEmpty() && !CellStsUtils.isCompositeSTS()) {
             throw new TokenValidationFailureException("No audiences found in the token");
         }
 
