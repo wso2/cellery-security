@@ -104,7 +104,7 @@ public class CelleryGWSTSService extends CelleryCellStsService {
         // This is the original JWT sent to the cell gateway.
         String jwt;
 
-        log.debug("Request with ID: to micro gateway from {}", requestId, request.getSource());
+        log.debug("Request with ID: {} to micro gateway from {}", requestId, request.getSource());
         if (StringUtils.isNotEmpty(localContextStore.get(requestId))) {
             log.debug("Found an already existing local token issued for same request on a different occurance");
             return localContextStore.get(requestId);
@@ -115,6 +115,6 @@ public class CelleryGWSTSService extends CelleryCellStsService {
         }
         // Remove from cache since this is no longer required after building local jwt.
         userContextStore.remove(requestId);
-        return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName());
+        return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
     }
 }
