@@ -59,10 +59,11 @@ public class CelleryCellStsService {
 
     private static final Logger log = LoggerFactory.getLogger(CelleryCellStsService.class);
 
-    protected static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
+    private static final String CELLERY_AUTH_SUBJECT_CLAIMS_HEADER = "x-cellery-auth-subject-claims";
+    private static final String KNATIVE_PROBE_HEADER_NAME = "k-network-probe";
+    private static final TokenValidator TOKEN_VALIDATOR = new SelfContainedTokenValidator();
+
     protected static final String BEARER_HEADER_VALUE_PREFIX = "Bearer ";
-    protected static final String KNATIVE_PROBE_HEADER_NAME = "k-network-probe";
-    protected static final TokenValidator TOKEN_VALIDATOR = new SelfContainedTokenValidator();
     protected static final CellSTSRequestValidator REQUEST_VALIDATOR = new DefaultCellSTSReqValidator();
     protected static final AuthorizationService AUTHORIZATION_SERVICE = new AuthorizationService();
 
@@ -127,8 +128,11 @@ public class CelleryCellStsService {
             headersToSet.put(Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
             log.debug("Set {} to: {}", Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
         } else {
+            // Make sure workload passed header is removed.
+            headersToSet.put(Constants.CELLERY_AUTH_SUBJECT_HEADER, "");
             log.debug("Subject is not available. No user context is passed.");
         }
+
         headersToSet.put(CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
         log.debug("Set {} to : {}", CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
 
@@ -136,7 +140,7 @@ public class CelleryCellStsService {
 
     }
 
-    protected JWTClaimsSet handleRequestComposite(CellStsRequest cellStsRequest, String requestId, String jwt) throws
+    private JWTClaimsSet handleRequestComposite(CellStsRequest cellStsRequest, String requestId, String jwt) throws
             CelleryCellSTSException {
 
         JWTClaimsSet jwtClaims;
@@ -157,18 +161,18 @@ public class CelleryCellStsService {
             CelleryCellSTSException {
 
         JWTClaimsSet jwtClaims;
-        log.debug("Call from a workload to workload within cell {} ; Source workload {} ; Destination workload",
+        log.debug("Call from a workload to workload within cell {} ; Source workload {} ; Destination workload {}",
                 cellStsRequest.getSource().getCellInstanceName(), cellStsRequest.getSource().getWorkload(),
                 cellStsRequest.getDestination().getWorkload());
 
         try {
             if (localContextStore.get(requestId) == null) {
-                log.debug("Initial entrace to cell from gateway. No cached security found.");
+                log.debug("Initial entrace to cell from gateway. No cached token found.");
                 validateInboundToken(cellStsRequest, jwt);
                 localContextStore.put(requestId, jwt);
             } else {
                 if (!StringUtils.equalsIgnoreCase(localContextStore.get(requestId), jwt)) {
-                    throw new CelleryCellSTSException("Intra cell STS security is tampered.");
+                    throw new CelleryCellSTSException("Intra cell STS token is tampered.");
                 }
             }
             jwtClaims = extractUserClaimsFromJwt(jwt);
@@ -218,7 +222,7 @@ public class CelleryCellStsService {
             log.info("Intercepted an outbound call to a workload:{} outside Cellery. Passing the call through.",
                     destination);
         } else {
-            log.info("Intercepted an outbound call to a workload:{} within Cellery. Injecting a STS security for " +
+            log.info("Intercepted an outbound call to a workload:{} within Cellery. Injecting a STS token for " +
                     "authentication and user-context sharing from Cell STS.", destination);
             attachToken(cellStsRequest, cellStsResponse);
         }
@@ -261,55 +265,51 @@ public class CelleryCellStsService {
 
     private String getStsToken(CellStsRequest request) throws CelleryCellSTSException {
 
-        try {
-            // Check for a stored user context
-            String requestId = request.getRequestId();
-            // This is the original JWT sent to the cell gateway.
-            String jwt;
+        // Check for a stored user context
+        String requestId = request.getRequestId();
+        // This is the original JWT sent to the cell gateway.
+        String jwt;
 
-            if (isRequestFromMicroGateway(request)) {
-                log.debug("Request with ID: {} from micro gateway to {} workload of cell {}", requestId, request
-                        .getDestination().getWorkload(), request.getDestination().getCellName());
-                if (StringUtils.isNotEmpty(localContextStore.get(requestId))) {
-                    log.debug("Found an already existing local token issued for same request on a different occurance");
-                    return localContextStore.get(requestId);
-
-                }
-                jwt = userContextStore.get(requestId);
-                if (StringUtils.isEmpty(jwt)) {
-                    return getTokenFromLocalSTS(CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
-                }
-                return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
-            } else if (!CellStsUtils.isCompositeSTS() && isIntraCellCall(request) &&
-                    localContextStore.get(requestId) != null) {
-                log.debug("Intra cell request with ID: {} from source workload {} to destination workload {} within " +
-                                "cell {}", requestId, request.getSource().getWorkload(),
-                        request.getDestination().getWorkload());
+        if (isRequestFromMicroGateway(request)) {
+            log.debug("Request with ID: {} from micro gateway to {} workload of cell {}", requestId, request
+                    .getDestination().getWorkload(), request.getDestination().getCellName());
+            if (StringUtils.isNotEmpty(localContextStore.get(requestId))) {
+                log.debug("Found an already existing local token issued for same request on a different occurance");
                 return localContextStore.get(requestId);
-            } else if (!CellStsUtils.isCompositeSTS() && !isIntraCellCall(request) &&
-                    localContextStore.get(requestId) != null) {
-                log.debug("Outbound call from home cell. Building token");
-                jwt = localContextStore.get(requestId);
-                return getTokenFromLocalSTS(jwt, request.getDestination().getCellName(),
-                        request.getDestination().getWorkload());
-            } else if (CellStsUtils.isCompositeSTS() && userContextStore.get(requestId) != null) {
-                String token = getTokenAsComposite(request, userContextStore.get(requestId));
-                // If an initial incoming request initiates multiple outgoing requests we need to have this stored in
-                userContextStore.put(requestId, token);
-                return token;
-            } else {
-                log.debug("Request initiated within cell {} to {}", request.getSource().getCellInstanceName(), request
-                        .getDestination().toString());
-                String token = getUserContextJwt(request);
-                if (StringUtils.isNotEmpty(token)) {
-                    log.debug("Found a token attached by the workload : {}", token);
-                    return getTokenWithWorkloadPassedBearerToken(request, token);
-                }
-                return getTokenFromLocalSTS(request.getDestination().getCellName(),
-                        request.getDestination().getWorkload());
+
             }
-        } finally {
-            // do nothing
+            jwt = userContextStore.get(requestId);
+            if (StringUtils.isEmpty(jwt)) {
+                return getTokenFromLocalSTS(CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
+            }
+            return getTokenFromLocalSTS(jwt, CellStsUtils.getMyCellName(), request.getDestination().getWorkload());
+        } else if (!CellStsUtils.isCompositeSTS() && isIntraCellCall(request) &&
+                localContextStore.get(requestId) != null) {
+            log.debug("Intra cell request with ID: {} from source workload {} to destination workload {} within " +
+                            "cell {}", requestId, request.getSource().getWorkload(),
+                    request.getDestination().getWorkload(), request.getSource().getCellInstanceName());
+            return localContextStore.get(requestId);
+        } else if (!CellStsUtils.isCompositeSTS() && !isIntraCellCall(request) &&
+                localContextStore.get(requestId) != null) {
+            log.debug("Outbound call from home cell. Building token");
+            jwt = localContextStore.get(requestId);
+            return getTokenFromLocalSTS(jwt, request.getDestination().getCellName(),
+                    request.getDestination().getWorkload());
+        } else if (CellStsUtils.isCompositeSTS() && userContextStore.get(requestId) != null) {
+            String token = getTokenAsComposite(request, userContextStore.get(requestId));
+            // If an initial incoming request initiates multiple outgoing requests we need to have this stored in
+            userContextStore.put(requestId, token);
+            return token;
+        } else {
+            log.debug("Request initiated within cell {} to {}", request.getSource().getCellInstanceName(), request
+                    .getDestination().toString());
+            String token = getUserContextJwt(request);
+            if (StringUtils.isNotEmpty(token)) {
+                log.debug("Found a token attached by the workload : {}", token);
+                return getTokenWithWorkloadPassedBearerToken(request, token);
+            }
+            return getTokenFromLocalSTS(request.getDestination().getCellName(),
+                    request.getDestination().getWorkload());
         }
     }
 
