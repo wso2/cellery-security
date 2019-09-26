@@ -112,7 +112,13 @@ public class CelleryCellStsService {
             log.debug("Request to micro-gateway intercepted");
             jwtClaims = handleRequestToMicroGW(cellStsRequest, requestId, jwt);
         } else if (Constants.COMPOSITE_CELL_NAME.equalsIgnoreCase(CellStsUtils.getMyCellName())) {
-            jwtClaims = handleRequestComposite(cellStsRequest, requestId, jwt);
+            if (StringUtils.isEmpty(jwt)) {
+                log.debug("No token found in the request. Passing through from Composite STS");
+                jwtClaims = null;
+                // Continues flow without aborting since we may need to block from authorization level.
+            } else {
+                jwtClaims = handleRequestComposite(cellStsRequest, requestId, jwt);
+            }
         } else {
             jwtClaims = handleInternalRequest(cellStsRequest, requestId, jwt);
         }
@@ -124,7 +130,7 @@ public class CelleryCellStsService {
         }
         Map<String, String> headersToSet = new HashMap<>();
 
-        if (StringUtils.isNotEmpty(jwtClaims.getSubject())) {
+        if (jwtClaims != null && StringUtils.isNotEmpty(jwtClaims.getSubject())) {
             headersToSet.put(Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
             log.debug("Set {} to: {}", Constants.CELLERY_AUTH_SUBJECT_HEADER, jwtClaims.getSubject());
         } else {
@@ -133,8 +139,10 @@ public class CelleryCellStsService {
             log.debug("Subject is not available. No user context is passed.");
         }
 
-        headersToSet.put(CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
-        log.debug("Set {} to : {}", CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
+        if (jwtClaims != null) {
+            headersToSet.put(CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
+            log.debug("Set {} to : {}", CELLERY_AUTH_SUBJECT_CLAIMS_HEADER, new PlainJWT(jwtClaims).serialize());
+        }
 
         cellStsResponse.addResponseHeaders(headersToSet);
 
