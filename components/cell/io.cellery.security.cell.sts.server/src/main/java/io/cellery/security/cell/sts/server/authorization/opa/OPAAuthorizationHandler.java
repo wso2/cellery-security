@@ -49,8 +49,11 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
 
         AuthorizeRequest authorizeRequest = buildAuthorizeRequest(cellStsRequest, jwt);
         log.debug("OPA authorization handler invoked for request id: {}", authorizeRequest.getRequestId());
-        authorizeRequest.setAuthorizationContext(new OPAAuthorizationContext(authorizeRequest.getAuthorizationContext()
-                .getJwt()));
+        // In a case of composite JWT might not be available.
+        if (StringUtils.isNotEmpty(jwt)) {
+            authorizeRequest.setAuthorizationContext(new OPAAuthorizationContext(authorizeRequest.
+                    getAuthorizationContext().getJwt()));
+        }
         Gson gson = new Gson();
         String requestString = gson.toJson(authorizeRequest);
         requestString = "{ \"input\" :" + requestString + "}";
@@ -70,7 +73,7 @@ public class OPAAuthorizationHandler implements AuthorizationHandler {
                             apiResponse.getBody().toString());
                 }
             } catch (JSONException e) {
-                // Ignoring sicne this is due to not having proper policies configured.
+                // Ignoring since this is due to not having proper policies configured.
                 log.debug("Proper policies which returns {\"result\" : boolean} are not defined for query {}",
                         query);
             }
