@@ -57,6 +57,7 @@ public class CelleryGWSTSService extends CelleryCellStsService {
         try {
             boolean authenticationRequired = REQUEST_VALIDATOR.isAuthenticationRequired(cellStsRequest);
             if (!authenticationRequired) {
+                attachToken(cellStsRequest, cellStsResponse);
                 return;
             }
             log.debug("Authentication is required for the request ID: {} ", requestId);
