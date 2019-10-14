@@ -223,7 +223,7 @@
     <properties>
         <maven.checkstyleplugin.excludes>**/io/cellery/security/cell/sts/server/core/generated/**
         </maven.checkstyleplugin.excludes>
-        <mavan.findbugsplugin.exclude.file>spotbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <maven.spotbugs.exclude.file>spotbugs-exclude.xml</maven.spotbugs.exclude.file>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
