@@ -101,7 +101,11 @@ public class CellStsUtils {
      */
     public static String getIssuerName(String cellName) {
 
-        return cellName + "--sts-service";
+        if (cellName.equals(Constants.COMPOSITE_CELL_NAME)) {
+            return cellName + "--sts-service.cellery-system";
+        } else {
+            return cellName + "--sts-service.default";
+        }
     }
 
     public static String getGatewayIssuer(String cellName) {

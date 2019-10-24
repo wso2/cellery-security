@@ -156,7 +156,7 @@ public class CellStsUtilsTest {
     @Test
     public void testGetIssuerName() throws Exception {
 
-        Assert.assertEquals(CellStsUtils.getIssuerName("hr"), "hr--sts-service");
+        Assert.assertEquals(CellStsUtils.getIssuerName("hr"), "hr--sts-service.default");
     }
 
     @Test
