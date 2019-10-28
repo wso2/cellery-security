@@ -102,9 +102,11 @@ public class CellStsUtils {
     public static String getIssuerName(String cellName) {
 
         if (cellName.equals(Constants.COMPOSITE_CELL_NAME)) {
-            return cellName + "--sts-service.cellery-system";
+            return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
+                    .append(Constants.SYSTEM_NAMESPACE).toString();
         } else {
-            return cellName + "--sts-service.default";
+            return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
+                    .append(Constants.DEFAULT_NAMESPACE).toString();
         }
     }
 
