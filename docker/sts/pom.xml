@@ -21,7 +21,7 @@
         <groupId>io.cellery.security</groupId>
         <artifactId>cellery-seucirity-parent</artifactId>
         <relativePath>../../pom.xml</relativePath>
-        <version>0.4.1-SNAPSHOT</version>
+        <version>0.5.0</version>
     </parent>
 
     <artifactId>cellery-seucirity-sts-docker</artifactId>
