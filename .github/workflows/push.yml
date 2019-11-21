@@ -22,4 +22,5 @@ jobs:
       uses: actions/checkout@v1
       
     - name: Build
-      run: make build-all
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} && make build-all
