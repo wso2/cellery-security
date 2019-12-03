@@ -43,6 +43,8 @@ public class SelfContainedTokenValidator implements TokenValidator {
     private JWTSignatureValidator jwtValidator = new JWKSBasedJWTValidator();
     private static final Logger log = LoggerFactory.getLogger(SelfContainedTokenValidator.class);
     private static String globalIssuer = "https://sts.cellery.io";
+    private static final String compositeIssuer = CellStsUtils.getIssuerName(Constants.COMPOSITE_CELL_NAME,
+            Constants.SYSTEM_NAMESPACE);
     public static final String KNATIVE_ACTIVATOR_WORKLOAD_REGEX = "^activator-.*\\.knative-serving$";
 
     /**
@@ -149,17 +151,25 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
         String issuer = globalIssuer;
         String workload = request.getSource().getWorkload();
+        String issuerInToken = claimsSet.getIssuer();
+
         if (StringUtils.isNotEmpty(request.getSource().getCellInstanceName())) {
-            issuer = CellStsUtils.getIssuerName(request.getSource().getCellInstanceName());
+            String sourceSTSNamespace = CellStsUtils.getNamespaceFromAddress(request.getSource().getWorkload());
+            if (StringUtils.isNotEmpty(issuerInToken) && compositeIssuer.equalsIgnoreCase(issuerInToken)) {
+                sourceSTSNamespace = Constants.SYSTEM_NAMESPACE;
+                log.debug("Composite issuer found. Hence changing source issuer ns to " + Constants.SYSTEM_NAMESPACE);
+            }
+            issuer = CellStsUtils.getIssuerName(request.getSource().getCellInstanceName(),
+                    sourceSTSNamespace);
         } else if (StringUtils.isNotEmpty(workload) && workload.matches(KNATIVE_ACTIVATOR_WORKLOAD_REGEX)) {
             try {
                 log.debug("Request is received from the knative activator. Setting issuer to this cell");
-                issuer = CellStsUtils.getIssuerName(CellStsUtils.getMyCellName());
+                issuer = CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
+                        CellStsUtils.getNamespaceFromAddress(request.getSource().getWorkload()));
             } catch (CelleryCellSTSException e) {
                 throw new TokenValidationFailureException("Cannot infer the issuer", e);
             }
         }
-        String issuerInToken = claimsSet.getIssuer();
         if (StringUtils.isEmpty(issuerInToken)) {
             throw new TokenValidationFailureException("No issuer found in the JWT");
         }
@@ -211,7 +221,10 @@ public class SelfContainedTokenValidator implements TokenValidator {
                     log.debug("Validating token issued by composite cell");
                     hostname = jwtClaimsSet.getIssuer();
                 } else {
-                    hostname = CellStsUtils.getIssuerName(sourceCell);
+                    log.debug("Deriving hostname from source and source workload ns" +
+                            CellStsUtils.getNamespaceFromAddress(cellStsRequest.getSource().getWorkload()));
+                    hostname = CellStsUtils.getIssuerName(sourceCell,
+                            CellStsUtils.getNamespaceFromAddress(cellStsRequest.getSource().getWorkload()));
                 }
 
                 jwkEndpoint = "https://" + hostname + ":" + port;
@@ -234,8 +247,8 @@ public class SelfContainedTokenValidator implements TokenValidator {
 
         log.debug("Asserting whether the token is issued by composite, Issuer :" + issuer + ". Destination from req :" +
                 " " + destinationFromRequest + ", destination from token : " + destinationFromToken);
-        if (CellStsUtils.getIssuerName(Constants.COMPOSITE_CELL_NAME).equalsIgnoreCase(issuer) &&
-                StringUtils.equals(destinationFromRequest, destinationFromToken)) {
+        if (CellStsUtils.getIssuerName(Constants.COMPOSITE_CELL_NAME, Constants.SYSTEM_NAMESPACE).
+                equalsIgnoreCase(issuer) && StringUtils.equals(destinationFromRequest, destinationFromToken)) {
             return true;
         }
         return false;

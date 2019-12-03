@@ -99,14 +99,17 @@ public class CellStsUtils {
      * @param cellName Name of the cell.
      * @return Issuer name of the respective cell.
      */
-    public static String getIssuerName(String cellName) {
+    public static String getIssuerName(String cellName, String namespace) {
 
+        if (StringUtils.isEmpty(namespace)) {
+            namespace = Constants.DEFAULT_NAMESPACE;
+        }
         if (cellName.equals(Constants.COMPOSITE_CELL_NAME)) {
             return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
-                    .append(Constants.SYSTEM_NAMESPACE).toString();
+                    .append(namespace).toString();
         } else {
             return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
-                    .append(Constants.DEFAULT_NAMESPACE).toString();
+                    .append(namespace).toString();
         }
     }
 
@@ -214,5 +217,15 @@ public class CellStsUtils {
             celleryAuthorizationHeader = requestHeaders.get(Constants.AUTHORIZATION_HEADER_NAME);
         }
         return celleryAuthorizationHeader;
+    }
+
+    public static String getNamespaceFromAddress(String address) {
+
+        String[] splitResults = address.split("\\.");
+        if (splitResults == null || splitResults.length < 2) {
+            return "";
+        } else {
+            return splitResults[1];
+        }
     }
 }

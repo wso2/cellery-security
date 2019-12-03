@@ -34,6 +34,7 @@ public class Constants {
     public static final String CELL_IMAGE_NAME_ENV_VAR = "CELL_IMAGE_NAME";
     public static final String CELL_INSTANCE_NAME_ENV_VAR = "CELL_INSTANCE_NAME";
     public static final String CELL_ORG_NAME_ENV_VAR = "CELL_ORG_NAME";
+    public static final String CELL_NAMESPACE = "CELL_NAMESPACE";
     public static final String CELL_VERSION_ENV_VAR = "CELL_IMAGE_VERSION";
     public static final String COMPOSITE_CELL_NAME = "composite";
     public static final String SYSTEM_NAMESPACE = "cellery-system";

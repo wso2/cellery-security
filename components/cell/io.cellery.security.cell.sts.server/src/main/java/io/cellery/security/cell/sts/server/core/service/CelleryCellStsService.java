@@ -52,6 +52,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+import static io.cellery.security.cell.sts.server.core.Constants.CELL_NAMESPACE;
+
 /**
  * Cellery Token Service.
  */
@@ -360,15 +362,16 @@ public class CelleryCellStsService {
 
     protected String getTokenFromLocalSTS(String audience, String destination) throws CelleryCellSTSException {
 
-        return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()),
-                destination);
+        return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
+                CellStsUtils.getNamespaceFromAddress(CellStsUtils.resolveSystemVariable(CELL_NAMESPACE))), destination);
     }
 
     protected String getTokenFromLocalSTS(String jwt, String audience, String destination)
             throws CelleryCellSTSException {
 
         String token = STSTokenGenerator.generateToken(jwt, audience,
-                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()), destination);
+                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(), CellStsUtils.resolveSystemVariable
+                        (CELL_NAMESPACE)), destination);
         log.info("Issued a token from local STS : " + CellStsUtils.getCellImageName());
         return token;
     }

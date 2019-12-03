@@ -159,24 +159,7 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
 
     private String getDestination(CheckRequest request) {
 
-        String destination = "";
-
-        AttributesOuterClass.Attributes attributesFromRequest = getAttributesFromRequest(request);
-        if (attributesFromRequest != null) {
-            AttributesOuterClass.Attributes.AttributeValue attributeValue =
-                    attributesFromRequest.getAttributesMap().get("destination.service.name");
-            if (attributeValue != null) {
-                destination = attributeValue.getStringValue();
-            }
-        }
-        if (StringUtils.isEmpty(destination)) {
-            log.debug("Destination cannot be found in request attributes.");
-            destination = request.getAttributes().getRequest().getHttp().getHeadersMap().get(DESTINATION_HEADER);
-            if (StringUtils.isBlank(destination)) {
-                destination = request.getAttributes().getRequest().getHttp().getHost();
-                log.debug("Destination is picked from host value in the request.");
-            }
-        }
+        String destination = request.getAttributes().getRequest().getHttp().getHost();
         return destination;
     }
 
