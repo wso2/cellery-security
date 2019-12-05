@@ -362,14 +362,16 @@ public class CelleryCellStsService {
 
     protected String getTokenFromLocalSTS(String audience, String destination) throws CelleryCellSTSException {
 
-        return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
-                CellStsUtils.getNamespaceFromAddress(CellStsUtils.resolveSystemVariable(CELL_NAMESPACE))), destination);
+        return STSTokenGenerator.generateToken(getAudienceWithNS(audience, destination),
+                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
+                        CellStsUtils.getNamespaceFromAddress(CellStsUtils.
+                                resolveSystemVariable(CELL_NAMESPACE))), destination);
     }
 
     protected String getTokenFromLocalSTS(String jwt, String audience, String destination)
             throws CelleryCellSTSException {
 
-        String token = STSTokenGenerator.generateToken(jwt, audience,
+        String token = STSTokenGenerator.generateToken(jwt, getAudienceWithNS(audience, destination),
                 CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(), CellStsUtils.resolveSystemVariable
                         (CELL_NAMESPACE)), destination);
         log.info("Issued a token from local STS : " + CellStsUtils.getCellImageName());
@@ -389,5 +391,15 @@ public class CelleryCellStsService {
             throw new CelleryCellSTSException("Error while initializing SSL context");
         }
 
+    }
+
+    protected String getAudienceWithNS(String rawAudience, String destination) {
+
+        log.debug("Constructing audience for raw audience : " + rawAudience + ", and destination : " + destination);
+        String namespace = CellStsUtils.getNamespaceFromAddress(destination);
+        if (StringUtils.isEmpty(namespace)) {
+            namespace = CellStsUtils.resolveSystemVariable(CELL_NAMESPACE);
+        }
+        return new StringBuilder(rawAudience).append(".").append(namespace).toString();
     }
 }

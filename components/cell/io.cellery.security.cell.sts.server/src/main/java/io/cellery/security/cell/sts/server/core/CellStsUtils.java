@@ -221,6 +221,13 @@ public class CellStsUtils {
 
     public static String getNamespaceFromAddress(String address) {
 
+        if (StringUtils.isEmpty(address)) {
+            String cellNS = resolveSystemVariable(Constants.CELL_NAMESPACE);
+            if (StringUtils.isNotEmpty(cellNS)) {
+                return cellNS;
+            }
+            return Constants.DEFAULT_NAMESPACE;
+        }
         String[] splitResults = address.split("\\.");
         if (splitResults == null || splitResults.length < 2) {
             return "";

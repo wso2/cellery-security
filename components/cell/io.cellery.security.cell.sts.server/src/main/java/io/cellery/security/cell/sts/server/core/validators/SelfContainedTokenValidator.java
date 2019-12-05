@@ -101,7 +101,11 @@ public class SelfContainedTokenValidator implements TokenValidator {
         }
 
         try {
-            String cellAudience = CellStsUtils.getMyCellName();
+
+            String audienceList = String.join(",", jwtClaimsSet.getAudience());
+            log.debug("Audiences in the token : " + audienceList);
+            String cellAudience = new StringBuilder(CellStsUtils.getMyCellName()).append(".").
+                            append(CellStsUtils.resolveSystemVariable(Constants.CELL_NAMESPACE)).toString();
             Optional<String> audienceMatch = jwtClaimsSet.getAudience().stream().filter(audience ->
                     audience.equalsIgnoreCase(cellAudience)).findAny();
             if (!audienceMatch.isPresent() && !isReqAddressedToComposite(jwtClaimsSet, cellStsRequest)) {
