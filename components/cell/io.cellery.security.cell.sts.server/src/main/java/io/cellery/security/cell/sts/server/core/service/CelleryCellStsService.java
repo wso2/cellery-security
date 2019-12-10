@@ -364,8 +364,7 @@ public class CelleryCellStsService {
 
         return STSTokenGenerator.generateToken(getAudienceWithNS(audience, destination),
                 CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
-                        CellStsUtils.getNamespaceFromAddress(CellStsUtils.
-                                resolveSystemVariable(CELL_NAMESPACE))), destination);
+                        CellStsUtils.resolveSystemVariable(CELL_NAMESPACE)), destination);
     }
 
     protected String getTokenFromLocalSTS(String jwt, String audience, String destination)
