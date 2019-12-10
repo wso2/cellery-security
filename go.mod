@@ -1,4 +1,4 @@
-module github.com/cellery-io/mesh-security
+module cellery.io/cellery-security
 
 go 1.12
 

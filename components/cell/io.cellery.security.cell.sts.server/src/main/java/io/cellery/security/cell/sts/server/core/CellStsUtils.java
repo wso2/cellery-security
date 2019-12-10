@@ -114,8 +114,16 @@ public class CellStsUtils {
     }
 
     public static String getGatewayIssuer(String cellName) {
-
-        return cellName + "--gateway";
+        String cellNamespace = CellStsUtils.resolveSystemVariable(Constants.CELL_NAMESPACE);
+        if (StringUtils.isEmpty(cellNamespace)) {
+            return new StringBuilder(cellName).append("--gateway").toString();
+        }
+        // If this is the initial request, no source cell is involved. Hence returning empty string.
+        if (StringUtils.isEmpty(cellName)) {
+            return "";
+        }
+        return new StringBuilder(cellName).append("--gateway.").
+                append(cellNamespace).toString();
     }
 
     public static String getConfigFilePath() {
