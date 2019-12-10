@@ -27,9 +27,9 @@ GIT_REVISION := $(shell git rev-parse --verify HEAD)
 OIDC_FILTER_NAME := envoy-oidc-filter
 JWKS_SERVER_NAME := jwks-server
 
-VERSION ?= lal
+VERSION ?= $(GIT_REVISION)
 
-DOCKER_REPO ?= hasinthaindrajee
+DOCKER_REPO ?= wso2cellery
 DOCKER_IMAGE_TAG ?= $(VERSION)
 
 .PHONY: build-java-components
