@@ -27,10 +27,11 @@ import (
 	b64 "encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 	"log"
 	"math/big"
 	"time"
+
+	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 )
 
 var (

@@ -21,10 +21,11 @@ package resolver
 import (
 	"crypto/tls"
 	//"cellery.io/cellery-security/components/cell/jwks-server/crypto/service"
-	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 	"io/ioutil"
 	"log"
 	"testing"
+
+	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 )
 
 const keyFilePath string = "../../resources/key.pem"

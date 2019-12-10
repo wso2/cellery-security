@@ -10,8 +10,8 @@ import (
 	"os/signal"
 	"strings"
 
-	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
 	"cellery.io/cellery-security/components/envoy-oidc-filter/oidc"
+	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

@@ -19,7 +19,7 @@
 package resources
 
 type JwksJson struct {
-	Keys [] Key `json:"keys"`
+	Keys []Key `json:"keys"`
 }
 
 type Key struct {

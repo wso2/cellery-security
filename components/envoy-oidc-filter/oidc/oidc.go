@@ -17,7 +17,7 @@ import (
 	"github.com/coreos/go-oidc"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
-	"github.com/envoyproxy/go-control-plane/envoy/type"
+	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type"
 	googlerpc "github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
 	"golang.org/x/oauth2"
@@ -438,8 +438,8 @@ func buildOkCheckResponse(authzHeader string, xSubjectHeader string, subjectHash
 	}
 }
 
-func getInstance (val int) string {
-	if val % 2 == 0 {
+func getInstance(val int) string {
+	if val%2 == 0 {
 		return "1"
 	} else {
 		return "2"
@@ -449,7 +449,7 @@ func getInstance (val int) string {
 func hash(s string) int {
 	hashVal := 7
 	for _, r := range s {
-		hashVal = hashVal * 31 + int(r);
+		hashVal = hashVal*31 + int(r)
 	}
 	return hashVal
 }
