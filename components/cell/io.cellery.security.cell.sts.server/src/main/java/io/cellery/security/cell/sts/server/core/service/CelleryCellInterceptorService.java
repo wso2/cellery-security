@@ -164,9 +164,12 @@ public abstract class CelleryCellInterceptorService extends AuthorizationGrpc.Au
         AttributesOuterClass.Attributes attributesFromRequest = getAttributesFromRequest(request);
         if (attributesFromRequest != null) {
             AttributesOuterClass.Attributes.AttributeValue attributeValue =
-                    attributesFromRequest.getAttributesMap().get("destination.service.name");
+                    attributesFromRequest.getAttributesMap().get("destination.service.host");
             if (attributeValue != null) {
-                destination = attributeValue.getStringValue();
+                String[] splitResults = attributeValue.getStringValue().split("\\.");
+                if (splitResults.length >= 2) {
+                    destination = String.join(".", splitResults[0], splitResults[1]);
+                }
             }
         }
         if (StringUtils.isEmpty(destination)) {

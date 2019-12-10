@@ -156,8 +156,8 @@ public class CellStsUtilsTest {
     @Test
     public void testGetIssuerName() throws Exception {
 
-        Assert.assertEquals(CellStsUtils.getIssuerName("hr"), new StringBuilder("hr")
-                .append(Constants.STS_SERVICE).append(".").append(Constants.DEFAULT_NAMESPACE).toString());
+        Assert.assertEquals(CellStsUtils.getIssuerName("hr", "ns1"), new StringBuilder("hr")
+                .append(Constants.STS_SERVICE).append(".").append("ns1").toString());
     }
 
     @Test

@@ -52,6 +52,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+import static io.cellery.security.cell.sts.server.core.Constants.CELL_NAMESPACE;
+
 /**
  * Cellery Token Service.
  */
@@ -360,15 +362,17 @@ public class CelleryCellStsService {
 
     protected String getTokenFromLocalSTS(String audience, String destination) throws CelleryCellSTSException {
 
-        return STSTokenGenerator.generateToken(audience, CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()),
-                destination);
+        return STSTokenGenerator.generateToken(getAudienceWithNS(audience, destination),
+                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(),
+                        CellStsUtils.resolveSystemVariable(CELL_NAMESPACE)), destination);
     }
 
     protected String getTokenFromLocalSTS(String jwt, String audience, String destination)
             throws CelleryCellSTSException {
 
-        String token = STSTokenGenerator.generateToken(jwt, audience,
-                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName()), destination);
+        String token = STSTokenGenerator.generateToken(jwt, getAudienceWithNS(audience, destination),
+                CellStsUtils.getIssuerName(CellStsUtils.getMyCellName(), CellStsUtils.resolveSystemVariable
+                        (CELL_NAMESPACE)), destination);
         log.info("Issued a token from local STS : " + CellStsUtils.getCellImageName());
         return token;
     }
@@ -386,5 +390,15 @@ public class CelleryCellStsService {
             throw new CelleryCellSTSException("Error while initializing SSL context");
         }
 
+    }
+
+    protected String getAudienceWithNS(String rawAudience, String destination) {
+
+        log.debug("Constructing audience for raw audience : " + rawAudience + ", and destination : " + destination);
+        String namespace = CellStsUtils.getNamespaceFromAddress(destination);
+        if (StringUtils.isEmpty(namespace)) {
+            namespace = CellStsUtils.resolveSystemVariable(CELL_NAMESPACE);
+        }
+        return new StringBuilder(rawAudience).append(".").append(namespace).toString();
     }
 }

@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"strings"
 
-	"github.com/cellery-io/mesh-security/components/envoy-oidc-filter/oidc"
+	"cellery.io/cellery-security/components/envoy-oidc-filter/oidc"
 	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -36,6 +36,7 @@ const (
 	SubjectClaim               = "SUBJECT_CLAIM"
 	FilterListenerPort         = "FILTER_LISTENER_PORT"
 	HttpCallbackListenerPort   = "HTTP_CALLBACK_LISTENER_PORT"
+	CellNamespace              = "CELL_NAMESPACE"
 )
 
 func main() {
@@ -60,8 +61,8 @@ func main() {
 		SecurePaths:     getSecurePaths(),
 		PrivateKeyFile:  os.Getenv(PrivateKeyFile),
 		CertificateFile: os.Getenv(CertificateFile),
-		JwtIssuer:       os.Getenv(JwtIssuer),
-		JwtAudience:     os.Getenv(JwtAudience),
+		JwtIssuer:       fmt.Sprintf("%s.%s", os.Getenv(JwtIssuer), os.Getenv(CellNamespace)),
+		JwtAudience:     fmt.Sprintf("%s.%s", os.Getenv(JwtAudience), os.Getenv(CellNamespace)),
 		SubjectClaim:    os.Getenv(SubjectClaim),
 	}
 	err := cfg.Validate()

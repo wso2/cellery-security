@@ -19,8 +19,9 @@
 package main
 
 import (
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/service"
 	"log"
+
+	"cellery.io/cellery-security/components/cell/jwks-server/crypto/service"
 )
 
 func main() {

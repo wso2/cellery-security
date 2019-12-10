@@ -99,20 +99,31 @@ public class CellStsUtils {
      * @param cellName Name of the cell.
      * @return Issuer name of the respective cell.
      */
-    public static String getIssuerName(String cellName) {
+    public static String getIssuerName(String cellName, String namespace) {
 
+        if (StringUtils.isEmpty(namespace)) {
+            namespace = Constants.DEFAULT_NAMESPACE;
+        }
         if (cellName.equals(Constants.COMPOSITE_CELL_NAME)) {
             return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
-                    .append(Constants.SYSTEM_NAMESPACE).toString();
+                    .append(namespace).toString();
         } else {
             return new StringBuilder(cellName).append(Constants.STS_SERVICE).append(".")
-                    .append(Constants.DEFAULT_NAMESPACE).toString();
+                    .append(namespace).toString();
         }
     }
 
     public static String getGatewayIssuer(String cellName) {
-
-        return cellName + "--gateway";
+        String cellNamespace = CellStsUtils.resolveSystemVariable(Constants.CELL_NAMESPACE);
+        if (StringUtils.isEmpty(cellNamespace)) {
+            return new StringBuilder(cellName).append("--gateway").toString();
+        }
+        // If this is the initial request, no source cell is involved. Hence returning empty string.
+        if (StringUtils.isEmpty(cellName)) {
+            return "";
+        }
+        return new StringBuilder(cellName).append("--gateway.").
+                append(cellNamespace).toString();
     }
 
     public static String getConfigFilePath() {
@@ -214,5 +225,22 @@ public class CellStsUtils {
             celleryAuthorizationHeader = requestHeaders.get(Constants.AUTHORIZATION_HEADER_NAME);
         }
         return celleryAuthorizationHeader;
+    }
+
+    public static String getNamespaceFromAddress(String address) {
+
+        if (StringUtils.isEmpty(address)) {
+            String cellNS = resolveSystemVariable(Constants.CELL_NAMESPACE);
+            if (StringUtils.isNotEmpty(cellNS)) {
+                return cellNS;
+            }
+            return Constants.DEFAULT_NAMESPACE;
+        }
+        String[] splitResults = address.split("\\.");
+        if (splitResults == null || splitResults.length < 2) {
+            return "";
+        } else {
+            return splitResults[1];
+        }
     }
 }
