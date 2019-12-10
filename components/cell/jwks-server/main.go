@@ -19,7 +19,7 @@
 package main
 
 import (
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/service"
+	"cellery.io/cellery-security/components/cell/jwks-server/crypto/service"
 	"log"
 )
 

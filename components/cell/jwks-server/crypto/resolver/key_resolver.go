@@ -27,7 +27,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/resources"
+	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 	"log"
 	"math/big"
 	"time"

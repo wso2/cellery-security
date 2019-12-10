@@ -21,8 +21,8 @@ package service
 import (
 	"crypto/tls"
 	"encoding/json"
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/resolver"
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/resources"
+	"cellery.io/cellery-security/components/cell/jwks-server/crypto/resolver"
+	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 	"io/ioutil"
 	"log"
 	"net/http"

@@ -20,8 +20,8 @@ package resolver
 
 import (
 	"crypto/tls"
-	//"github.com/cellery-io/mesh-security/components/cell/jwks-server/crypto/service"
-	"github.com/cellery-io/mesh-security/components/cell/jwks-server/resources"
+	//"cellery.io/cellery-security/components/cell/jwks-server/crypto/service"
+	"cellery.io/cellery-security/components/cell/jwks-server/resources"
 	"io/ioutil"
 	"log"
 	"testing"

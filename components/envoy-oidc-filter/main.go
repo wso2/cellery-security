@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	ext_authz "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2"
-	"github.com/wso2/cellery-security/components/envoy-oidc-filter/oidc"
+	"cellery.io/cellery-security/components/envoy-oidc-filter/oidc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
