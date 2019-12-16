@@ -240,7 +240,7 @@ public class CellStsUtils {
         if (splitResults == null || splitResults.length < 2) {
             return "";
         } else {
-            return splitResults[1];
+            return splitResults[1].split(":")[0];
         }
     }
 }
