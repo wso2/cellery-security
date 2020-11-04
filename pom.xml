@@ -439,7 +439,7 @@
         <nimbus.josejwt.version>7.0</nimbus.josejwt.version>
         <carbon.identity.inbound.auth.oauth.version>6.0.52</carbon.identity.inbound.auth.oauth.version>
         <carbon.apimgt.version>6.4.50</carbon.apimgt.version>
-        <synapse.version>2.1.7-wso2v10</synapse.version>
+        <synapse.version>3.0.1</synapse.version>
         <org.json.version>20160212</org.json.version>
 
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
